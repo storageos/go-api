@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/storageos/client/types"
+	"github.com/storageos/go-api/types"
 )
 
 func TestListVolumes(t *testing.T) {

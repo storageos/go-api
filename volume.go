@@ -5,7 +5,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/storageos/client/types"
+	"github.com/storageos/go-api/types"
 )
 
 var (

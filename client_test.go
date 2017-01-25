@@ -22,7 +22,7 @@ import (
 
 	"golang.org/x/net/context"
 
-	"github.com/storageos/client/types"
+	"github.com/storageos/go-api/types"
 )
 
 func newTestClient(rt http.RoundTripper) Client {
