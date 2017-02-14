@@ -90,32 +90,49 @@ definitions:
         format: "datetime"
         readOnly: true
 
-  CreateVolumeOptions:
-    type: "object"
-    description: "Parameters for creating new volumes."
-    required: [Name, Size]
-    properties:
-      Name:
-        description: "Volume name."
-        type: "string"
-        x-nullable: false
-      Description:
-        type: "string"
-        x-nullable: false
-        description: "Volume description."
-      Size:
-        type: integer
-        description: "Size in GB."
-        x-nullable: false
-      Pool:
-        type: "string"
-        description: "Name of capacity pool to provision the volume in, or the name of the current pool."
-      Labels:
-        type: "object"
-        description: "User-defined key/value metadata."
-        x-nullable: false
-        additionalProperties:
-          type: "string"
+  # VolumeCreateOptions:
+  #   type: "object"
+  #   description: "Parameters for creating new volumes."
+  #   required: [Name, Size]
+  #   properties:
+  #     Name:
+  #       description: "Volume name."
+  #       type: "string"
+  #       x-nullable: false
+  #     Description:
+  #       type: "string"
+  #       x-nullable: false
+  #       description: "Volume description."
+  #     Size:
+  #       type: "integer"
+  #       description: "Size in GB."
+  #       x-nullable: false
+  #     Pool:
+  #       type: "string"
+  #       description: "Name of capacity pool to provision the volume in, or the name of the current pool."
+  #     Labels:
+  #       type: "object"
+  #       description: "User-defined key/value metadata."
+  #       x-nullable: false
+  #       additionalProperties:
+  #         type: "string"
+  #
+  # VolumeListOptions:
+  #   type: "object"
+  #   description: "Parameters for finding volumes."
+  #   properties:
+  #     LabelSelector:
+  #       description: "A selector to restrict the list of returned objects by their labels. Defaults to everything."
+  #       type: "string"
+  #     FieldSelector:
+  #       type: "string"
+  #       description: "A selector to restrict the list of returned objects by their fields. Defaults to everything."
+  #     TimeoutSeconds:
+  #       type: "integer"
+  #       description: "Timeout for the list call."
+  #     Namespace:
+  #       type: "string"
+  #       description: "Object name and auth scope, such as for teams and projects"
 
   Volume:
     type: "object"
