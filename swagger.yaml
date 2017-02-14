@@ -1,0 +1,263 @@
+
+# A Swagger 2.0 (a.k.a. OpenAPI) definition of the Engine API.
+#
+# This is used for generating API documentation and the types used by the
+# client/server. See api/README.md for more information.
+#
+# Some style notes:
+# - This file is used by ReDoc, which allows GitHub Flavored Markdown in
+#   descriptions.
+# - There is no maximum line length, for ease of editing and pretty diffs.
+# - operationIds are in the format "NounVerb", with a singular noun.
+
+swagger: "2.0"
+schemes:
+  - "http"
+  - "https"
+produces:
+  - "application/json"
+  - "text/plain"
+consumes:
+  - "application/json"
+  - "text/plain"
+basePath: "/v1"
+info:
+  title: "StorageOS API"
+  version: "0.7"
+  x-logo:
+    url: "http://storageos.com/wp-content/uploads/2016/06/storage-os-logo.png"
+  description: |
+    The StorageOS API is an HTTP API used for volume management and management of the StorageOS services. It is the API the StorageOS UI, CLI and platform integartions uses to communicate with StorageOS, so everything they can do can do can be done with the API.
+
+    # Errors
+
+    The API uses standard HTTP status codes to indicate the success or failure of the API call. The body of the response will be JSON in the following format:
+    ```
+    {
+      "message": "page not found"
+    }
+    ```
+# The tags on paths define the menu sections in the ReDoc documentation, so
+# the usage of tags must make sense for that:
+# - They should be singular, not plural.
+# - There should not be too many tags, or the menu becomes unwieldy. For
+#   example, it is preferable to add a path to the "System" tag instead of
+#   creating a tag with a single path in it.
+# - The order of tags in this list defines the order in the menu.
+tags:
+  # Primary objects
+  - name: "Volume"
+    x-displayName: "Volumes"
+    description: |
+      Create and manage volumes.
+
+definitions:
+
+  ErrorResponse:
+    description: "Represents an error."
+    type: "object"
+    required: ["message"]
+    properties:
+      message:
+        description: "The error message."
+        type: "string"
+        x-nullable: false
+    example:
+      message: "Something went wrong."
+
+  Deployment:
+    type: "object"
+    description: "Volume master or replica deployment details."
+    properties:
+      ID:
+        type: "string"
+        readOnly: true
+      Controller:
+        type: "string"
+        readOnly: true
+      Inode:
+        type: "integer"
+        format: "uint32"
+        readOnly: true
+      Status:
+        type: "string"
+        readOnly: true
+      Health:
+        type: "string"
+        readOnly: true
+      CreatedAt:
+        type: "string"
+        format: "datetime"
+        readOnly: true
+
+  CreateVolumeOptions:
+    type: "object"
+    description: "Parameters for creating new volumes."
+    required: [Name, Size]
+    properties:
+      Name:
+        description: "Volume name."
+        type: "string"
+        x-nullable: false
+      Description:
+        type: "string"
+        x-nullable: false
+        description: "Volume description."
+      Size:
+        type: integer
+        description: "Size in GB."
+        x-nullable: false
+      Pool:
+        type: "string"
+        description: "Name of capacity pool to provision the volume in, or the name of the current pool."
+      Labels:
+        type: "object"
+        description: "User-defined key/value metadata."
+        x-nullable: false
+        additionalProperties:
+          type: "string"
+
+  Volume:
+    type: "object"
+    description: "A storage volume."
+    required: [Name, Size]
+    properties:
+      ID:
+        description: "Volume unique ID."
+        type: "string"
+        x-nullable: false
+        readOnly: true
+      Name:
+        description: "Volume name."
+        type: "string"
+        x-nullable: false
+      Description:
+        type: "string"
+        x-nullable: false
+        description: "Volume description."
+      Size:
+        type: integer
+        description: "Size in GB."
+        x-nullable: false
+      Pool:
+        type: "string"
+        description: "Name of capacity pool to provision the volume in, or the name of the current pool."
+      Labels:
+        type: "object"
+        description: "User-defined key/value metadata."
+        x-nullable: false
+        additionalProperties:
+          type: "string"
+      Master:
+        type: "object"
+        description: "Volume deployment information for the master volume."
+        $ref: "#/definitions/Deployment"
+        readOnly: true
+      Replicas:
+        type: "array"
+        description: "Volume deployment information for the replica volumes."
+        items:
+          $ref: "#/definitions/Deployment"
+        readOnly: true
+      Status:
+        type: "string"
+        description: "Short status, one of: pending, evaluating, deploying, active, unavailable, failed, updating, deleting."
+        readOnly: true
+      StatusMessage:
+        type: "string"
+        description: "Status message explaining current status."
+        readOnly: true
+      Health:
+        type: "string"
+        description: "Volume health, one of: healthy, degraded or dead."
+        readOnly: true
+      Inode:
+        type: "integer"
+        format: "uint32"
+        description: "Block device inode."
+        readOnly: true
+      Deleted:
+        type: "boolean"
+        description: "Flag indicating if the volume has been deleted and is waiting for scrubbing."
+        readOnly: true
+      Mounted:
+        type: "boolean"
+        description: "Flag indicating if the volume is mounted and in use."
+        readOnly: true
+      MountedBy:
+        type: "string"
+        description: "Reference to the node that has the volume mounted."
+        readOnly: true
+      MountedAt:
+        type: "string"
+        format: "dateTime"
+        description: "When the volume was mounted."
+        readOnly: true
+      CreatedBy:
+        type: "string"
+        description: "User that created the volume."
+        readOnly: true
+      CreatedAt:
+        type: "string"
+        format: "dateTime"
+        description: "When the volume was created."
+        readOnly: true
+    example:
+      Name: vol01
+      Size: 5
+      Labels:
+        com.example.some-label: "some-value"
+        com.example.some-other-label: "some-other-value"
+
+paths:
+  /volumes:
+    get:
+      summary: "List volumes"
+      description: "List of volumes that match the query."
+      produces:
+        - "application/json"
+      tags: ["Volume"]
+      responses:
+        200:
+          description: "No error."
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Volume"
+    post:
+      summary: "Create volume"
+      description: "Provisions a new volume."
+      produces:
+        - "application/json"
+      tags: ["Volume"]
+      responses:
+        200:
+          description: "No error."
+          schema:
+            $ref: "#/definitions/Volume"
+  /volumes/{name}:
+    get:
+      summary: "Get a volume"
+      description: "Gets a volume by name or ID.  Returns to whole volume object."
+      produces:
+        - "application/json"
+      tags: ["Volume"]
+      responses:
+        200:
+          description: "No error."
+          schema:
+            $ref: "#/definitions/Volume"
+        404:
+          description: "No such volume."
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        500:
+          description: "Server error."
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+      parameters:
+        - name: "name"
+          in: "path"
+          required: true
+          description: "Volume name or ID."
+          type: "string"
