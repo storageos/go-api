@@ -14,7 +14,7 @@ type VolumeCreateOptions struct {
 
 	// Size in GB.
 	// Required: true
-	Size int64
+	Size int
 
 	// Pool is the name or id of capacity pool to provision the volume in.
 	Pool string
