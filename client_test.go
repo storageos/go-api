@@ -13,7 +13,6 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"os"
-	"path/filepath"
 	"reflect"
 	"strconv"
 	"strings"
@@ -21,8 +20,6 @@ import (
 	"time"
 
 	"golang.org/x/net/context"
-
-	"github.com/storageos/go-api/types"
 )
 
 func newTestClient(rt http.RoundTripper) Client {
@@ -114,55 +111,6 @@ func TestNewVersionedClient(t *testing.T) {
 	}
 	if client.endpoint != endpoint {
 		t.Errorf("Expected endpoint %s. Got %s.", endpoint, client.endpoint)
-	}
-	if reqVersion := client.requestedAPIVersion; reqVersion != 1 {
-		t.Errorf("Wrong requestAPIVersion. Want %d. Got %d.", 1, reqVersion)
-	}
-	if client.SkipServerVersionCheck {
-		t.Error("Expected SkipServerVersionCheck to be false, got true")
-	}
-}
-
-func TestNewVersionedClientFromEnv(t *testing.T) {
-	endpoint := "tcp://localhost:8000"
-	endpointURL := "http://localhost:8000"
-	os.Setenv("STORAGEOS_HOST", endpoint)
-	os.Setenv("STORAGEOS_TLS_VERIFY", "")
-	client, err := NewVersionedClientFromEnv("1")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if client.endpoint != endpoint {
-		t.Errorf("Expected endpoint %s. Got %s.", endpoint, client.endpoint)
-	}
-	if client.endpointURL.String() != endpointURL {
-		t.Errorf("Expected endpointURL %s. Got %s.", endpoint, client.endpoint)
-	}
-	if reqVersion := client.requestedAPIVersion; reqVersion != 1 {
-		t.Errorf("Wrong requestAPIVersion. Want %d. Got %d.", 1, reqVersion)
-	}
-	if client.SkipServerVersionCheck {
-		t.Error("Expected SkipServerVersionCheck to be false, got true")
-	}
-}
-
-// TODO: this is failing, not sure why.  https should be set.
-func TestNewVersionedClientFromEnvTLS(t *testing.T) {
-	endpoint := "tcp://localhost:8000"
-	endpointURL := "https://localhost:8000"
-	base, _ := os.Getwd()
-	os.Setenv("STORAGEOS_CERT_PATH", filepath.Join(base, "/testing/data/"))
-	os.Setenv("STORAGEOS_HOST", endpoint)
-	os.Setenv("STORAGEOS_TLS_VERIFY", "1")
-	client, err := NewVersionedClientFromEnv("1")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if client.endpoint != endpoint {
-		t.Errorf("Expected endpoint %s. Got %s.", endpoint, client.endpoint)
-	}
-	if client.endpointURL.String() != endpointURL {
-		t.Errorf("Expected endpointURL %s. Got %s.", endpoint, client.endpoint)
 	}
 	if reqVersion := client.requestedAPIVersion; reqVersion != 1 {
 		t.Errorf("Wrong requestAPIVersion. Want %d. Got %d.", 1, reqVersion)
@@ -366,9 +314,9 @@ func TestQueryString(t *testing.T) {
 		input interface{}
 		want  string
 	}{
-		{&types.ListVolumeOptions{All: true}, "all=1"},
-		{types.ListVolumeOptions{All: true}, "all=1"},
-		// {ListVolumeOptions{Filters: map[string][]string{"status": {"paused", "running"}}}, "filters=%7B%22status%22%3A%5B%22paused%22%2C%22running%22%5D%7D"},
+		// {&types.VolumeListOptions{All: true}, "all=1"},
+		// {types.VolumeListOptions{All: true}, "all=1"},
+		// {VolumeListOptions{Filters: map[string][]string{"status": {"paused", "running"}}}, "filters=%7B%22status%22%3A%5B%22paused%22%2C%22running%22%5D%7D"},
 		{dumb{X: 10, Y: 10.35000}, "x=10&y=10.35"},
 		{dumb{W: v, X: 10, Y: 10.35000}, f32QueryString},
 		{dumb{X: 10, Y: 10.35000, Z: 10}, "x=10&y=10.35&zee=10"},

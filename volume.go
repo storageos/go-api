@@ -17,8 +17,8 @@ var (
 	ErrVolumeInUse = errors.New("volume in use and cannot be removed")
 )
 
-// ListVolumes returns the list of available volumes.
-func (c *Client) ListVolumes(opts types.ListVolumeOptions) ([]types.Volume, error) {
+// VolumeList returns the list of available volumes.
+func (c *Client) VolumeList(opts types.VolumeListOptions) ([]types.Volume, error) {
 	path := "/volumes?" + queryString(opts)
 	resp, err := c.do("GET", path, doOptions{context: opts.Context})
 	if err != nil {
@@ -32,8 +32,8 @@ func (c *Client) ListVolumes(opts types.ListVolumeOptions) ([]types.Volume, erro
 	return volumes, nil
 }
 
-// CreateVolume creates a volume on the server and returns its unique id.
-func (c *Client) CreateVolume(opts types.CreateVolumeOptions) (string, error) {
+// VolumeCreate creates a volume on the server and returns its unique id.
+func (c *Client) VolumeCreate(opts types.VolumeCreateOptions) (string, error) {
 	resp, err := c.do("POST", "/volumes", doOptions{
 		data:    opts,
 		context: opts.Context,
@@ -49,8 +49,8 @@ func (c *Client) CreateVolume(opts types.CreateVolumeOptions) (string, error) {
 	return string(out), nil
 }
 
-// GetVolume returns a volume by its reference.
-func (c *Client) GetVolume(ref string) (*types.Volume, error) {
+// Volume returns a volume by its reference.
+func (c *Client) Volume(ref string) (*types.Volume, error) {
 	resp, err := c.do("GET", "/volumes/"+ref, doOptions{})
 	if err != nil {
 		if e, ok := err.(*Error); ok && e.Status == http.StatusNotFound {
@@ -66,8 +66,8 @@ func (c *Client) GetVolume(ref string) (*types.Volume, error) {
 	return &volume, nil
 }
 
-// RemoveVolume removes a volume by its reference.
-func (c *Client) RemoveVolume(ref string) error {
+// VolumeDelete removes a volume by its reference.
+func (c *Client) VolumeDelete(ref string) error {
 	resp, err := c.do("DELETE", "/volumes/"+ref, doOptions{})
 	if err != nil {
 		if e, ok := err.(*Error); ok {

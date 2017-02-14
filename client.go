@@ -14,8 +14,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"path"
-	"path/filepath"
 	"reflect"
 	"strconv"
 	"strings"
@@ -30,6 +28,7 @@ const (
 	namedPipeProtocol = "npipe"
 	defaultVersionStr = "1"
 	defaultVersion    = 1
+	defaultNamespace  = "default"
 )
 
 var (
@@ -145,11 +144,6 @@ func NewVersionedClient(endpoint string, apiVersionString string) (*Client, erro
 	return c, nil
 }
 
-// NewVersionnedTLSClient has been DEPRECATED, please use NewVersionedTLSClient.
-func NewVersionnedTLSClient(endpoint string, cert, key, ca, apiVersionString string) (*Client, error) {
-	return NewVersionedTLSClient(endpoint, cert, key, ca, apiVersionString)
-}
-
 // NewVersionedTLSClient returns a Client instance ready for TLS communications with the givens
 // server endpoint, key and certificates, using a specific remote API version.
 func NewVersionedTLSClient(endpoint string, cert, key, ca, apiVersionString string) (*Client, error) {
@@ -175,45 +169,6 @@ func NewVersionedTLSClient(endpoint string, cert, key, ca, apiVersionString stri
 		}
 	}
 	return NewVersionedTLSClientFromBytes(endpoint, certPEMBlock, keyPEMBlock, caPEMCert, apiVersionString)
-}
-
-// NewClientFromEnv returns a Client instance ready for communication created from
-// Docker's default logic for the environment variables STORAGEOS_HOST, STORAGEOS_TLS_VERIFY, and STORAGEOS_CERT_PATH.
-//
-// See https://github.com/docker/docker/blob/1f963af697e8df3a78217f6fdbf67b8123a7db94/docker/docker.go#L68.
-// See https://github.com/docker/compose/blob/81707ef1ad94403789166d2fe042c8a718a4c748/compose/cli/docker_client.py#L7.
-func NewClientFromEnv() (*Client, error) {
-	client, err := NewVersionedClientFromEnv("")
-	if err != nil {
-		return nil, err
-	}
-	client.SkipServerVersionCheck = true
-	return client, nil
-}
-
-// NewVersionedClientFromEnv returns a Client instance ready for TLS communications created from
-// Docker's default logic for the environment variables DOCKER_HOST, DOCKER_TLS_VERIFY, and DOCKER_CERT_PATH,
-// and using a specific remote API version.
-//
-// See https://github.com/docker/docker/blob/1f963af697e8df3a78217f6fdbf67b8123a7db94/docker/docker.go#L68.
-// See https://github.com/docker/compose/blob/81707ef1ad94403789166d2fe042c8a718a4c748/compose/cli/docker_client.py#L7.
-func NewVersionedClientFromEnv(apiVersionString string) (*Client, error) {
-	storageosEnv, err := getEnv()
-	if err != nil {
-		return nil, err
-	}
-	storageosHost := storageosEnv.storageosHost
-	if storageosEnv.storageosTLSVerify {
-		parts := strings.SplitN(storageosEnv.storageosHost, "://", 2)
-		if len(parts) != 2 {
-			return nil, fmt.Errorf("could not split %s into two parts by ://", storageosHost)
-		}
-		cert := filepath.Join(storageosEnv.storageosCertPath, "cert.pem")
-		key := filepath.Join(storageosEnv.storageosCertPath, "key.pem")
-		ca := filepath.Join(storageosEnv.storageosCertPath, "ca.pem")
-		return NewVersionedTLSClient(storageosEnv.storageosHost, cert, key, ca, apiVersionString)
-	}
-	return NewVersionedClient(storageosEnv.storageosHost, apiVersionString)
 }
 
 // NewVersionedTLSClientFromBytes returns a Client instance ready for TLS communications with the givens
@@ -291,19 +246,19 @@ func (c *Client) SetTimeout(t time.Duration) {
 }
 
 func (c *Client) checkAPIVersion() error {
-	// serverAPIVersionString, err := c.getServerAPIVersionString()
-	// if err != nil {
-	// 	return err
-	// }
-	// c.serverAPIVersion, err = NewAPIVersion(serverAPIVersionString)
-	// if err != nil {
-	// 	return err
-	// }
-	// if c.requestedAPIVersion == 0 {
-	// 	c.expectedAPIVersion = c.serverAPIVersion
-	// } else {
-	// 	c.expectedAPIVersion = c.requestedAPIVersion
-	// }
+	serverAPIVersionString, err := c.getServerAPIVersionString()
+	if err != nil {
+		return err
+	}
+	c.serverAPIVersion, err = NewAPIVersion(serverAPIVersionString)
+	if err != nil {
+		return err
+	}
+	if c.requestedAPIVersion == 0 {
+		c.expectedAPIVersion = c.serverAPIVersion
+	} else {
+		c.expectedAPIVersion = c.requestedAPIVersion
+	}
 	return nil
 }
 
@@ -331,22 +286,23 @@ func (c *Client) Ping() error {
 }
 
 func (c *Client) getServerAPIVersionString() (version string, err error) {
-	resp, err := c.do("GET", "/version", doOptions{})
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("Received unexpected status %d while trying to retrieve the server version", resp.StatusCode)
-	}
-	var versionResponse map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&versionResponse); err != nil {
-		return "", err
-	}
-	if version, ok := (versionResponse["ApiVersion"]).(string); ok {
-		return version, nil
-	}
-	return "", nil
+	// resp, err := c.do("GET", "/version", doOptions{})
+	// if err != nil {
+	// 	return "", err
+	// }
+	// defer resp.Body.Close()
+	// if resp.StatusCode != http.StatusOK {
+	// 	return "", fmt.Errorf("Received unexpected status %d while trying to retrieve the server version", resp.StatusCode)
+	// }
+	// var versionResponse map[string]interface{}
+	// if err := json.NewDecoder(resp.Body).Decode(&versionResponse); err != nil {
+	// 	return "", err
+	// }
+	// if version, ok := (versionResponse["ApiVersion"]).(string); ok {
+	// 	return version, nil
+	// }
+	// return "", nil
+	return "1", nil
 }
 
 type doOptions struct {
@@ -371,7 +327,7 @@ func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response
 			return nil, err
 		}
 	}
-	urlpath = path.Join(path.Join("/", c.serverAPIVersion.String()), urlpath)
+	// urlpath = path.Join(path.Join("/", c.serverAPIVersion.String()), urlpath)
 	httpClient := c.HTTPClient
 	protocol := c.endpointURL.Scheme
 	var u string
@@ -436,7 +392,7 @@ func (c *Client) getURL(path string) string {
 		urlStr = ""
 	}
 	if c.requestedAPIVersion != 0 {
-		return fmt.Sprintf("%s/v%s%s", urlStr, c.requestedAPIVersion, path)
+		return fmt.Sprintf("%s/%s%s", urlStr, c.requestedAPIVersion, path)
 	}
 	return fmt.Sprintf("%s%s", urlStr, path)
 }
@@ -590,41 +546,6 @@ func parseEndpoint(endpoint string, tls bool) (*url.URL, error) {
 	default:
 		return nil, ErrInvalidEndpoint
 	}
-}
-
-type storageosEnv struct {
-	storageosHost      string
-	storageosTLSVerify bool
-	storageosCertPath  string
-}
-
-func getEnv() (*storageosEnv, error) {
-	storageosHost := os.Getenv("STORAGEOS_API")
-	var err error
-	if storageosHost == "" {
-		storageosHost = DefaultHost
-	}
-	storageosTLSVerify := os.Getenv("STORAGEOS_TLS_VERIFY") != ""
-	var storageosCertPath string
-	if storageosTLSVerify {
-		storageosCertPath = os.Getenv("STORAGEOS_CERT_PATH")
-		if storageosCertPath == "" {
-			home := os.Getenv("STORAGEOS_CERT_PATH")
-			if home == "" {
-				return nil, errors.New("environment variable HOME must be set if STORAGEOS_CERT_PATH is not set")
-			}
-			storageosCertPath = filepath.Join(home, ".storageos")
-			storageosCertPath, err = filepath.Abs(storageosCertPath)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	return &storageosEnv{
-		storageosHost:      storageosHost,
-		storageosTLSVerify: storageosTLSVerify,
-		storageosCertPath:  storageosCertPath,
-	}, nil
 }
 
 // defaultTransport returns a new http.Transport with the same default values
