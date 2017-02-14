@@ -19,6 +19,9 @@ type VolumeCreateOptions struct {
 	// Pool is the name or id of capacity pool to provision the volume in.
 	Pool string
 
+	// Namespace is the object scope, such as for teams and projects.
+	Namespace string
+
 	// Labels are user-defined key/value metadata.
 	Labels map[string]string
 
