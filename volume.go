@@ -3,6 +3,7 @@ package storageos
 import (
 	"encoding/json"
 	"errors"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/storageos/go-api/types"
@@ -31,21 +32,21 @@ func (c *Client) ListVolumes(opts types.ListVolumeOptions) ([]types.Volume, erro
 	return volumes, nil
 }
 
-// CreateVolume creates a volume on the server.
-func (c *Client) CreateVolume(opts types.CreateVolumeOptions) (*types.Volume, error) {
+// CreateVolume creates a volume on the server and returns its unique id.
+func (c *Client) CreateVolume(opts types.CreateVolumeOptions) (string, error) {
 	resp, err := c.do("POST", "/volumes", doOptions{
 		data:    opts,
 		context: opts.Context,
 	})
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	defer resp.Body.Close()
-	var volume types.Volume
-	if err := json.NewDecoder(resp.Body).Decode(&volume); err != nil {
-		return nil, err
+	out, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
 	}
-	return &volume, nil
+	return string(out), nil
 }
 
 // GetVolume returns a volume by its reference.

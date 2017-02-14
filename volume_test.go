@@ -87,19 +87,9 @@ func TestListVolumes(t *testing.T) {
 }
 
 func TestCreateVolume(t *testing.T) {
-	body := `{
-		"Name": "unit01",
-		"Description": "Unit test volume",
-		"Pool": "default",
-		"Size": 5
-	}`
-	var expected types.Volume
-	if err := json.Unmarshal([]byte(body), &expected); err != nil {
-		t.Fatal(err)
-	}
-	fakeRT := &FakeRoundTripper{message: body, status: http.StatusOK}
+	fakeRT := &FakeRoundTripper{message: "ef897b9f-0b47-08ee-b669-0a2057df981c", status: http.StatusOK}
 	client := newTestClient(fakeRT)
-	volume, err := client.CreateVolume(
+	id, err := client.CreateVolume(
 		types.CreateVolumeOptions{
 			Name:        "unit01",
 			Description: "Unit test volume",
@@ -112,8 +102,8 @@ func TestCreateVolume(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(volume, &expected) {
-		t.Errorf("CreateVolume: Wrong return value. Want %#v. Got %#v.", expected, volume)
+	if len(id) != 36 {
+		t.Errorf("CreateVolume: Wrong return value. Wanted 34 character UUID. Got %d. (%s)", len(id), id)
 	}
 	req := fakeRT.requests[0]
 	expectedMethod := "POST"
