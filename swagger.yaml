@@ -226,6 +226,65 @@ definitions:
         com.example.some-label: "some-value"
         com.example.some-other-label: "some-other-value"
 
+  Rule:
+    type: "object"
+    description: "A policy rule."
+    required: [Name, Size]
+    properties:
+      ID:
+        description: "Rule unique ID."
+        type: "string"
+        x-nullable: false
+        readOnly: true
+      Name:
+        description: "Rule name."
+        type: "string"
+        x-nullable: false
+      Description:
+        type: "string"
+        x-nullable: false
+        description: "Rule description."
+      Active:
+        type: "boolean"
+        x-nullable: false
+        description: "Flag describing whether rule is active."
+        default: false
+      Weight:
+        type: "integer"
+        x-nullable: false
+        description: |
+          "Weight is used to determine order during rule processing.  Rules with heavier weights are processed later."
+        default: 0
+      Operator:
+        type: "string"
+        description: "Operator is used to compare objects or labels."
+        enum:
+          - "!"
+          - "="
+          - "=="
+          - "in"
+          - "!="
+          - "notin"
+          - "exists"
+          - "gt"
+          - "lt"
+      RuleAction:
+        type: "string"
+        description: "RuleAction controls whether the action is to add or remove a label from the matching object(s)."
+        enum:
+          - "add"
+          - "remove"
+        default: "add"
+      Selectors:
+        type: "object"
+        description: "Selectors defines the list of labels that should trigger a rule."
+        additionalProperties:
+          type: "string"
+      Labels:
+        type: "object"
+        description: "Labels defines the list of labels that will be added or removed from the matching object(s).."
+        additionalProperties:
+          type: "string"
 paths:
   /volumes:
     get:
