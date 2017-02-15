@@ -229,7 +229,7 @@ definitions:
   Rule:
     type: "object"
     description: "A policy rule."
-    required: [Name, Size]
+    required: [Name]
     properties:
       ID:
         description: "Rule unique ID."
