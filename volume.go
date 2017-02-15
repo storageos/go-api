@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 
 	"github.com/storageos/go-api/types"
 )
@@ -46,7 +47,7 @@ func (c *Client) VolumeCreate(opts types.VolumeCreateOptions) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return string(out), nil
+	return strconv.Unquote(string(out))
 }
 
 // Volume returns a volume by its reference.
