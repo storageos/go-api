@@ -2,7 +2,7 @@ package types
 
 import "context"
 
-// VolumeCreateOptions Parameters for creating new volumes.
+// VolumeCreateOptions are available parameters for creating new volumes.
 type VolumeCreateOptions struct {
 
 	// Name is the name of the volume to create.

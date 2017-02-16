@@ -2,7 +2,7 @@ package types
 
 import "context"
 
-// RuleCreateOptions Parameters for creating new Rules.
+// RuleCreateOptions are available parameters for creating new rules.
 type RuleCreateOptions struct {
 
 	// Rule name.

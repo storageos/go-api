@@ -1,11 +1,9 @@
 package types
 
-// Template is used to define an auto-naming rule.
-type Template struct {
+import "context"
 
-	// Template unique ID.
-	// Read Only: true
-	ID string `json:"id"`
+// TemplateCreateOptions are available parameters for creating new templates.
+type TemplateCreateOptions struct {
 
 	// Template name.
 	// Required: true
@@ -47,7 +45,7 @@ type Template struct {
 	// Labels defines a list of the labels that the object must have in order for
 	// the template to be applied.
 	Labels map[string]string `json:"labels"`
-}
 
-// Templates is a collection of Template objects
-type Templates []*Template
+	// Context can be set with a timeout or can be used to cancel a request.
+	Context context.Context
+}
