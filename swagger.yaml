@@ -121,23 +121,6 @@ definitions:
         additionalProperties:
           type: "string"
 
-  ListOptions:
-    type: "object"
-    description: "Parameters for finding volumes."
-    properties:
-      LabelSelector:
-        description: "A selector to restrict the list of returned objects by their labels. Defaults to everything."
-        type: "string"
-      FieldSelector:
-        type: "string"
-        description: "A selector to restrict the list of returned objects by their fields. Defaults to everything."
-      TimeoutSeconds:
-        type: "integer"
-        description: "Timeout for the list call."
-      Namespace:
-        type: "string"
-        description: "Object name and auth scope, such as for teams and projects"
-
   Volume:
     type: "object"
     description: "A storage volume."
@@ -420,6 +403,11 @@ paths:
       produces:
         - "application/json"
       tags: ["Volume"]
+      parameters:
+        - name: "name"
+          in: "body"
+          schema:
+            $ref: "#/definitions/VolumeCreateOptions"
       responses:
         200:
           description: "No error."
