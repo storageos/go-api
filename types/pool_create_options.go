@@ -34,7 +34,7 @@ type PoolCreateOptions struct {
 	// Default: false
 	Active bool `json:"active"`
 
-	// Labels defines a list of labels that describe the pool.
+	// Labels define a list of labels that describe the pool.
 	Labels map[string]string `json:"labels"`
 
 	// Context can be set with a timeout or can be used to cancel a request.

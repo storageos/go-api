@@ -31,7 +31,7 @@ type RuleCreateOptions struct {
 	// Selectors defines the list of labels that should trigger a rule.
 	Selectors map[string]string `json:"selectors"`
 
-	// Labels defines the list of labels that will be added or removed from the
+	// Labels define the list of labels that will be added or removed from the
 	// matching object(s).
 	Labels map[string]string `json:"labels"`
 

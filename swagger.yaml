@@ -226,6 +226,72 @@ definitions:
         com.example.some-label: "some-value"
         com.example.some-other-label: "some-other-value"
 
+  Pool:
+    type: "object"
+    description: |
+      Pools are used to define distributed capacity that can be used to provision
+      volumes from.  Typically, each server that makes storage available will be
+      added to one or more pools.
+
+      Capacity drivers are also added to the pool to deetermine which backend
+      storage driver to use.  Currently this is limited to a single type of
+      driver per pool, but in the future we will allow multiple, allowing for
+      dynamic tiering and snapshots from one driver type to another.
+    required: [Name]
+    properties:
+      ID:
+        description: "Pool unique ID."
+        type: "string"
+        x-nullable: false
+        readOnly: true
+      Name:
+        description: "Pool name."
+        type: "string"
+        x-nullable: false
+      Description:
+        type: "string"
+        x-nullable: false
+        description: "Pool description."
+      Default:
+        type: "boolean"
+        x-nullable: false
+        description: |
+          Default determines whether this pool is the default if a volume is
+          provisioned without a pool specified.  There can only be one default
+          pool.
+      DefaultDriver:
+        type: "string"
+        description: |
+          DefaultDriver specifies the storage driver to use by default if there
+          are multiple drivers in the pool and no driver was specified in the
+          provisioning request or assigned by rules.  If no driver was specified
+          and no default set, driver weight is used to determine the default.
+      ControllerNames:
+        type: "array"
+        description: "ControllerNames is a list of controller names that are participating in the storage pool."
+        items:
+          type: "string"
+      DriverNames:
+        type: "array"
+        description: "DriverNames is a list of backend storage drivers that are available in the storage pool."
+        items:
+          type: "string"
+      Active:
+        type: "boolean"
+        x-nullable: false
+        description: "Flag describing whether rule is active."
+        default: false
+      CapacityStats:
+        type: "object"
+        description: |
+          "CapacityStats are used to track aggregate capacity usage information across all controllers and driver instances."
+        $ref: "#/definitions/CapacityStats"
+      Labels:
+        type: "object"
+        description: "Labels define a list of labels that describe the pool."
+        additionalProperties:
+          type: "string"
+
   Rule:
     type: "object"
     description: "A policy rule."
@@ -282,9 +348,27 @@ definitions:
           type: "string"
       Labels:
         type: "object"
-        description: "Labels defines the list of labels that will be added or removed from the matching object(s).."
+        description: "Labels define the list of labels that will be added or removed from the matching object(s).."
         additionalProperties:
           type: "string"
+
+  CapacityStats:
+    type: "object"
+    description: "CapacityStats is used to report capacity statistics on pools and controllers."
+    properties:
+      TotalCapacityBytes:
+        description: "TotalCapacityBytes is the object's total capacity in bytes."
+        type: "integer"
+        readOnly: true
+      AvailableCapacityBytes:
+        description: "AvailableCapacityBytes is the object's available capacity in bytes."
+        type: "integer"
+        readOnly: true
+      ProvisionedCapacityBytes:
+        description: "ProvisionedCapacityBytes is the object's provisioned capacity in bytes."
+        type: "integer"
+        readOnly: true
+
 paths:
   /volumes:
     get:

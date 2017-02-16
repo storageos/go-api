@@ -42,7 +42,7 @@ type TemplateCreateOptions struct {
 	// ObjectTypes defines the type names that the template can be applied to.
 	ObjectTypes []string `json:"objectTypes"`
 
-	// Labels defines a list of the labels that the object must have in order for
+	// Labels define a list of the labels that the object must have in order for
 	// the template to be applied.
 	Labels map[string]string `json:"labels"`
 

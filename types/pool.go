@@ -47,7 +47,7 @@ type Pool struct {
 	// Read Only: true
 	CapacityStats CapacityStats `json:"capacityStats"`
 
-	// Labels defines a list of labels that describe the pool.
+	// Labels define a list of labels that describe the pool.
 	Labels map[string]string `json:"labels"`
 }
 

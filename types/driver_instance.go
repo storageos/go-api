@@ -23,7 +23,7 @@ type DriverInstance struct {
 	// specific format, and the driver is responsible for validation.
 	Config interface{} `json:"config"`
 
-	// Labels defines a list of labels that describe the driver instance.  These
+	// Labels define a list of labels that describe the driver instance.  These
 	// are inherited from the pool when the driver instance is created.
 	Labels []string `json:"labels"`
 
