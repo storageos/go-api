@@ -11,6 +11,10 @@ import (
 )
 
 var (
+
+	// VolumeAPIPrefix is a partial path to the HTTP endpoint.
+	VolumeAPIPrefix = "/volumes"
+
 	// ErrNoSuchVolume is the error returned when the volume does not exist.
 	ErrNoSuchVolume = errors.New("no such volume")
 
@@ -19,8 +23,8 @@ var (
 )
 
 // VolumeList returns the list of available volumes.
-func (c *Client) VolumeList(opts types.VolumeListOptions) ([]types.Volume, error) {
-	path := "/volumes?" + queryString(opts)
+func (c *Client) VolumeList(opts types.ListOptions) ([]types.Volume, error) {
+	path := VolumeAPIPrefix + "?" + queryString(opts)
 	resp, err := c.do("GET", path, doOptions{context: opts.Context})
 	if err != nil {
 		return nil, err
@@ -35,7 +39,7 @@ func (c *Client) VolumeList(opts types.VolumeListOptions) ([]types.Volume, error
 
 // VolumeCreate creates a volume on the server and returns its unique id.
 func (c *Client) VolumeCreate(opts types.VolumeCreateOptions) (string, error) {
-	resp, err := c.do("POST", "/volumes", doOptions{
+	resp, err := c.do("POST", VolumeAPIPrefix, doOptions{
 		data:    opts,
 		context: opts.Context,
 	})
@@ -52,7 +56,7 @@ func (c *Client) VolumeCreate(opts types.VolumeCreateOptions) (string, error) {
 
 // Volume returns a volume by its reference.
 func (c *Client) Volume(ref string) (*types.Volume, error) {
-	resp, err := c.do("GET", "/volumes/"+ref, doOptions{})
+	resp, err := c.do("GET", VolumeAPIPrefix+"/"+ref, doOptions{})
 	if err != nil {
 		if e, ok := err.(*Error); ok && e.Status == http.StatusNotFound {
 			return nil, ErrNoSuchVolume
@@ -69,7 +73,7 @@ func (c *Client) Volume(ref string) (*types.Volume, error) {
 
 // VolumeDelete removes a volume by its reference.
 func (c *Client) VolumeDelete(ref string) error {
-	resp, err := c.do("DELETE", "/volumes/"+ref, doOptions{})
+	resp, err := c.do("DELETE", VolumeAPIPrefix+"/"+ref, doOptions{})
 	if err != nil {
 		if e, ok := err.(*Error); ok {
 			if e.Status == http.StatusNotFound {

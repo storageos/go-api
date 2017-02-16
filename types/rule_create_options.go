@@ -1,24 +1,9 @@
 package types
 
-// Versions and Prefixes used in API and KV URLs
-const (
+import "context"
 
-	// RuleActionAdd specifies to add labels to the object(s).
-	RuleActionAdd RuleAction = "add"
-
-	// RuleActionRemove specifies to remove labels from the object(s).
-	RuleActionRemove RuleAction = "remove"
-)
-
-// RuleAction - rule action type
-type RuleAction string
-
-// Rule is used to define a rule
-type Rule struct {
-
-	// Rule unique ID.
-	// Read Only: true
-	ID string `json:"id"`
+// RuleCreateOptions Parameters for creating new Rules.
+type RuleCreateOptions struct {
 
 	// Rule name.
 	// Required: true
@@ -49,7 +34,7 @@ type Rule struct {
 	// Labels defines the list of labels that will be added or removed from the
 	// matching object(s).
 	Labels map[string]string `json:"labels"`
-}
 
-// Rules is a collection of Rules.
-type Rules []*Rule
+	// Context can be set with a timeout or can be used to cancel a request.
+	Context context.Context
+}

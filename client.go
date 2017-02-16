@@ -367,7 +367,6 @@ func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response
 		if strings.Contains(err.Error(), "connection refused") {
 			return nil, ErrConnectionRefused
 		}
-
 		return nil, chooseError(ctx, err)
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 400 {

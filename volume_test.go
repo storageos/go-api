@@ -1,6 +1,7 @@
 package storageos
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/url"
@@ -77,7 +78,7 @@ func TestVolumeList(t *testing.T) {
 	}
 
 	client := newTestClient(&FakeRoundTripper{message: volumesData, status: http.StatusOK})
-	volumes, err := client.VolumeList(types.VolumeListOptions{})
+	volumes, err := client.VolumeList(types.ListOptions{})
 	if err != nil {
 		t.Error(err)
 	}
@@ -87,7 +88,8 @@ func TestVolumeList(t *testing.T) {
 }
 
 func TestVolumeCreate(t *testing.T) {
-	fakeRT := &FakeRoundTripper{message: "ef897b9f-0b47-08ee-b669-0a2057df981c", status: http.StatusOK}
+	message := "\"ef897b9f-0b47-08ee-b669-0a2057df981c\""
+	fakeRT := &FakeRoundTripper{message: message, status: http.StatusOK}
 	client := newTestClient(fakeRT)
 	id, err := client.VolumeCreate(
 		types.VolumeCreateOptions{
@@ -97,6 +99,7 @@ func TestVolumeCreate(t *testing.T) {
 			Labels: map[string]string{
 				"foo": "bar",
 			},
+			Context: context.Background(),
 		},
 	)
 	if err != nil {
@@ -110,7 +113,7 @@ func TestVolumeCreate(t *testing.T) {
 	if req.Method != expectedMethod {
 		t.Errorf("VolumeCreate(): Wrong HTTP method. Want %s. Got %s.", expectedMethod, req.Method)
 	}
-	u, _ := url.Parse(client.getURL("/volumes"))
+	u, _ := url.Parse(client.getURL(VolumeAPIPrefix))
 	if req.URL.Path != u.Path {
 		t.Errorf("VolumeCreate(): Wrong request path. Want %q. Got %q.", u.Path, req.URL.Path)
 	}
@@ -142,7 +145,7 @@ func TestVolume(t *testing.T) {
 	if req.Method != expectedMethod {
 		t.Errorf("InspectVolume(%q): Wrong HTTP method. Want %s. Got %s.", name, expectedMethod, req.Method)
 	}
-	u, _ := url.Parse(client.getURL("/volumes/" + name))
+	u, _ := url.Parse(client.getURL(VolumeAPIPrefix + "/" + name))
 	if req.URL.Path != u.Path {
 		t.Errorf("VolumeCreate(%q): Wrong request path. Want %q. Got %q.", name, u.Path, req.URL.Path)
 	}
@@ -160,7 +163,7 @@ func TestVolumeDelete(t *testing.T) {
 	if req.Method != expectedMethod {
 		t.Errorf("VolumeDelete(%q): Wrong HTTP method. Want %s. Got %s.", name, expectedMethod, req.Method)
 	}
-	u, _ := url.Parse(client.getURL("/volumes/" + name))
+	u, _ := url.Parse(client.getURL(VolumeAPIPrefix + "/" + name))
 	if req.URL.Path != u.Path {
 		t.Errorf("VolumeDelete(%q): Wrong request path. Want %q. Got %q.", name, u.Path, req.URL.Path)
 	}

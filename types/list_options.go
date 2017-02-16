@@ -2,8 +2,8 @@ package types
 
 import "context"
 
-// VolumeListOptions are optional parameters for finding and listing volumes.
-type VolumeListOptions struct {
+// ListOptions are optional parameters for finding and listing most objects.
+type ListOptions struct {
 
 	// FieldSelector restricts the list of returned objects by their fields. Defaults to everything.
 	FieldSelector string
