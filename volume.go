@@ -3,9 +3,7 @@ package storageos
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"net/http"
-	"strconv"
 
 	"github.com/storageos/go-api/types"
 )
@@ -13,7 +11,7 @@ import (
 var (
 
 	// VolumeAPIPrefix is a partial path to the HTTP endpoint.
-	VolumeAPIPrefix = "/volumes"
+	VolumeAPIPrefix = "volumes"
 
 	// ErrNoSuchVolume is the error returned when the volume does not exist.
 	ErrNoSuchVolume = errors.New("no such volume")
@@ -24,8 +22,11 @@ var (
 
 // VolumeList returns the list of available volumes.
 func (c *Client) VolumeList(opts types.ListOptions) ([]types.Volume, error) {
-	path := VolumeAPIPrefix + "?" + queryString(opts)
-	resp, err := c.do("GET", path, doOptions{context: opts.Context})
+	path, err := namespacedPath(opts.Namespace, VolumeAPIPrefix)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.do("GET", path+"?"+queryString(opts), doOptions{context: opts.Context})
 	if err != nil {
 		return nil, err
 	}
@@ -37,26 +38,13 @@ func (c *Client) VolumeList(opts types.ListOptions) ([]types.Volume, error) {
 	return volumes, nil
 }
 
-// VolumeCreate creates a volume on the server and returns its unique id.
-func (c *Client) VolumeCreate(opts types.VolumeCreateOptions) (string, error) {
-	resp, err := c.do("POST", VolumeAPIPrefix, doOptions{
-		data:    opts,
-		context: opts.Context,
-	})
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-	out, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
-	return strconv.Unquote(string(out))
-}
-
 // Volume returns a volume by its reference.
-func (c *Client) Volume(ref string) (*types.Volume, error) {
-	resp, err := c.do("GET", VolumeAPIPrefix+"/"+ref, doOptions{})
+func (c *Client) Volume(namespace string, ref string) (*types.Volume, error) {
+	path, err := namespacedRefPath(namespace, VolumeAPIPrefix, ref)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.do("GET", path, doOptions{})
 	if err != nil {
 		if e, ok := err.(*Error); ok && e.Status == http.StatusNotFound {
 			return nil, ErrNoSuchVolume
@@ -71,9 +59,64 @@ func (c *Client) Volume(ref string) (*types.Volume, error) {
 	return &volume, nil
 }
 
+// VolumeCreate creates a volume on the server and returns its unique id.
+func (c *Client) VolumeCreate(opts types.VolumeCreateOptions) (*types.Volume, error) {
+	path, err := namespacedPath(opts.Namespace, VolumeAPIPrefix)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.do("POST", path, doOptions{
+		data:    opts,
+		context: opts.Context,
+	})
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	// out, err := ioutil.ReadAll(resp.Body)
+	// if err != nil {
+	// 	return "", err
+	// }
+	// return strconv.Unquote(string(out))
+	var volume types.Volume
+	if err := json.NewDecoder(resp.Body).Decode(&volume); err != nil {
+		return nil, err
+	}
+	return &volume, nil
+}
+
+// VolumeUpdate updates a volume on the server.
+func (c *Client) VolumeUpdate(opts types.VolumeUpdateOptions) (*types.Volume, error) {
+	ref := opts.Name
+	if IsUUID(opts.ID) {
+		ref = opts.ID
+	}
+	path, err := namespacedRefPath(opts.Namespace, VolumeAPIPrefix, ref)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.do("PUT", path, doOptions{
+		data:    opts,
+		context: opts.Context,
+	})
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	var volume types.Volume
+	if err := json.NewDecoder(resp.Body).Decode(&volume); err != nil {
+		return nil, err
+	}
+	return &volume, nil
+}
+
 // VolumeDelete removes a volume by its reference.
-func (c *Client) VolumeDelete(ref string) error {
-	resp, err := c.do("DELETE", VolumeAPIPrefix+"/"+ref, doOptions{})
+func (c *Client) VolumeDelete(namespace string, ref string) error {
+	path, err := namespacedRefPath(namespace, VolumeAPIPrefix, ref)
+	if err != nil {
+		return err
+	}
+	resp, err := c.do("DELETE", path, doOptions{})
 	if err != nil {
 		if e, ok := err.(*Error); ok {
 			if e.Status == http.StatusNotFound {

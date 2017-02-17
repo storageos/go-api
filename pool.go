@@ -13,7 +13,7 @@ import (
 var (
 
 	// PoolAPIPrefix is a partial path to the HTTP endpoint.
-	PoolAPIPrefix = "/pools"
+	PoolAPIPrefix = "pools"
 
 	// ErrNoSuchPool is the error returned when the pool does not exist.
 	ErrNoSuchPool = errors.New("no such pool")

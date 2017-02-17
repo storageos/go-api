@@ -24,8 +24,6 @@ func TestVolumeList(t *testing.T) {
     },
     "replicas": null,
     "created_by": "storageos",
-    "datacentre": "",
-    "tenant": "",
     "name": "test02",
     "status": "pending",
     "status_message": "",
@@ -53,8 +51,6 @@ func TestVolumeList(t *testing.T) {
     },
     "replicas": null,
     "created_by": "storageos",
-    "datacentre": "",
-    "tenant": "",
     "name": "test01",
     "status": "active",
     "status_message": "",
@@ -78,7 +74,7 @@ func TestVolumeList(t *testing.T) {
 	}
 
 	client := newTestClient(&FakeRoundTripper{message: volumesData, status: http.StatusOK})
-	volumes, err := client.VolumeList(types.ListOptions{})
+	volumes, err := client.VolumeList(types.ListOptions{Namespace: "projA"})
 	if err != nil {
 		t.Error(err)
 	}
@@ -88,14 +84,47 @@ func TestVolumeList(t *testing.T) {
 }
 
 func TestVolumeCreate(t *testing.T) {
-	message := "\"ef897b9f-0b47-08ee-b669-0a2057df981c\""
-	fakeRT := &FakeRoundTripper{message: message, status: http.StatusOK}
+	// message := "\"ef897b9f-0b47-08ee-b669-0a2057df981c\""
+	body := `{
+				"created_at": "0001-01-01T00:00:00Z",
+				"created_by": "storageos",
+				"datacentre": "",
+				"description": "Kubernetes volume",
+				"health": "",
+				"id": "671e90a2-06f9-9cd7-b4ee-d1338dfe31ee",
+				"inode": 137190,
+				"labels": {
+						"storageos.driver": "filesystem"
+				},
+				"master": {
+						"controller": "01c43d34-89f8-83d3-422b-43536a0f25e6",
+						"created_at": "2017-02-15T01:40:44.792120679Z",
+						"health": "",
+						"id": "2a611b3f-8e23-eaa3-537a-d0b635bdd6a5",
+						"inode": 166017,
+						"status": "active"
+				},
+				"mounted": false,
+				"mounted_at": "0001-01-01T00:00:00Z",
+				"mounted_by": "",
+				"name": "pvc-c46b39a3-f31f-11e6-9fe1-08002736b526",
+				"no_of_mounts": 0,
+				"pool": "b4c87d6c-2958-6283-128b-f767153938ad",
+				"replicas": [],
+				"size": 5,
+				"status": "active",
+				"status_message": "volume was affected by controller with ID 01c43d34-89f8-83d3-422b-43536a0f25e6 submodule health changes",
+				"tenant": ""
+		}`
+	fakeRT := &FakeRoundTripper{message: body, status: http.StatusOK}
 	client := newTestClient(fakeRT)
-	id, err := client.VolumeCreate(
+	namespace := "projA"
+	volume, err := client.VolumeCreate(
 		types.VolumeCreateOptions{
 			Name:        "unit01",
 			Description: "Unit test volume",
 			Pool:        "default",
+			Namespace:   namespace,
 			Labels: map[string]string{
 				"foo": "bar",
 			},
@@ -105,15 +134,19 @@ func TestVolumeCreate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(id) != 36 {
-		t.Errorf("VolumeCreate: Wrong return value. Wanted 34 character UUID. Got %d. (%s)", len(id), id)
+	// if len(id) != 36 {
+	// 	t.Errorf("VolumeCreate: Wrong return value. Wanted 34 character UUID. Got %d. (%s)", len(id), id)
+	// }
+	if volume == nil {
+		t.Errorf("VolumeCreate: Wrong return value. Wanted volume. Got %v.", volume)
 	}
 	req := fakeRT.requests[0]
 	expectedMethod := "POST"
 	if req.Method != expectedMethod {
 		t.Errorf("VolumeCreate(): Wrong HTTP method. Want %s. Got %s.", expectedMethod, req.Method)
 	}
-	u, _ := url.Parse(client.getURL(VolumeAPIPrefix))
+	path, _ := namespacedPath(namespace, VolumeAPIPrefix)
+	u, _ := url.Parse(client.getURL(path))
 	if req.URL.Path != u.Path {
 		t.Errorf("VolumeCreate(): Wrong request path. Want %q. Got %q.", u.Path, req.URL.Path)
 	}
@@ -121,11 +154,36 @@ func TestVolumeCreate(t *testing.T) {
 
 func TestVolume(t *testing.T) {
 	body := `{
-		"Name": "unit01",
-		"Description": "Unit test volume",
-		"Pool": "default",
-		"Size": 5
-	}`
+        "created_at": "0001-01-01T00:00:00Z",
+        "created_by": "storageos",
+        "datacentre": "",
+        "description": "Kubernetes volume",
+        "health": "",
+        "id": "671e90a2-06f9-9cd7-b4ee-d1338dfe31ee",
+        "inode": 137190,
+        "labels": {
+            "storageos.driver": "filesystem"
+        },
+        "master": {
+            "controller": "01c43d34-89f8-83d3-422b-43536a0f25e6",
+            "created_at": "2017-02-15T01:40:44.792120679Z",
+            "health": "",
+            "id": "2a611b3f-8e23-eaa3-537a-d0b635bdd6a5",
+            "inode": 166017,
+            "status": "active"
+        },
+        "mounted": false,
+        "mounted_at": "0001-01-01T00:00:00Z",
+        "mounted_by": "",
+        "name": "pvc-c46b39a3-f31f-11e6-9fe1-08002736b526",
+        "no_of_mounts": 0,
+        "pool": "b4c87d6c-2958-6283-128b-f767153938ad",
+        "replicas": [],
+        "size": 5,
+        "status": "active",
+        "status_message": "volume was affected by controller with ID 01c43d34-89f8-83d3-422b-43536a0f25e6 submodule health changes",
+        "tenant": ""
+    }`
 	var expected types.Volume
 	if err := json.Unmarshal([]byte(body), &expected); err != nil {
 		t.Fatal(err)
@@ -133,7 +191,8 @@ func TestVolume(t *testing.T) {
 	fakeRT := &FakeRoundTripper{message: body, status: http.StatusOK}
 	client := newTestClient(fakeRT)
 	name := "tardis"
-	volume, err := client.Volume(name)
+	namespace := "projA"
+	volume, err := client.Volume(namespace, name)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -145,7 +204,8 @@ func TestVolume(t *testing.T) {
 	if req.Method != expectedMethod {
 		t.Errorf("InspectVolume(%q): Wrong HTTP method. Want %s. Got %s.", name, expectedMethod, req.Method)
 	}
-	u, _ := url.Parse(client.getURL(VolumeAPIPrefix + "/" + name))
+	path, _ := namespacedRefPath(namespace, VolumeAPIPrefix, name)
+	u, _ := url.Parse(client.getURL(path))
 	if req.URL.Path != u.Path {
 		t.Errorf("VolumeCreate(%q): Wrong request path. Want %q. Got %q.", name, u.Path, req.URL.Path)
 	}
@@ -153,9 +213,10 @@ func TestVolume(t *testing.T) {
 
 func TestVolumeDelete(t *testing.T) {
 	name := "test"
+	namespace := "projA"
 	fakeRT := &FakeRoundTripper{message: "", status: http.StatusNoContent}
 	client := newTestClient(fakeRT)
-	if err := client.VolumeDelete(name); err != nil {
+	if err := client.VolumeDelete(namespace, name); err != nil {
 		t.Fatal(err)
 	}
 	req := fakeRT.requests[0]
@@ -163,7 +224,8 @@ func TestVolumeDelete(t *testing.T) {
 	if req.Method != expectedMethod {
 		t.Errorf("VolumeDelete(%q): Wrong HTTP method. Want %s. Got %s.", name, expectedMethod, req.Method)
 	}
-	u, _ := url.Parse(client.getURL(VolumeAPIPrefix + "/" + name))
+	path, _ := namespacedRefPath(namespace, VolumeAPIPrefix, name)
+	u, _ := url.Parse(client.getURL(path))
 	if req.URL.Path != u.Path {
 		t.Errorf("VolumeDelete(%q): Wrong request path. Want %q. Got %q.", name, u.Path, req.URL.Path)
 	}
@@ -171,14 +233,14 @@ func TestVolumeDelete(t *testing.T) {
 
 func TestVolumeDeleteNotFound(t *testing.T) {
 	client := newTestClient(&FakeRoundTripper{message: "no such volume", status: http.StatusNotFound})
-	if err := client.VolumeDelete("test:"); err != ErrNoSuchVolume {
+	if err := client.VolumeDelete("xyz", "test"); err != ErrNoSuchVolume {
 		t.Errorf("VolumeDelete: wrong error. Want %#v. Got %#v.", ErrNoSuchVolume, err)
 	}
 }
 
 func TestVolumeDeleteInUse(t *testing.T) {
 	client := newTestClient(&FakeRoundTripper{message: "volume in use and cannot be removed", status: http.StatusConflict})
-	if err := client.VolumeDelete("test:"); err != ErrVolumeInUse {
+	if err := client.VolumeDelete("xyz", "test"); err != ErrVolumeInUse {
 		t.Errorf("VolumeDelete: wrong error. Want %#v. Got %#v.", ErrVolumeInUse, err)
 	}
 }

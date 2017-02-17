@@ -96,7 +96,7 @@ definitions:
 
   VolumeCreateOptions:
     type: "object"
-    description: "Parameters for creating new volumes."
+    description: "Parameters available for creating new volumes."
     required: [Name, Size]
     properties:
       Name:
@@ -120,6 +120,42 @@ definitions:
         x-nullable: false
         additionalProperties:
           type: "string"
+
+  VolumeUpdateOptions:
+    type: "object"
+    description: "Parameters available for updating existing volumes."
+    properties:
+      Description:
+        type: "string"
+        x-nullable: false
+        description: "Volume description."
+      Size:
+        type: "integer"
+        description: "Size in GB."
+        x-nullable: false
+      Labels:
+        type: "object"
+        description: "User-defined key/value metadata."
+        x-nullable: false
+        additionalProperties:
+          type: "string"
+
+  # ListOptions:
+  #   type: "object"
+  #   description: "Parameters for finding volumes."
+  #   properties:
+  #     LabelSelector:
+  #       description: "A selector to restrict the list of returned objects by their labels. Defaults to everything."
+  #       type: "string"
+  #     FieldSelector:
+  #       type: "string"
+  #       description: "A selector to restrict the list of returned objects by their fields. Defaults to everything."
+  #     TimeoutSeconds:
+  #       type: "integer"
+  #       description: "Timeout for the list call."
+  #     Namespace:
+  #       type: "string"
+  #       description: "Object name and auth scope, such as for teams and projects"
 
   Volume:
     type: "object"
@@ -388,13 +424,13 @@ paths:
         - $ref: "#/parameters/Namespace"
       responses:
         200:
-          description: "No error."
+          description: "Success"
           schema:
             type: "array"
             items:
               $ref: "#/definitions/Volume"
         500:
-          description: "Server error."
+          description: "Server error"
           schema:
             $ref: "#/definitions/ErrorResponse"
     post:
@@ -404,17 +440,17 @@ paths:
         - "application/json"
       tags: ["Volume"]
       parameters:
-        - name: "name"
+        - name: "VolumeCreateOptions"
           in: "body"
           schema:
             $ref: "#/definitions/VolumeCreateOptions"
       responses:
-        200:
-          description: "No error."
+        201:
+          description: "Volume created successfully"
           schema:
             $ref: "#/definitions/Volume"
         500:
-          description: "Server error."
+          description: "Server error"
           schema:
             $ref: "#/definitions/ErrorResponse"
   /volumes/{name}:
@@ -426,15 +462,15 @@ paths:
       tags: ["Volume"]
       responses:
         200:
-          description: "No error."
+          description: "Success"
           schema:
             $ref: "#/definitions/Volume"
         404:
-          description: "No such volume."
+          description: "Not found"
           schema:
             $ref: "#/definitions/ErrorResponse"
         500:
-          description: "Server error."
+          description: "Server error"
           schema:
             $ref: "#/definitions/ErrorResponse"
       parameters:
@@ -443,3 +479,48 @@ paths:
           required: true
           description: "Volume name or ID."
           type: "string"
+    put:
+      summary: "Update volume"
+      description: "Updates an existing volume."
+      produces:
+        - "application/json"
+      tags: ["Volume"]
+      parameters:
+        - name: "name"
+          in: "path"
+          required: true
+          description: "Volume name or ID."
+          type: "string"
+        - name: "VolumeUpdateOptions"
+          in: "body"
+          schema:
+            $ref: "#/definitions/VolumeUpdateOptions"
+      responses:
+        200:
+          description: "Success"
+          schema:
+            $ref: "#/definitions/Volume"
+        500:
+          description: "Server error"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    delete:
+      summary: "Delete volume"
+      description: "Deletes a volume."
+      produces:
+        - "application/json"
+      tags: ["Volume"]
+      parameters:
+        - name: "name"
+          in: "path"
+          required: true
+          description: "Volume name or ID."
+          type: "string"
+      responses:
+        200:
+          description: "Success"
+        500:
+          description: "Server error"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  

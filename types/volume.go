@@ -2,6 +2,9 @@ package types
 
 import "time"
 
+// DefaultNamespace is used when a namespace hasn't been specified.
+const DefaultNamespace = "default"
+
 // Volume represents storage volume.
 // swagger:model Volume
 type Volume struct {
@@ -30,6 +33,9 @@ type Volume struct {
 
 	// User-defined key/value metadata.
 	Labels map[string]string `json:"labels"`
+
+	// Namespace is the object name and authentication scope, such as for teams and projects.
+	Namespace string `json:"namespace"`
 
 	// Volume deployment information for the master volume.
 	// Read Only: true

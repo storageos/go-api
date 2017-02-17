@@ -13,7 +13,7 @@ import (
 var (
 
 	// RuleAPIPrefix is a partial path to the HTTP endpoint.
-	RuleAPIPrefix = "/rules"
+	RuleAPIPrefix = "rules"
 
 	// ErrNoSuchRule is the error returned when the rule does not exist.
 	ErrNoSuchRule = errors.New("no such rule")
