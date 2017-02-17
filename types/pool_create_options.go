@@ -38,5 +38,5 @@ type PoolCreateOptions struct {
 	Labels map[string]string `json:"labels"`
 
 	// Context can be set with a timeout or can be used to cancel a request.
-	Context context.Context
+	Context context.Context `json:"-"`
 }

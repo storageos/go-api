@@ -7,24 +7,24 @@ type VolumeCreateOptions struct {
 
 	// Name is the name of the volume to create.
 	// Required: true
-	Name string
+	Name string `json:"name"`
 
 	// Description describes the volume.
-	Description string
+	Description string `json:"description"`
 
 	// Size in GB.
 	// Required: true
-	Size int
+	Size int `json:"size"`
 
 	// Pool is the name or id of capacity pool to provision the volume in.
-	Pool string
+	Pool string `json:"pool"`
 
 	// Namespace is the object scope, such as for teams and projects.
-	Namespace string
+	Namespace string `json:"namespace"`
 
 	// Labels are user-defined key/value metadata.
-	Labels map[string]string
+	Labels map[string]string `json:"labels"`
 
 	// Context can be set with a timeout or can be used to cancel a request.
-	Context context.Context
+	Context context.Context `json:"-"`
 }

@@ -14,18 +14,18 @@ type VolumeUpdateOptions struct {
 	Name string `json:"name"`
 
 	// Description describes the volume.
-	Description string
+	Description string `json:"description"`
 
 	// Size in GB.
 	// Required: true
-	Size int
+	Size int `json:"size"`
 
 	// Namespace is the object scope, such as for teams and projects.
-	Namespace string
+	Namespace string `json:"namespace"`
 
 	// Labels are user-defined key/value metadata.
-	Labels map[string]string
+	Labels map[string]string `json:"labels"`
 
 	// Context can be set with a timeout or can be used to cancel a request.
-	Context context.Context
+	Context context.Context `json:"-"`
 }
