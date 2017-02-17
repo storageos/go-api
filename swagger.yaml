@@ -449,6 +449,8 @@ paths:
           description: "Volume created successfully"
           schema:
             $ref: "#/definitions/Volume"
+        401:
+          description: "Unauthorized"
         500:
           description: "Server error"
           schema:
@@ -465,6 +467,8 @@ paths:
           description: "Success"
           schema:
             $ref: "#/definitions/Volume"
+        401:
+          description: "Unauthorized"
         404:
           description: "Not found"
           schema:
@@ -500,6 +504,8 @@ paths:
           description: "Success"
           schema:
             $ref: "#/definitions/Volume"
+        401:
+          description: "Unauthorized"
         500:
           description: "Server error"
           schema:
@@ -519,8 +525,9 @@ paths:
       responses:
         200:
           description: "Success"
+        401:
+          description: "Unauthorized"
         500:
           description: "Server error"
           schema:
             $ref: "#/definitions/ErrorResponse"
-  
