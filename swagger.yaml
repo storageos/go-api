@@ -451,6 +451,8 @@ paths:
             $ref: "#/definitions/Volume"
         401:
           description: "Unauthorized"
+        409:
+          description: "Volume with name already exists"          
         500:
           description: "Server error"
           schema:
