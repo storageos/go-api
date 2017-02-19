@@ -19,6 +19,9 @@ type VolumeCreateOptions struct {
 	// Pool is the name or id of capacity pool to provision the volume in.
 	Pool string `json:"pool"`
 
+	// Filesystem type to mount.  May be set on create, or set by rules to influence client.
+	FSType string `json:"fsType"`
+
 	// Namespace is the object scope, such as for teams and projects.
 	Namespace string `json:"namespace"`
 

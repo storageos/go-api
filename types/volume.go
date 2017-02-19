@@ -23,10 +23,13 @@ type Volume struct {
 
 	// Size in GB.
 	// Required: true
-	Size int64 `json:"size"`
+	Size int `json:"size"`
 
 	// Name of capacity pool to provision the volume in, or the name of the current pool.
 	Pool string `json:"pool"`
+
+	// Filesystem type to mount.  May be set on create, or set by rules to influence client.
+	FSType string `json:"fsType"`
 
 	// Volume description.
 	Description string `json:"description"`
@@ -56,10 +59,6 @@ type Volume struct {
 	// Volume deployment information for the replica volumes.
 	// Read Only: true
 	Replicas []*Deployment `json:"replicas"`
-
-	// Flag indicating if the volume has been deleted and is waiting for scrubbing.
-	// Read Only: true
-	Deleted bool `json:"deleted"`
 
 	// Volume health, one of: healthy, degraded or dead.
 	// Read Only: true
