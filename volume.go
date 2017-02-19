@@ -126,7 +126,65 @@ func (c *Client) VolumeDelete(namespace string, ref string) error {
 				return ErrVolumeInUse
 			}
 		}
-		return nil
+		return err
+	}
+	defer resp.Body.Close()
+	return nil
+}
+
+// VolumeMount updates the volume with the client that mounted it.
+func (c *Client) VolumeMount(opts types.VolumeMountOptions) error {
+	ref := opts.Name
+	if IsUUID(opts.ID) {
+		ref = opts.ID
+	}
+	path, err := namespacedRefPath(opts.Namespace, VolumeAPIPrefix, ref)
+	if err != nil {
+		return err
+	}
+	resp, err := c.do("POST", path+"/mount", doOptions{
+		data:    opts,
+		context: opts.Context,
+	})
+	if err != nil {
+		if e, ok := err.(*Error); ok {
+			if e.Status == http.StatusNotFound {
+				return ErrNoSuchVolume
+			}
+			if e.Status == http.StatusConflict {
+				return ErrVolumeInUse
+			}
+		}
+		return err
+	}
+	defer resp.Body.Close()
+	return nil
+}
+
+// VolumeUnMount removes the client from the mount reference.
+func (c *Client) VolumeUnmount(opts types.VolumeUnmountOptions) error {
+	ref := opts.Name
+	if IsUUID(opts.ID) {
+		ref = opts.ID
+	}
+	path, err := namespacedRefPath(opts.Namespace, VolumeAPIPrefix, ref)
+	if err != nil {
+		return err
+	}
+	resp, err := c.do("POST", path+"/unmount", doOptions{
+		data:    opts,
+		context: opts.Context,
+	})
+	if err != nil {
+		if e, ok := err.(*Error); ok {
+			if e.Status == http.StatusNotFound {
+				return ErrNoSuchVolume
+			}
+			if e.Status == http.StatusConflict {
+				return ErrVolumeInUse
+			}
+		}
+		return err
 	}
 	defer resp.Body.Close()
 	return nil

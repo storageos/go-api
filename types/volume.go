@@ -1,6 +1,9 @@
 package types
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 // DefaultNamespace is used when a namespace hasn't been specified.
 const DefaultNamespace = "default"
@@ -79,4 +82,43 @@ type Volume struct {
 	// User that created the volume.
 	// Read Only: true
 	CreatedBy string `json:"createdBy"`
+}
+
+// VolumeMountOptions - used by clients to inform of volume mount operations.
+type VolumeMountOptions struct {
+
+	// Volume unique ID.
+	ID string `json:"id"`
+
+	// Name is the name of the volume to mount.
+	Name string `json:"name"`
+
+	// Namespace is the object scope, such as for teams and projects.
+	Namespace string `json:"namespace"`
+
+	// The hostname of the client mounting the volume.
+	Client string `json:"client"`
+
+	// Context can be set with a timeout or can be used to cancel a request.
+	Context context.Context `json:"-"`
+}
+
+// VolumeUnmountOptions - used by clients to inform of volume mount operations.
+type VolumeUnmountOptions struct {
+
+	// Volume unique ID.
+	ID string `json:"id"`
+
+	// Name is the name of the volume to unmount.
+	Name string `json:"name"`
+
+	// Namespace is the object scope, such as for teams and projects.
+	Namespace string `json:"namespace"`
+
+	// The hostname of the client unmounting the volume.  Must match the hostname
+	// of the client that registered the mount operation.
+	Client string `json:"client"`
+
+	// Context can be set with a timeout or can be used to cancel a request.
+	Context context.Context `json:"-"`
 }

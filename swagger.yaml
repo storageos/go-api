@@ -140,6 +140,48 @@ definitions:
         additionalProperties:
           type: "string"
 
+  # VolumeMountOptions:
+  #   type: "object"
+  #   description: "Parameters available for mounting volumes."
+  #   properties:
+  #     ID:
+  #       type: "string"
+  #       x-nullable: false
+  #       description: "Volume unique ID."
+  #     Name:
+  #       description: "Volume name."
+  #       type: "string"
+  #       x-nullable: false
+  #     Namespace:
+  #       description: "The object scope, such as for teams and projects."
+  #       type: "string"
+  #       x-nullable: false
+  #     Client:
+  #       type: "string"
+  #       x-nullable: false
+  #       description: "Hostname of the client performing the mount."
+  #
+  # VolumeUnmountOptions:
+  #   type: "object"
+  #   description: "Parameters available for unmounting volumes."
+  #   properties:
+  #     ID:
+  #       type: "string"
+  #       x-nullable: false
+  #       description: "Volume unique ID."
+  #     Name:
+  #       description: "Volume name."
+  #       type: "string"
+  #       x-nullable: false
+  #     Namespace:
+  #       description: "The object scope, such as for teams and projects."
+  #       type: "string"
+  #       x-nullable: false
+  #     Client:
+  #       type: "string"
+  #       x-nullable: false
+  #       description: "Hostname of the client performing the unmount."
+
   # ListOptions:
   #   type: "object"
   #   description: "Parameters for finding volumes."
@@ -387,6 +429,24 @@ definitions:
         readOnly: true
 
 parameters:
+  Name:
+    name: "name"
+    in: "path"
+    type: "string"
+    description: "Volume name or ID."
+    required: true
+  Namespace:
+    name: "namespace"
+    in: "path"
+    type: "string"
+    description: "Object name and auth scope, such as for teams and projects."
+    required: true
+  NamespaceQuery:
+    name: "namespace"
+    in: "query"
+    type: "string"
+    description: "Object name and auth scope, such as for teams and projects."
+    default: "default"
   LabelSelector:
     name: "labelSelector"
     in: "query"
@@ -402,15 +462,9 @@ parameters:
     in: "query"
     type: "integer"
     description: "Timeout for the list call."
-  Namespace:
-    name: "namespace"
-    in: "query"
-    type: "string"
-    description: "Object name and auth scope, such as for teams and projects"
-    default: "default"
 
 paths:
-  /volumes:
+  /namespaces/{namespace}/volumes:
     get:
       summary: "List volumes"
       description: "List of volumes that match the query."
@@ -418,10 +472,15 @@ paths:
         - "application/json"
       tags: ["Volume"]
       parameters:
+        - name: "namespace"
+          in: "path"
+          required: true
+          description: "The object scope, such as for teams and projects."
+          type: "string"
         - $ref: "#/parameters/LabelSelector"
         - $ref: "#/parameters/FieldSelector"
         - $ref: "#/parameters/TimeoutSeconds"
-        - $ref: "#/parameters/Namespace"
+        - $ref: "#/parameters/NamespaceQuery"
       responses:
         200:
           description: "Success"
@@ -440,6 +499,7 @@ paths:
         - "application/json"
       tags: ["Volume"]
       parameters:
+        - $ref: "#/parameters/Namespace"
         - name: "VolumeCreateOptions"
           in: "body"
           schema:
@@ -452,18 +512,21 @@ paths:
         401:
           description: "Unauthorized"
         409:
-          description: "Volume with name already exists"          
+          description: "Volume with name already exists"
         500:
           description: "Server error"
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /volumes/{name}:
+  /namespaces/{namespace}/volumes/{name}:
     get:
       summary: "Get a volume"
       description: "Gets a volume by name or ID.  Returns to whole volume object."
       produces:
         - "application/json"
       tags: ["Volume"]
+      parameters:
+        - $ref: "#/parameters/Name"
+        - $ref: "#/parameters/Namespace"
       responses:
         200:
           description: "Success"
@@ -475,16 +538,12 @@ paths:
           description: "Not found"
           schema:
             $ref: "#/definitions/ErrorResponse"
+        407:
+          description: "Volume already exists"
         500:
           description: "Server error"
           schema:
             $ref: "#/definitions/ErrorResponse"
-      parameters:
-        - name: "name"
-          in: "path"
-          required: true
-          description: "Volume name or ID."
-          type: "string"
     put:
       summary: "Update volume"
       description: "Updates an existing volume."
@@ -492,11 +551,8 @@ paths:
         - "application/json"
       tags: ["Volume"]
       parameters:
-        - name: "name"
-          in: "path"
-          required: true
-          description: "Volume name or ID."
-          type: "string"
+        - $ref: "#/parameters/Name"
+        - $ref: "#/parameters/Namespace"
         - name: "VolumeUpdateOptions"
           in: "body"
           schema:
@@ -519,6 +575,11 @@ paths:
         - "application/json"
       tags: ["Volume"]
       parameters:
+        - name: "namespace"
+          in: "path"
+          required: true
+          description: "The object scope, such as for teams and projects."
+          type: "string"
         - name: "name"
           in: "path"
           required: true
@@ -529,6 +590,66 @@ paths:
           description: "Success"
         401:
           description: "Unauthorized"
+        407:
+          description: "Volume in use"
+        500:
+          description: "Server error"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /namespaces/{namespace}/volumes/{name}/mount:
+    post:
+      summary: "Mount volume"
+      description: "Updates the mount reference for the volume."
+      produces:
+        - "application/json"
+      tags: ["Volume"]
+      parameters:
+        - $ref: "#/parameters/Name"
+        - $ref: "#/parameters/Namespace"
+        - name: "client"
+          in: "body"
+          description: "Hostname of the client mounting the volume"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        200:
+          description: "Success"
+          schema:
+            $ref: "#/definitions/Volume"
+        401:
+          description: "Unauthorized"
+        407:
+          description: "Volume already mounted"
+        500:
+          description: "Server error"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /namespaces/{namespace}/volumes/{name}/unmount:
+    post:
+      summary: "Mount volume"
+      description: "Updates the mount reference for the volume."
+      produces:
+        - "application/json"
+      tags: ["Volume"]
+      parameters:
+        - $ref: "#/parameters/Name"
+        - $ref: "#/parameters/Namespace"
+        - name: "client"
+          in: "body"
+          description: "Hostname of the client mounting the volume"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        200:
+          description: "Success"
+          schema:
+            $ref: "#/definitions/Volume"
+        401:
+          description: "Unauthorized"
+        407:
+          description: "Volume not mounted"
         500:
           description: "Server error"
           schema:

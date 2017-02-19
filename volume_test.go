@@ -244,3 +244,57 @@ func TestVolumeDeleteInUse(t *testing.T) {
 		t.Errorf("VolumeDelete: wrong error. Want %#v. Got %#v.", ErrVolumeInUse, err)
 	}
 }
+
+func TestVolumeMount(t *testing.T) {
+	name := "test"
+	namespace := "projA"
+	fakeRT := &FakeRoundTripper{message: "", status: http.StatusNoContent}
+	client := newTestClient(fakeRT)
+	err := client.VolumeMount(
+		types.VolumeMountOptions{
+			Name:      name,
+			Namespace: namespace,
+			Client:    "clientA",
+		},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req := fakeRT.requests[0]
+	expectedMethod := "POST"
+	if req.Method != expectedMethod {
+		t.Errorf("VolumeMount(%q): Wrong HTTP method. Want %s. Got %s.", name, expectedMethod, req.Method)
+	}
+	path, _ := namespacedRefPath(namespace, VolumeAPIPrefix, name)
+	u, _ := url.Parse(client.getURL(path) + "/mount")
+	if req.URL.Path != u.Path {
+		t.Errorf("VolumeMount(%q): Wrong request path. Want %q. Got %q.", name, u.Path, req.URL.Path)
+	}
+}
+
+func TestVolumeUnmount(t *testing.T) {
+	name := "test"
+	namespace := "projA"
+	fakeRT := &FakeRoundTripper{message: "", status: http.StatusNoContent}
+	client := newTestClient(fakeRT)
+	err := client.VolumeUnmount(
+		types.VolumeUnmountOptions{
+			Name:      name,
+			Namespace: namespace,
+			Client:    "clientA",
+		},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req := fakeRT.requests[0]
+	expectedMethod := "POST"
+	if req.Method != expectedMethod {
+		t.Errorf("VolumeUnmount(%q): Wrong HTTP method. Want %s. Got %s.", name, expectedMethod, req.Method)
+	}
+	path, _ := namespacedRefPath(namespace, VolumeAPIPrefix, name)
+	u, _ := url.Parse(client.getURL(path) + "/unmount")
+	if req.URL.Path != u.Path {
+		t.Errorf("VolumeUnount(%q): Wrong request path. Want %q. Got %q.", name, u.Path, req.URL.Path)
+	}
+}
