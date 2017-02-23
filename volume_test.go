@@ -84,7 +84,6 @@ func TestVolumeList(t *testing.T) {
 }
 
 func TestVolumeCreate(t *testing.T) {
-	// message := "\"ef897b9f-0b47-08ee-b669-0a2057df981c\""
 	body := `{
 				"created_at": "0001-01-01T00:00:00Z",
 				"created_by": "storageos",

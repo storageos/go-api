@@ -161,7 +161,7 @@ func (c *Client) VolumeMount(opts types.VolumeMountOptions) error {
 	return nil
 }
 
-// VolumeUnMount removes the client from the mount reference.
+// VolumeUnmount removes the client from the mount reference.
 func (c *Client) VolumeUnmount(opts types.VolumeUnmountOptions) error {
 	ref := opts.Name
 	if IsUUID(opts.ID) {
