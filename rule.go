@@ -3,9 +3,8 @@ package storageos
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/storageos/go-api/types"
 )
@@ -23,14 +22,19 @@ var (
 )
 
 // RuleList returns the list of available rules.
-func (c *Client) RuleList(opts types.ListOptions) ([]types.Rule, error) {
-	path := RuleAPIPrefix + "?" + queryString(opts)
-	resp, err := c.do("GET", path, doOptions{context: opts.Context})
+func (c *Client) RuleList(opts types.ListOptions) ([]*types.Rule, error) {
+	listOpts := doOptions{
+		fieldSelector: opts.FieldSelector,
+		labelSelector: opts.LabelSelector,
+		namespace:     opts.Namespace,
+		context:       opts.Context,
+	}
+	resp, err := c.do("GET", RuleAPIPrefix, listOpts)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	var rules []types.Rule
+	var rules []*types.Rule
 	if err := json.NewDecoder(resp.Body).Decode(&rules); err != nil {
 		return nil, err
 	}
@@ -38,25 +42,30 @@ func (c *Client) RuleList(opts types.ListOptions) ([]types.Rule, error) {
 }
 
 // RuleCreate creates a rule on the server and returns its unique id.
-func (c *Client) RuleCreate(opts types.RuleCreateOptions) (string, error) {
+func (c *Client) RuleCreate(opts types.RuleCreateOptions) (*types.Rule, error) {
+	fmt.Printf("RuleCreate: %#v\n", opts)
 	resp, err := c.do("POST", RuleAPIPrefix, doOptions{
-		data:    opts,
-		context: opts.Context,
+		data:      opts,
+		namespace: opts.Namespace,
+		context:   opts.Context,
 	})
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	defer resp.Body.Close()
-	out, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
+	var rule types.Rule
+	if err := json.NewDecoder(resp.Body).Decode(&rule); err != nil {
+		return nil, err
 	}
-	return strconv.Unquote(string(out))
+	return &rule, nil
 }
 
 // Rule returns a rule by its reference.
-func (c *Client) Rule(ref string) (*types.Rule, error) {
-	resp, err := c.do("GET", RuleAPIPrefix+"/"+ref, doOptions{})
+func (c *Client) Rule(namespace string, ref string) (*types.Rule, error) {
+	path, err := namespacedRefPath(namespace, RuleAPIPrefix, ref)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.do("GET", path, doOptions{})
 	if err != nil {
 		if e, ok := err.(*Error); ok && e.Status == http.StatusNotFound {
 			return nil, ErrNoSuchRule
@@ -72,8 +81,13 @@ func (c *Client) Rule(ref string) (*types.Rule, error) {
 }
 
 // RuleDelete removes a rule by its reference.
-func (c *Client) RuleDelete(ref string) error {
-	resp, err := c.do("DELETE", RuleAPIPrefix+"/"+ref, doOptions{})
+func (c *Client) RuleDelete(opts types.DeleteOptions) error {
+	deleteOpts := doOptions{
+		namespace: opts.Namespace,
+		force:     opts.Force,
+		context:   opts.Context,
+	}
+	resp, err := c.do("DELETE", RuleAPIPrefix+"/"+opts.Name, deleteOpts)
 	if err != nil {
 		if e, ok := err.(*Error); ok {
 			if e.Status == http.StatusNotFound {

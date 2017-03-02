@@ -94,7 +94,7 @@ func TestTemplateCreate(t *testing.T) {
 	if req.Method != expectedMethod {
 		t.Errorf("TemplateCreate(): Wrong HTTP method. Want %s. Got %s.", expectedMethod, req.Method)
 	}
-	u, _ := url.Parse(client.getURL(TemplateAPIPrefix))
+	u, _ := url.Parse(client.getAPIPath(TemplateAPIPrefix, url.Values{}))
 	if req.URL.Path != u.Path {
 		t.Errorf("TemplateCreate(): Wrong request path. Want %q. Got %q.", u.Path, req.URL.Path)
 	}
@@ -126,7 +126,7 @@ func TestTemplate(t *testing.T) {
 	if req.Method != expectedMethod {
 		t.Errorf("InspectTemplate(%q): Wrong HTTP method. Want %s. Got %s.", name, expectedMethod, req.Method)
 	}
-	u, _ := url.Parse(client.getURL(TemplateAPIPrefix + "/" + name))
+	u, _ := url.Parse(client.getAPIPath(TemplateAPIPrefix+"/"+name, url.Values{}))
 	if req.URL.Path != u.Path {
 		t.Errorf("TemplateCreate(%q): Wrong request path. Want %q. Got %q.", name, u.Path, req.URL.Path)
 	}
@@ -144,7 +144,7 @@ func TestTemplateDelete(t *testing.T) {
 	if req.Method != expectedMethod {
 		t.Errorf("TemplateDelete(%q): Wrong HTTP method. Want %s. Got %s.", name, expectedMethod, req.Method)
 	}
-	u, _ := url.Parse(client.getURL(TemplateAPIPrefix + "/" + name))
+	u, _ := url.Parse(client.getAPIPath(TemplateAPIPrefix+"/"+name, url.Values{}))
 	if req.URL.Path != u.Path {
 		t.Errorf("TemplateDelete(%q): Wrong request path. Want %q. Got %q.", name, u.Path, req.URL.Path)
 	}

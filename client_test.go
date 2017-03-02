@@ -684,8 +684,9 @@ func TestClientDoContextDeadline(t *testing.T) {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
 	defer cancel()
-	_, err = client.do("POST", "/image/create", doOptions{
-		context: ctx,
+	_, err = client.do("POST", VolumeAPIPrefix, doOptions{
+		namespace: "testns",
+		context:   ctx,
 	})
 	if err != context.DeadlineExceeded {
 		t.Fatalf("expected %s, got: %s", context.DeadlineExceeded, err)
@@ -705,8 +706,9 @@ func TestClientDoContextCancel(t *testing.T) {
 		time.Sleep(100 * time.Millisecond)
 		cancel()
 	}()
-	_, err = client.do("POST", "/image/create", doOptions{
-		context: ctx,
+	_, err = client.do("POST", VolumeAPIPrefix, doOptions{
+		namespace: "testns",
+		context:   ctx,
 	})
 	if err != context.Canceled {
 		t.Fatalf("expected %s, got: %s", context.Canceled, err)

@@ -3,9 +3,7 @@ package storageos
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"net/http"
-	"strconv"
 
 	"github.com/storageos/go-api/types"
 )
@@ -23,14 +21,19 @@ var (
 )
 
 // PoolList returns the list of available pools.
-func (c *Client) PoolList(opts types.ListOptions) ([]types.Pool, error) {
-	path := PoolAPIPrefix + "?" + queryString(opts)
-	resp, err := c.do("GET", path, doOptions{context: opts.Context})
+func (c *Client) PoolList(opts types.ListOptions) ([]*types.Pool, error) {
+	listOpts := doOptions{
+		fieldSelector: opts.FieldSelector,
+		labelSelector: opts.LabelSelector,
+		namespace:     opts.Namespace,
+		context:       opts.Context,
+	}
+	resp, err := c.do("GET", PoolAPIPrefix, listOpts)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	var pools []types.Pool
+	var pools []*types.Pool
 	if err := json.NewDecoder(resp.Body).Decode(&pools); err != nil {
 		return nil, err
 	}
@@ -38,20 +41,19 @@ func (c *Client) PoolList(opts types.ListOptions) ([]types.Pool, error) {
 }
 
 // PoolCreate creates a pool on the server and returns its unique id.
-func (c *Client) PoolCreate(opts types.PoolCreateOptions) (string, error) {
+func (c *Client) PoolCreate(opts types.PoolCreateOptions) (*types.Pool, error) {
 	resp, err := c.do("POST", PoolAPIPrefix, doOptions{
 		data:    opts,
 		context: opts.Context,
 	})
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	defer resp.Body.Close()
-	out, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
+	var pool types.Pool
+	if err := json.NewDecoder(resp.Body).Decode(&pool); err != nil {
+		return nil, err
 	}
-	return strconv.Unquote(string(out))
+	return &pool, nil
 }
 
 // Pool returns a pool by its reference.
@@ -72,8 +74,12 @@ func (c *Client) Pool(ref string) (*types.Pool, error) {
 }
 
 // PoolDelete removes a pool by its reference.
-func (c *Client) PoolDelete(ref string) error {
-	resp, err := c.do("DELETE", PoolAPIPrefix+"/"+ref, doOptions{})
+func (c *Client) PoolDelete(opts types.DeleteOptions) error {
+	deleteOpts := doOptions{
+		force:   opts.Force,
+		context: opts.Context,
+	}
+	resp, err := c.do("DELETE", PoolAPIPrefix+"/"+opts.Name, deleteOpts)
 	if err != nil {
 		if e, ok := err.(*Error); ok {
 			if e.Status == http.StatusNotFound {

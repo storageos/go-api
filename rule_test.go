@@ -30,7 +30,7 @@ func TestRuleList(t *testing.T) {
     }
 ]`
 
-	var expected []types.Rule
+	var expected []*types.Rule
 	if err := json.Unmarshal([]byte(rulesData), &expected); err != nil {
 		t.Fatal(err)
 	}
@@ -46,10 +46,24 @@ func TestRuleList(t *testing.T) {
 }
 
 func TestRuleCreate(t *testing.T) {
-	message := "\"ef897b9f-0b47-08ee-b669-0a2057df981c\""
-	fakeRT := &FakeRoundTripper{message: message, status: http.StatusOK}
+	body := `{
+				"active": true,
+				"description": "",
+				"id": "17490903-4876-ece8-5b07-59c53e75315c",
+				"labels": {
+						"storageos.driver": "filesystem"
+				},
+				"name": "default driver",
+				"operator": "notin",
+				"rule_action": "add",
+				"selectors": {
+						"storageos.driver": "disk,filesystem"
+				},
+				"weight": 0
+		}`
+	fakeRT := &FakeRoundTripper{message: body, status: http.StatusOK}
 	client := newTestClient(fakeRT)
-	id, err := client.RuleCreate(
+	rule, err := client.RuleCreate(
 		types.RuleCreateOptions{
 			Name:        "unit01",
 			Description: "Unit test rule",
@@ -69,15 +83,15 @@ func TestRuleCreate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(id) != 36 {
-		t.Errorf("RuleCreate: Wrong return value. Wanted 34 character UUID. Got %d. (%s)", len(id), id)
+	if rule == nil {
+		t.Fatalf("RuleCreate(): Wrong return value. Wanted rule. Got %v.", rule)
 	}
 	req := fakeRT.requests[0]
 	expectedMethod := "POST"
 	if req.Method != expectedMethod {
 		t.Errorf("RuleCreate(): Wrong HTTP method. Want %s. Got %s.", expectedMethod, req.Method)
 	}
-	u, _ := url.Parse(client.getURL(RuleAPIPrefix))
+	u, _ := url.Parse(client.getAPIPath(RuleAPIPrefix, url.Values{}))
 	if req.URL.Path != u.Path {
 		t.Errorf("RuleCreate(): Wrong request path. Want %q. Got %q.", u.Path, req.URL.Path)
 	}
@@ -97,7 +111,8 @@ func TestRule(t *testing.T) {
 	fakeRT := &FakeRoundTripper{message: body, status: http.StatusOK}
 	client := newTestClient(fakeRT)
 	name := "tardis"
-	rule, err := client.Rule(name)
+	namespace := "galaxy"
+	rule, err := client.Rule(namespace, name)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -109,7 +124,8 @@ func TestRule(t *testing.T) {
 	if req.Method != expectedMethod {
 		t.Errorf("InspectRule(%q): Wrong HTTP method. Want %s. Got %s.", name, expectedMethod, req.Method)
 	}
-	u, _ := url.Parse(client.getURL(RuleAPIPrefix + "/" + name))
+	path, _ := namespacedRefPath(namespace, RuleAPIPrefix, name)
+	u, _ := url.Parse(client.getAPIPath(path, url.Values{}))
 	if req.URL.Path != u.Path {
 		t.Errorf("RuleCreate(%q): Wrong request path. Want %q. Got %q.", name, u.Path, req.URL.Path)
 	}
@@ -117,9 +133,16 @@ func TestRule(t *testing.T) {
 
 func TestRuleDelete(t *testing.T) {
 	name := "test"
+	namespace := "projA"
 	fakeRT := &FakeRoundTripper{message: "", status: http.StatusNoContent}
 	client := newTestClient(fakeRT)
-	if err := client.RuleDelete(name); err != nil {
+	err := client.RuleDelete(
+		types.DeleteOptions{
+			Name:      name,
+			Namespace: namespace,
+		},
+	)
+	if err != nil {
 		t.Fatal(err)
 	}
 	req := fakeRT.requests[0]
@@ -127,7 +150,8 @@ func TestRuleDelete(t *testing.T) {
 	if req.Method != expectedMethod {
 		t.Errorf("RuleDelete(%q): Wrong HTTP method. Want %s. Got %s.", name, expectedMethod, req.Method)
 	}
-	u, _ := url.Parse(client.getURL(RuleAPIPrefix + "/" + name))
+	path, _ := namespacedRefPath(namespace, RuleAPIPrefix, name)
+	u, _ := url.Parse(client.getAPIPath(path, url.Values{}))
 	if req.URL.Path != u.Path {
 		t.Errorf("RuleDelete(%q): Wrong request path. Want %q. Got %q.", name, u.Path, req.URL.Path)
 	}
@@ -135,14 +159,47 @@ func TestRuleDelete(t *testing.T) {
 
 func TestRuleDeleteNotFound(t *testing.T) {
 	client := newTestClient(&FakeRoundTripper{message: "no such rule", status: http.StatusNotFound})
-	if err := client.RuleDelete("test:"); err != ErrNoSuchRule {
-		t.Errorf("RuleDelete: wrong error. Want %#v. Got %#v.", ErrNoSuchRule, err)
+	err := client.RuleDelete(
+		types.DeleteOptions{
+			Name:      "badname",
+			Namespace: "badnamespace",
+		},
+	)
+	if err != ErrNoSuchRule {
+		t.Errorf("RuleDelete(%q): wrong error. Want %#v. Got %#v.", "badname", ErrNoSuchRule, err)
 	}
 }
 
 func TestRuleDeleteInUse(t *testing.T) {
+	name := "test"
+	namespace := "projA"
 	client := newTestClient(&FakeRoundTripper{message: "rule in use and cannot be removed", status: http.StatusConflict})
-	if err := client.RuleDelete("test:"); err != ErrRuleInUse {
-		t.Errorf("RuleDelete: wrong error. Want %#v. Got %#v.", ErrVolumeInUse, err)
+	err := client.RuleDelete(
+		types.DeleteOptions{
+			Name:      name,
+			Namespace: namespace,
+		},
+	)
+	if err != ErrRuleInUse {
+		t.Errorf("RuleDelete(%q): wrong error. Want %#v. Got %#v.", name, ErrRuleInUse, err)
+	}
+}
+
+func TestRuleDeleteForce(t *testing.T) {
+	name := "testdelete"
+	namespace := "projA"
+	fakeRT := &FakeRoundTripper{message: "", status: http.StatusNoContent}
+	client := newTestClient(fakeRT)
+	if err := client.RuleDelete(types.DeleteOptions{Name: name, Namespace: namespace, Force: true}); err != nil {
+		t.Fatal(err)
+	}
+	req := fakeRT.requests[0]
+	vals := req.URL.Query()
+	if len(vals) == 0 {
+		t.Error("RuleDelete: query string empty. Expected force=1.")
+	}
+	force := vals.Get("force")
+	if force != "1" {
+		t.Errorf("RuleDelete(%q): Force not set. Want %q. Got %q.", name, "1", force)
 	}
 }

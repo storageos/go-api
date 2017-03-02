@@ -68,7 +68,7 @@ func TestVolumeList(t *testing.T) {
     "created_at": "0001-01-01T00:00:00Z"
 }]`
 
-	var expected []types.Volume
+	var expected []*types.Volume
 	if err := json.Unmarshal([]byte(volumesData), &expected); err != nil {
 		t.Fatal(err)
 	}
@@ -133,11 +133,11 @@ func TestVolumeCreate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// if len(id) != 36 {
-	// 	t.Errorf("VolumeCreate: Wrong return value. Wanted 34 character UUID. Got %d. (%s)", len(id), id)
-	// }
 	if volume == nil {
-		t.Errorf("VolumeCreate: Wrong return value. Wanted volume. Got %v.", volume)
+		t.Fatalf("VolumeCreate(): Wrong return value. Wanted volume. Got %v.", volume)
+	}
+	if len(volume.ID) != 36 {
+		t.Errorf("VolumeCreate(): Wrong return value. Wanted 34 character UUID. Got %d. (%s)", len(volume.ID), volume.ID)
 	}
 	req := fakeRT.requests[0]
 	expectedMethod := "POST"
@@ -145,7 +145,7 @@ func TestVolumeCreate(t *testing.T) {
 		t.Errorf("VolumeCreate(): Wrong HTTP method. Want %s. Got %s.", expectedMethod, req.Method)
 	}
 	path, _ := namespacedPath(namespace, VolumeAPIPrefix)
-	u, _ := url.Parse(client.getURL(path))
+	u, _ := url.Parse(client.getAPIPath(path, url.Values{}))
 	if req.URL.Path != u.Path {
 		t.Errorf("VolumeCreate(): Wrong request path. Want %q. Got %q.", u.Path, req.URL.Path)
 	}
@@ -204,7 +204,7 @@ func TestVolume(t *testing.T) {
 		t.Errorf("InspectVolume(%q): Wrong HTTP method. Want %s. Got %s.", name, expectedMethod, req.Method)
 	}
 	path, _ := namespacedRefPath(namespace, VolumeAPIPrefix, name)
-	u, _ := url.Parse(client.getURL(path))
+	u, _ := url.Parse(client.getAPIPath(path, url.Values{}))
 	if req.URL.Path != u.Path {
 		t.Errorf("VolumeCreate(%q): Wrong request path. Want %q. Got %q.", name, u.Path, req.URL.Path)
 	}
@@ -215,7 +215,13 @@ func TestVolumeDelete(t *testing.T) {
 	namespace := "projA"
 	fakeRT := &FakeRoundTripper{message: "", status: http.StatusNoContent}
 	client := newTestClient(fakeRT)
-	if err := client.VolumeDelete(namespace, name); err != nil {
+	err := client.VolumeDelete(
+		types.DeleteOptions{
+			Name:      name,
+			Namespace: namespace,
+		},
+	)
+	if err != nil {
 		t.Fatal(err)
 	}
 	req := fakeRT.requests[0]
@@ -224,7 +230,7 @@ func TestVolumeDelete(t *testing.T) {
 		t.Errorf("VolumeDelete(%q): Wrong HTTP method. Want %s. Got %s.", name, expectedMethod, req.Method)
 	}
 	path, _ := namespacedRefPath(namespace, VolumeAPIPrefix, name)
-	u, _ := url.Parse(client.getURL(path))
+	u, _ := url.Parse(client.getAPIPath(path, url.Values{}))
 	if req.URL.Path != u.Path {
 		t.Errorf("VolumeDelete(%q): Wrong request path. Want %q. Got %q.", name, u.Path, req.URL.Path)
 	}
@@ -232,15 +238,48 @@ func TestVolumeDelete(t *testing.T) {
 
 func TestVolumeDeleteNotFound(t *testing.T) {
 	client := newTestClient(&FakeRoundTripper{message: "no such volume", status: http.StatusNotFound})
-	if err := client.VolumeDelete("xyz", "test"); err != ErrNoSuchVolume {
-		t.Errorf("VolumeDelete: wrong error. Want %#v. Got %#v.", ErrNoSuchVolume, err)
+	err := client.VolumeDelete(
+		types.DeleteOptions{
+			Name:      "badname",
+			Namespace: "badnamespace",
+		},
+	)
+	if err != ErrNoSuchVolume {
+		t.Errorf("VolumeDelete(%q): wrong error. Want %#v. Got %#v.", "badname", ErrNoSuchVolume, err)
 	}
 }
 
 func TestVolumeDeleteInUse(t *testing.T) {
+	name := "test"
+	namespace := "projA"
 	client := newTestClient(&FakeRoundTripper{message: "volume in use and cannot be removed", status: http.StatusConflict})
-	if err := client.VolumeDelete("xyz", "test"); err != ErrVolumeInUse {
-		t.Errorf("VolumeDelete: wrong error. Want %#v. Got %#v.", ErrVolumeInUse, err)
+	err := client.VolumeDelete(
+		types.DeleteOptions{
+			Name:      name,
+			Namespace: namespace,
+		},
+	)
+	if err != ErrVolumeInUse {
+		t.Errorf("VolumeDelete(%q): wrong error. Want %#v. Got %#v.", name, ErrVolumeInUse, err)
+	}
+}
+
+func TestVolumeDeleteForce(t *testing.T) {
+	name := "testdelete"
+	namespace := "projA"
+	fakeRT := &FakeRoundTripper{message: "", status: http.StatusNoContent}
+	client := newTestClient(fakeRT)
+	if err := client.VolumeDelete(types.DeleteOptions{Name: name, Namespace: namespace, Force: true}); err != nil {
+		t.Fatal(err)
+	}
+	req := fakeRT.requests[0]
+	vals := req.URL.Query()
+	if len(vals) == 0 {
+		t.Error("VolumeDelete: query string empty. Expected force=1.")
+	}
+	force := vals.Get("force")
+	if force != "1" {
+		t.Errorf("VolumeDelete(%q): Force not set. Want %q. Got %q.", name, "1", force)
 	}
 }
 
@@ -265,7 +304,7 @@ func TestVolumeMount(t *testing.T) {
 		t.Errorf("VolumeMount(%q): Wrong HTTP method. Want %s. Got %s.", name, expectedMethod, req.Method)
 	}
 	path, _ := namespacedRefPath(namespace, VolumeAPIPrefix, name)
-	u, _ := url.Parse(client.getURL(path) + "/mount")
+	u, _ := url.Parse(client.getAPIPath(path+"/mount", url.Values{}))
 	if req.URL.Path != u.Path {
 		t.Errorf("VolumeMount(%q): Wrong request path. Want %q. Got %q.", name, u.Path, req.URL.Path)
 	}
@@ -292,7 +331,7 @@ func TestVolumeUnmount(t *testing.T) {
 		t.Errorf("VolumeUnmount(%q): Wrong HTTP method. Want %s. Got %s.", name, expectedMethod, req.Method)
 	}
 	path, _ := namespacedRefPath(namespace, VolumeAPIPrefix, name)
-	u, _ := url.Parse(client.getURL(path) + "/unmount")
+	u, _ := url.Parse(client.getAPIPath(path+"/unmount", url.Values{}))
 	if req.URL.Path != u.Path {
 		t.Errorf("VolumeUnount(%q): Wrong request path. Want %q. Got %q.", name, u.Path, req.URL.Path)
 	}

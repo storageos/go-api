@@ -21,17 +21,19 @@ var (
 )
 
 // VolumeList returns the list of available volumes.
-func (c *Client) VolumeList(opts types.ListOptions) ([]types.Volume, error) {
-	path, err := namespacedPath(opts.Namespace, VolumeAPIPrefix)
-	if err != nil {
-		return nil, err
+func (c *Client) VolumeList(opts types.ListOptions) ([]*types.Volume, error) {
+	listOpts := doOptions{
+		fieldSelector: opts.FieldSelector,
+		labelSelector: opts.LabelSelector,
+		namespace:     opts.Namespace,
+		context:       opts.Context,
 	}
-	resp, err := c.do("GET", path+"?"+queryString(opts), doOptions{context: opts.Context})
+	resp, err := c.do("GET", VolumeAPIPrefix, listOpts)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	var volumes []types.Volume
+	var volumes []*types.Volume
 	if err := json.NewDecoder(resp.Body).Decode(&volumes); err != nil {
 		return nil, err
 	}
@@ -73,11 +75,6 @@ func (c *Client) VolumeCreate(opts types.VolumeCreateOptions) (*types.Volume, er
 		return nil, err
 	}
 	defer resp.Body.Close()
-	// out, err := ioutil.ReadAll(resp.Body)
-	// if err != nil {
-	// 	return "", err
-	// }
-	// return strconv.Unquote(string(out))
 	var volume types.Volume
 	if err := json.NewDecoder(resp.Body).Decode(&volume); err != nil {
 		return nil, err
@@ -111,12 +108,13 @@ func (c *Client) VolumeUpdate(opts types.VolumeUpdateOptions) (*types.Volume, er
 }
 
 // VolumeDelete removes a volume by its reference.
-func (c *Client) VolumeDelete(namespace string, ref string) error {
-	path, err := namespacedRefPath(namespace, VolumeAPIPrefix, ref)
-	if err != nil {
-		return err
+func (c *Client) VolumeDelete(opts types.DeleteOptions) error {
+	deleteOpts := doOptions{
+		namespace: opts.Namespace,
+		force:     opts.Force,
+		context:   opts.Context,
 	}
-	resp, err := c.do("DELETE", path, doOptions{})
+	resp, err := c.do("DELETE", VolumeAPIPrefix+"/"+opts.Name, deleteOpts)
 	if err != nil {
 		if e, ok := err.(*Error); ok {
 			if e.Status == http.StatusNotFound {

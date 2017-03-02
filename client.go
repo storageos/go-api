@@ -26,8 +26,8 @@ const (
 	userAgent         = "go-storageosclient"
 	unixProtocol      = "unix"
 	namedPipeProtocol = "npipe"
-	defaultVersionStr = "1"
-	defaultVersion    = 1
+	DefaultVersionStr = "1"
+	DefaultVersion    = 1
 	defaultNamespace  = "default"
 )
 
@@ -45,7 +45,7 @@ var (
 	ErrInvalidVersion = errors.New("invalid version")
 
 	// DefaultHost is the default API host
-	DefaultHost = "tcp://localhost:8000"
+	DefaultHost = "tcp://localhost:5705"
 )
 
 // APIVersion is an internal representation of a version of the Remote API.
@@ -56,7 +56,7 @@ type APIVersion int
 // The given string must be in the form <major>
 func NewAPIVersion(input string) (APIVersion, error) {
 	if input == "" {
-		return defaultVersion, ErrInvalidVersion
+		return DefaultVersion, ErrInvalidVersion
 	}
 	version, err := strconv.Atoi(input)
 	if err != nil {
@@ -84,6 +84,11 @@ type Client struct {
 	serverAPIVersion       APIVersion
 	expectedAPIVersion     APIVersion
 	nativeHTTPClient       *http.Client
+}
+
+// ClientVersion returns the API version of the client
+func (c *Client) ClientVersion() string {
+	return DefaultVersionStr
 }
 
 // Dialer is an interface that allows network connections to be dialed
@@ -306,10 +311,15 @@ func (c *Client) getServerAPIVersionString() (version string, err error) {
 }
 
 type doOptions struct {
-	data      interface{}
-	forceJSON bool
-	headers   map[string]string
-	context   context.Context
+	data          interface{}
+	fieldSelector string
+	labelSelector string
+	namespace     string
+	forceJSON     bool
+	force         bool
+	values        url.Values
+	headers       map[string]string
+	context       context.Context
 }
 
 func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response, error) {
@@ -321,13 +331,28 @@ func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response
 		}
 		params = bytes.NewBuffer(buf)
 	}
+
+	// Prefix the path with the namespace if given.  The caller should only set
+	// the namespace if this is desired.
+	if doOptions.namespace != "" {
+		urlpath = "/" + NamespaceAPIPrefix + "/" + doOptions.namespace + "/" + urlpath
+	}
+
 	if urlpath != "/version" && !c.SkipServerVersionCheck && c.expectedAPIVersion == 0 {
 		err := c.checkAPIVersion()
 		if err != nil {
 			return nil, err
 		}
 	}
-	// urlpath = path.Join(path.Join("/", c.serverAPIVersion.String()), urlpath)
+
+	query := url.Values{}
+	if doOptions.values != nil {
+		query = doOptions.values
+	}
+	if doOptions.force {
+		query.Add("force", "1")
+	}
+
 	httpClient := c.HTTPClient
 	protocol := c.endpointURL.Scheme
 	var u string
@@ -336,7 +361,7 @@ func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response
 		httpClient = c.nativeHTTPClient
 		u = c.getFakeNativeURL(urlpath)
 	default:
-		u = c.getURL(urlpath)
+		u = c.getAPIPath(urlpath, query)
 	}
 
 	req, err := http.NewRequest(method, u, params)
@@ -394,6 +419,30 @@ func (c *Client) getURL(path string) string {
 		return fmt.Sprintf("%s/%s%s", urlStr, c.requestedAPIVersion, path)
 	}
 	return fmt.Sprintf("%s%s", urlStr, path)
+}
+
+func (c *Client) getAPIPath(path string, query url.Values) string {
+	var apiPath string
+	urlStr := strings.TrimRight(c.endpointURL.String(), "/")
+	if c.endpointURL.Scheme == unixProtocol || c.endpointURL.Scheme == namedPipeProtocol {
+		urlStr = ""
+	}
+	if !strings.HasPrefix(path, "/") {
+		path = "/" + path
+	}
+	if c.requestedAPIVersion != 0 {
+		apiPath = fmt.Sprintf("%s/%s%s", urlStr, c.requestedAPIVersion, path)
+	} else {
+		apiPath = fmt.Sprintf("%s%s", urlStr, path)
+	}
+
+	u := &url.URL{
+		Path: apiPath,
+	}
+	if len(query) > 0 {
+		u.RawQuery = query.Encode()
+	}
+	return u.String()
 }
 
 // getFakeNativeURL returns the URL needed to make an HTTP request over a UNIX

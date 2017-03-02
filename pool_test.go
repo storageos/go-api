@@ -104,7 +104,7 @@ func TestPoolList(t *testing.T) {
     }
 ]`
 
-	var expected []types.Pool
+	var expected []*types.Pool
 	if err := json.Unmarshal([]byte(poolsData), &expected); err != nil {
 		t.Fatal(err)
 	}
@@ -120,10 +120,112 @@ func TestPoolList(t *testing.T) {
 }
 
 func TestPoolCreate(t *testing.T) {
-	message := "\"ef897b9f-0b47-08ee-b669-0a2057df981c\""
-	fakeRT := &FakeRoundTripper{message: message, status: http.StatusOK}
+	body := `{
+		"id": "b4c87d6c-2958-6283-128b-f767153938ad",
+		"datacentre": "",
+		"tenant": "",
+		"name": "default",
+		"description": "Default storage pool",
+		"default": true,
+		"default_driver": "filesystem",
+		"active": true,
+		"controller_names": [
+			"storageos-1",
+			"storageos-2",
+			"storageos-3"
+		],
+		"driver_names": [
+			"filesystem"
+		],
+		"driver_instances": [
+			{
+				"id": "2935b1b9-a8af-121c-9e79-a64c637f0ee9",
+				"datacentre": "",
+				"tenant": "",
+				"name": "default",
+				"description": "Default storage pool",
+				"type": "",
+				"active": true,
+				"config": {
+					"data_dir": "/var/lib/storageos/data"
+				},
+				"tags": [
+					"prod",
+					"london"
+				],
+				"controller_name": "storageos-1",
+				"pool_id": "b4c87d6c-2958-6283-128b-f767153938ad",
+				"driver_name": "filesystem",
+				"capacity_stats": {
+					"total_capacity_bytes": 103440351232,
+					"available_capacity_bytes": 76249460736,
+					"provisioned_capacity_bytes": 0
+				}
+			},
+			{
+				"id": "b8c8cf01-98a2-0270-6393-e86427103275",
+				"datacentre": "",
+				"tenant": "",
+				"name": "default",
+				"description": "Default storage pool",
+				"type": "",
+				"active": true,
+				"config": {
+					"data_dir": "/var/lib/storageos/data"
+				},
+				"tags": [
+					"prod",
+					"london"
+				],
+				"controller_name": "storageos-2",
+				"pool_id": "b4c87d6c-2958-6283-128b-f767153938ad",
+				"driver_name": "filesystem",
+				"capacity_stats": {
+					"total_capacity_bytes": 18392936448,
+					"available_capacity_bytes": 5679550464,
+					"provisioned_capacity_bytes": 0
+				}
+			},
+			{
+				"id": "097a3e9a-86f1-1c7f-f874-90602b498aff",
+				"datacentre": "",
+				"tenant": "",
+				"name": "default",
+				"description": "Default storage pool",
+				"type": "",
+				"active": true,
+				"config": {
+					"data_dir": "/var/lib/storageos/data"
+				},
+				"tags": [
+					"prod",
+					"london"
+				],
+				"controller_name": "storageos-3",
+				"pool_id": "b4c87d6c-2958-6283-128b-f767153938ad",
+				"driver_name": "filesystem",
+				"capacity_stats": {
+					"total_capacity_bytes": 18392936448,
+					"available_capacity_bytes": 10806575104,
+					"provisioned_capacity_bytes": 0
+				}
+			}
+		],
+		"tags": [
+			"prod",
+			"london"
+		],
+		"capacity_stats": {
+			"total_capacity_bytes": 140226224128,
+			"available_capacity_bytes": 92735586304,
+			"provisioned_capacity_bytes": 0
+		},
+		"driver_capacity_stats": null,
+		"labels": null
+	}`
+	fakeRT := &FakeRoundTripper{message: body, status: http.StatusOK}
 	client := newTestClient(fakeRT)
-	id, err := client.PoolCreate(
+	pool, err := client.PoolCreate(
 		types.PoolCreateOptions{
 			Name:            "unit01",
 			Description:     "Unit test pool",
@@ -141,15 +243,18 @@ func TestPoolCreate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(id) != 36 {
-		t.Errorf("PoolCreate: Wrong return value. Wanted 34 character UUID. Got %d. (%s)", len(id), id)
+	if pool == nil {
+		t.Fatalf("PoolCreate: Wrong return value. Wanted pool. Got %v.", pool)
+	}
+	if len(pool.ID) != 36 {
+		t.Errorf("PoolCreate: Wrong return value. Wanted 34 character UUID. Got %d. (%s)", len(pool.ID), pool.ID)
 	}
 	req := fakeRT.requests[0]
 	expectedMethod := "POST"
 	if req.Method != expectedMethod {
 		t.Errorf("PoolCreate(): Wrong HTTP method. Want %s. Got %s.", expectedMethod, req.Method)
 	}
-	u, _ := url.Parse(client.getURL(PoolAPIPrefix))
+	u, _ := url.Parse(client.getAPIPath(PoolAPIPrefix, url.Values{}))
 	if req.URL.Path != u.Path {
 		t.Errorf("PoolCreate(): Wrong request path. Want %q. Got %q.", u.Path, req.URL.Path)
 	}
@@ -186,7 +291,7 @@ func TestPool(t *testing.T) {
 	}
 	fakeRT := &FakeRoundTripper{message: body, status: http.StatusOK}
 	client := newTestClient(fakeRT)
-	name := "tardis"
+	name := "default"
 	pool, err := client.Pool(name)
 	if err != nil {
 		t.Fatal(err)
@@ -199,17 +304,17 @@ func TestPool(t *testing.T) {
 	if req.Method != expectedMethod {
 		t.Errorf("InspectPool(%q): Wrong HTTP method. Want %s. Got %s.", name, expectedMethod, req.Method)
 	}
-	u, _ := url.Parse(client.getURL(PoolAPIPrefix + "/" + name))
+	u, _ := url.Parse(client.getAPIPath(PoolAPIPrefix+"/"+name, url.Values{}))
 	if req.URL.Path != u.Path {
 		t.Errorf("PoolCreate(%q): Wrong request path. Want %q. Got %q.", name, u.Path, req.URL.Path)
 	}
 }
 
 func TestPoolDelete(t *testing.T) {
-	name := "test"
+	name := "testdelete"
 	fakeRT := &FakeRoundTripper{message: "", status: http.StatusNoContent}
 	client := newTestClient(fakeRT)
-	if err := client.PoolDelete(name); err != nil {
+	if err := client.PoolDelete(types.DeleteOptions{Name: name}); err != nil {
 		t.Fatal(err)
 	}
 	req := fakeRT.requests[0]
@@ -217,7 +322,7 @@ func TestPoolDelete(t *testing.T) {
 	if req.Method != expectedMethod {
 		t.Errorf("PoolDelete(%q): Wrong HTTP method. Want %s. Got %s.", name, expectedMethod, req.Method)
 	}
-	u, _ := url.Parse(client.getURL(PoolAPIPrefix + "/" + name))
+	u, _ := url.Parse(client.getAPIPath(PoolAPIPrefix+"/"+name, url.Values{}))
 	if req.URL.Path != u.Path {
 		t.Errorf("PoolDelete(%q): Wrong request path. Want %q. Got %q.", name, u.Path, req.URL.Path)
 	}
@@ -225,14 +330,32 @@ func TestPoolDelete(t *testing.T) {
 
 func TestPoolDeleteNotFound(t *testing.T) {
 	client := newTestClient(&FakeRoundTripper{message: "no such pool", status: http.StatusNotFound})
-	if err := client.PoolDelete("test:"); err != ErrNoSuchPool {
+	if err := client.PoolDelete(types.DeleteOptions{Name: "testdeletenotfound"}); err != ErrNoSuchPool {
 		t.Errorf("PoolDelete: wrong error. Want %#v. Got %#v.", ErrNoSuchPool, err)
 	}
 }
 
 func TestPoolDeleteInUse(t *testing.T) {
 	client := newTestClient(&FakeRoundTripper{message: "pool in use and cannot be removed", status: http.StatusConflict})
-	if err := client.PoolDelete("test:"); err != ErrPoolInUse {
-		t.Errorf("PoolDelete: wrong error. Want %#v. Got %#v.", ErrVolumeInUse, err)
+	if err := client.PoolDelete(types.DeleteOptions{Name: "testdeletinuse"}); err != ErrPoolInUse {
+		t.Errorf("PoolDelete: wrong error. Want %#v. Got %#v.", ErrNamespaceInUse, err)
+	}
+}
+
+func TestPoolDeleteForce(t *testing.T) {
+	name := "testdelete"
+	fakeRT := &FakeRoundTripper{message: "", status: http.StatusNoContent}
+	client := newTestClient(fakeRT)
+	if err := client.PoolDelete(types.DeleteOptions{Name: name, Force: true}); err != nil {
+		t.Fatal(err)
+	}
+	req := fakeRT.requests[0]
+	vals := req.URL.Query()
+	if len(vals) == 0 {
+		t.Error("PoolDelete: query string empty. Expected force=1.")
+	}
+	force := vals.Get("force")
+	if force != "1" {
+		t.Errorf("PoolDelete(%q): Force not set. Want %q. Got %q.", name, "1", force)
 	}
 }
