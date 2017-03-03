@@ -41,7 +41,7 @@ func (c *Client) RuleList(opts types.ListOptions) ([]*types.Rule, error) {
 	return rules, nil
 }
 
-// RuleCreate creates a rule on the server and returns its unique id.
+// RuleCreate creates a rule on the server and returns the new object.
 func (c *Client) RuleCreate(opts types.RuleCreateOptions) (*types.Rule, error) {
 	fmt.Printf("RuleCreate: %#v\n", opts)
 	resp, err := c.do("POST", RuleAPIPrefix, doOptions{

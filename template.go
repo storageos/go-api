@@ -37,7 +37,7 @@ func (c *Client) TemplateList(opts types.ListOptions) ([]types.Template, error) 
 	return templates, nil
 }
 
-// TemplateCreate creates a template on the server and returns its unique id.
+// TemplateCreate creates a template on the server and returns the new object.
 func (c *Client) TemplateCreate(opts types.TemplateCreateOptions) (string, error) {
 	resp, err := c.do("POST", TemplateAPIPrefix, doOptions{
 		data:    opts,

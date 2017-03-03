@@ -61,7 +61,7 @@ func (c *Client) Volume(namespace string, ref string) (*types.Volume, error) {
 	return &volume, nil
 }
 
-// VolumeCreate creates a volume on the server and returns its unique id.
+// VolumeCreate creates a volume on the server and returns the new object.
 func (c *Client) VolumeCreate(opts types.VolumeCreateOptions) (*types.Volume, error) {
 	path, err := namespacedPath(opts.Namespace, VolumeAPIPrefix)
 	if err != nil {

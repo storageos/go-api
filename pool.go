@@ -40,7 +40,7 @@ func (c *Client) PoolList(opts types.ListOptions) ([]*types.Pool, error) {
 	return pools, nil
 }
 
-// PoolCreate creates a pool on the server and returns its unique id.
+// PoolCreate creates a pool on the server and returns the new object.
 func (c *Client) PoolCreate(opts types.PoolCreateOptions) (*types.Pool, error) {
 	resp, err := c.do("POST", PoolAPIPrefix, doOptions{
 		data:    opts,

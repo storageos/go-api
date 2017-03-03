@@ -40,7 +40,7 @@ func (c *Client) NamespaceList(opts types.ListOptions) ([]*types.Namespace, erro
 	return namespaces, nil
 }
 
-// NamespaceCreate creates a namespace on the server and returns its unique id.
+// NamespaceCreate creates a namespace on the server and returns the new object.
 func (c *Client) NamespaceCreate(opts types.NamespaceCreateOptions) (*types.Namespace, error) {
 	resp, err := c.do("POST", NamespaceAPIPrefix, doOptions{
 		data:    opts,
@@ -66,6 +66,22 @@ func (c *Client) Namespace(ref string) (*types.Namespace, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
+	var namespace types.Namespace
+	if err := json.NewDecoder(resp.Body).Decode(&namespace); err != nil {
+		return nil, err
+	}
+	return &namespace, nil
+}
+
+// NamespaceUpdate updates a namespace on the server and returns the updated object.
+func (c *Client) NamespaceUpdate(opts types.NamespaceCreateOptions) (*types.Namespace, error) {
+	resp, err := c.do("PUT", NamespaceAPIPrefix+"/"+opts.Name, doOptions{
+		data:    opts,
+		context: opts.Context,
+	})
+	if err != nil {
+		return nil, err
+	}
 	var namespace types.Namespace
 	if err := json.NewDecoder(resp.Body).Decode(&namespace); err != nil {
 		return nil, err
