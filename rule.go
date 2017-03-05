@@ -41,6 +41,27 @@ func (c *Client) RuleList(opts types.ListOptions) ([]*types.Rule, error) {
 	return rules, nil
 }
 
+// Rule returns a rule by its reference.
+func (c *Client) Rule(namespace string, ref string) (*types.Rule, error) {
+	path, err := namespacedRefPath(namespace, RuleAPIPrefix, ref)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.do("GET", path, doOptions{})
+	if err != nil {
+		if e, ok := err.(*Error); ok && e.Status == http.StatusNotFound {
+			return nil, ErrNoSuchRule
+		}
+		return nil, err
+	}
+	defer resp.Body.Close()
+	var rule types.Rule
+	if err := json.NewDecoder(resp.Body).Decode(&rule); err != nil {
+		return nil, err
+	}
+	return &rule, nil
+}
+
 // RuleCreate creates a rule on the server and returns the new object.
 func (c *Client) RuleCreate(opts types.RuleCreateOptions) (*types.Rule, error) {
 	fmt.Printf("RuleCreate: %#v\n", opts)
@@ -59,17 +80,22 @@ func (c *Client) RuleCreate(opts types.RuleCreateOptions) (*types.Rule, error) {
 	return &rule, nil
 }
 
-// Rule returns a rule by its reference.
-func (c *Client) Rule(namespace string, ref string) (*types.Rule, error) {
-	path, err := namespacedRefPath(namespace, RuleAPIPrefix, ref)
+// RuleUpdate updates a rule on the server.
+func (c *Client) RuleUpdate(opts types.RuleUpdateOptions) (*types.Rule, error) {
+	ref := opts.Name
+	if IsUUID(opts.ID) {
+		ref = opts.ID
+	}
+	fmt.Printf("%#v\n", opts)
+	path, err := namespacedRefPath(opts.Namespace, RuleAPIPrefix, ref)
 	if err != nil {
 		return nil, err
 	}
-	resp, err := c.do("GET", path, doOptions{})
+	resp, err := c.do("PUT", path, doOptions{
+		data:    opts,
+		context: opts.Context,
+	})
 	if err != nil {
-		if e, ok := err.(*Error); ok && e.Status == http.StatusNotFound {
-			return nil, ErrNoSuchRule
-		}
 		return nil, err
 	}
 	defer resp.Body.Close()
