@@ -421,9 +421,6 @@ func (c *Client) getAPIPath(path string, query url.Values, unversioned bool) str
 	if c.endpointURL.Scheme == unixProtocol || c.endpointURL.Scheme == namedPipeProtocol {
 		urlStr = ""
 	}
-	if !strings.HasPrefix(path, "/") {
-		path = "/" + path
-	}
 	if unversioned {
 		apiPath = fmt.Sprintf("%s/%s", urlStr, path)
 	} else {
