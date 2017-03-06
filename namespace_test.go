@@ -85,7 +85,7 @@ func TestNamespaceCreate(t *testing.T) {
 	if req.Method != expectedMethod {
 		t.Errorf("NamespaceCreate(): Wrong HTTP method. Want %s. Got %s.", expectedMethod, req.Method)
 	}
-	u, _ := url.Parse(client.getAPIPath(NamespaceAPIPrefix, url.Values{}))
+	u, _ := url.Parse(client.getAPIPath(NamespaceAPIPrefix, url.Values{}, false))
 	if req.URL.Path != u.Path {
 		t.Errorf("NamespaceCreate(): Wrong request path. Want %q. Got %q.", u.Path, req.URL.Path)
 	}
@@ -135,7 +135,7 @@ func TestNamespace(t *testing.T) {
 	if req.Method != expectedMethod {
 		t.Errorf("InspectNamespace(%q): Wrong HTTP method. Want %s. Got %s.", name, expectedMethod, req.Method)
 	}
-	u, _ := url.Parse(client.getAPIPath(NamespaceAPIPrefix+"/"+name, url.Values{}))
+	u, _ := url.Parse(client.getAPIPath(NamespaceAPIPrefix+"/"+name, url.Values{}, false))
 	if req.URL.Path != u.Path {
 		t.Errorf("NamespaceCreate(%q): Wrong request path. Want %q. Got %q.", name, u.Path, req.URL.Path)
 	}
@@ -153,7 +153,7 @@ func TestNamespaceDelete(t *testing.T) {
 	if req.Method != expectedMethod {
 		t.Errorf("NamespaceDelete(%q): Wrong HTTP method. Want %s. Got %s.", name, expectedMethod, req.Method)
 	}
-	u, _ := url.Parse(client.getAPIPath(NamespaceAPIPrefix+"/"+name, url.Values{}))
+	u, _ := url.Parse(client.getAPIPath(NamespaceAPIPrefix+"/"+name, url.Values{}, false))
 	if req.URL.Path != u.Path {
 		t.Errorf("NamespaceDelete(%q): Wrong request path. Want %q. Got %q.", name, u.Path, req.URL.Path)
 	}

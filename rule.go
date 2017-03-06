@@ -64,7 +64,6 @@ func (c *Client) Rule(namespace string, ref string) (*types.Rule, error) {
 
 // RuleCreate creates a rule on the server and returns the new object.
 func (c *Client) RuleCreate(opts types.RuleCreateOptions) (*types.Rule, error) {
-	fmt.Printf("RuleCreate: %#v\n", opts)
 	resp, err := c.do("POST", RuleAPIPrefix, doOptions{
 		data:      opts,
 		namespace: opts.Namespace,

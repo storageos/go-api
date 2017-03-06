@@ -254,7 +254,7 @@ func TestPoolCreate(t *testing.T) {
 	if req.Method != expectedMethod {
 		t.Errorf("PoolCreate(): Wrong HTTP method. Want %s. Got %s.", expectedMethod, req.Method)
 	}
-	u, _ := url.Parse(client.getAPIPath(PoolAPIPrefix, url.Values{}))
+	u, _ := url.Parse(client.getAPIPath(PoolAPIPrefix, url.Values{}, false))
 	if req.URL.Path != u.Path {
 		t.Errorf("PoolCreate(): Wrong request path. Want %q. Got %q.", u.Path, req.URL.Path)
 	}
@@ -304,7 +304,7 @@ func TestPool(t *testing.T) {
 	if req.Method != expectedMethod {
 		t.Errorf("InspectPool(%q): Wrong HTTP method. Want %s. Got %s.", name, expectedMethod, req.Method)
 	}
-	u, _ := url.Parse(client.getAPIPath(PoolAPIPrefix+"/"+name, url.Values{}))
+	u, _ := url.Parse(client.getAPIPath(PoolAPIPrefix+"/"+name, url.Values{}, false))
 	if req.URL.Path != u.Path {
 		t.Errorf("PoolCreate(%q): Wrong request path. Want %q. Got %q.", name, u.Path, req.URL.Path)
 	}
@@ -322,7 +322,7 @@ func TestPoolDelete(t *testing.T) {
 	if req.Method != expectedMethod {
 		t.Errorf("PoolDelete(%q): Wrong HTTP method. Want %s. Got %s.", name, expectedMethod, req.Method)
 	}
-	u, _ := url.Parse(client.getAPIPath(PoolAPIPrefix+"/"+name, url.Values{}))
+	u, _ := url.Parse(client.getAPIPath(PoolAPIPrefix+"/"+name, url.Values{}, false))
 	if req.URL.Path != u.Path {
 		t.Errorf("PoolDelete(%q): Wrong request path. Want %q. Got %q.", name, u.Path, req.URL.Path)
 	}

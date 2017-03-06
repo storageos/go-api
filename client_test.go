@@ -244,7 +244,31 @@ func TestEndpoint(t *testing.T) {
 	}
 }
 
-func TestGetURL(t *testing.T) {
+func TestGetURLVersioned(t *testing.T) {
+	var tests = []struct {
+		endpoint string
+		path     string
+		expected string
+	}{
+		{"http://localhost:4243/", "/", "http://localhost:4243/v0/"},
+		{"http://localhost:4243", "/", "http://localhost:4243/v0/"},
+		{"http://localhost:4243", "/containers/ps", "http://localhost:4243/v0/containers/ps"},
+		{"tcp://localhost:4243", "/containers/ps", "http://localhost:4243/v0/containers/ps"},
+		{"http://localhost:4243/////", "/", "http://localhost:4243/v0/"},
+		{nativeRealEndpoint, "/containers", "/v0/containers"},
+	}
+	for _, tt := range tests {
+		client, _ := NewClient(tt.endpoint)
+		client.endpoint = tt.endpoint
+		client.SkipServerVersionCheck = true
+		got := client.getURL(tt.path, false)
+		if got != tt.expected {
+			t.Errorf("getURL(%q): Got %s. Want %s.", tt.path, got, tt.expected)
+		}
+	}
+}
+
+func TestGetURLUnversioned(t *testing.T) {
 	var tests = []struct {
 		endpoint string
 		path     string
@@ -252,16 +276,16 @@ func TestGetURL(t *testing.T) {
 	}{
 		{"http://localhost:4243/", "/", "http://localhost:4243/"},
 		{"http://localhost:4243", "/", "http://localhost:4243/"},
-		{"http://localhost:4243", "/containers/ps", "http://localhost:4243/containers/ps"},
-		{"tcp://localhost:4243", "/containers/ps", "http://localhost:4243/containers/ps"},
+		{"http://localhost:4243", "/version", "http://localhost:4243/version"},
+		{"http://localhost:4243", "/_ping", "http://localhost:4243/_ping"},
 		{"http://localhost:4243/////", "/", "http://localhost:4243/"},
-		{nativeRealEndpoint, "/containers", "/containers"},
+		{nativeRealEndpoint, "/_ping", "/_ping"},
 	}
 	for _, tt := range tests {
 		client, _ := NewClient(tt.endpoint)
 		client.endpoint = tt.endpoint
 		client.SkipServerVersionCheck = true
-		got := client.getURL(tt.path)
+		got := client.getURL(tt.path, true)
 		if got != tt.expected {
 			t.Errorf("getURL(%q): Got %s. Want %s.", tt.path, got, tt.expected)
 		}
@@ -274,15 +298,15 @@ func TestGetFakeNativeURL(t *testing.T) {
 		path     string
 		expected string
 	}{
-		{nativeRealEndpoint, "/", "http://unix.sock/"},
-		{nativeRealEndpoint, "/", "http://unix.sock/"},
-		{nativeRealEndpoint, "/containers/ps", "http://unix.sock/containers/ps"},
+		{nativeRealEndpoint, "/", "http://unix.sock/v0/"},
+		{nativeRealEndpoint, "/", "http://unix.sock/v0/"},
+		{nativeRealEndpoint, "/containers/ps", "http://unix.sock/v0/containers/ps"},
 	}
 	for _, tt := range tests {
 		client, _ := NewClient(tt.endpoint)
 		client.endpoint = tt.endpoint
 		client.SkipServerVersionCheck = true
-		got := client.getFakeNativeURL(tt.path)
+		got := client.getFakeNativeURL(tt.path, false)
 		if got != tt.expected {
 			t.Errorf("getURL(%q): Got %s. Want %s.", tt.path, got, tt.expected)
 		}

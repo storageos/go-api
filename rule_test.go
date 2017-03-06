@@ -91,7 +91,7 @@ func TestRuleCreate(t *testing.T) {
 	if req.Method != expectedMethod {
 		t.Errorf("RuleCreate(): Wrong HTTP method. Want %s. Got %s.", expectedMethod, req.Method)
 	}
-	u, _ := url.Parse(client.getAPIPath(RuleAPIPrefix, url.Values{}))
+	u, _ := url.Parse(client.getAPIPath(RuleAPIPrefix, url.Values{}, false))
 	if req.URL.Path != u.Path {
 		t.Errorf("RuleCreate(): Wrong request path. Want %q. Got %q.", u.Path, req.URL.Path)
 	}
@@ -125,7 +125,7 @@ func TestRule(t *testing.T) {
 		t.Errorf("InspectRule(%q): Wrong HTTP method. Want %s. Got %s.", name, expectedMethod, req.Method)
 	}
 	path, _ := namespacedRefPath(namespace, RuleAPIPrefix, name)
-	u, _ := url.Parse(client.getAPIPath(path, url.Values{}))
+	u, _ := url.Parse(client.getAPIPath(path, url.Values{}, false))
 	if req.URL.Path != u.Path {
 		t.Errorf("RuleCreate(%q): Wrong request path. Want %q. Got %q.", name, u.Path, req.URL.Path)
 	}
@@ -151,7 +151,7 @@ func TestRuleDelete(t *testing.T) {
 		t.Errorf("RuleDelete(%q): Wrong HTTP method. Want %s. Got %s.", name, expectedMethod, req.Method)
 	}
 	path, _ := namespacedRefPath(namespace, RuleAPIPrefix, name)
-	u, _ := url.Parse(client.getAPIPath(path, url.Values{}))
+	u, _ := url.Parse(client.getAPIPath(path, url.Values{}, false))
 	if req.URL.Path != u.Path {
 		t.Errorf("RuleDelete(%q): Wrong request path. Want %q. Got %q.", name, u.Path, req.URL.Path)
 	}

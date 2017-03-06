@@ -291,23 +291,11 @@ func (c *Client) Ping() error {
 }
 
 func (c *Client) getServerAPIVersionString() (version string, err error) {
-	// resp, err := c.do("GET", "/version", doOptions{})
-	// if err != nil {
-	// 	return "", err
-	// }
-	// defer resp.Body.Close()
-	// if resp.StatusCode != http.StatusOK {
-	// 	return "", fmt.Errorf("Received unexpected status %d while trying to retrieve the server version", resp.StatusCode)
-	// }
-	// var versionResponse map[string]interface{}
-	// if err := json.NewDecoder(resp.Body).Decode(&versionResponse); err != nil {
-	// 	return "", err
-	// }
-	// if version, ok := (versionResponse["ApiVersion"]).(string); ok {
-	// 	return version, nil
-	// }
-	// return "", nil
-	return "1", nil
+	v, err := c.ServerVersion(context.Background())
+	if err != nil {
+		return "", err
+	}
+	return v.APIVersion, nil
 }
 
 type doOptions struct {
@@ -319,6 +307,7 @@ type doOptions struct {
 	force         bool
 	values        url.Values
 	headers       map[string]string
+	unversioned   bool
 	context       context.Context
 }
 
@@ -338,7 +327,7 @@ func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response
 		urlpath = "/" + NamespaceAPIPrefix + "/" + doOptions.namespace + "/" + urlpath
 	}
 
-	if urlpath != "/version" && !c.SkipServerVersionCheck && c.expectedAPIVersion == 0 {
+	if !c.SkipServerVersionCheck && !doOptions.unversioned {
 		err := c.checkAPIVersion()
 		if err != nil {
 			return nil, err
@@ -359,9 +348,9 @@ func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response
 	switch protocol {
 	case unixProtocol, namedPipeProtocol:
 		httpClient = c.nativeHTTPClient
-		u = c.getFakeNativeURL(urlpath)
+		u = c.getFakeNativeURL(urlpath, doOptions.unversioned)
 	default:
-		u = c.getAPIPath(urlpath, query)
+		u = c.getAPIPath(urlpath, query, doOptions.unversioned)
 	}
 
 	req, err := http.NewRequest(method, u, params)
@@ -386,6 +375,7 @@ func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response
 	if ctx == nil {
 		ctx = context.Background()
 	}
+	// fmt.Printf("%s: %s\n", req.Method, req.URL)
 
 	resp, err := ctxhttp.Do(ctx, httpClient, req)
 	if err != nil {
@@ -410,30 +400,34 @@ func chooseError(ctx context.Context, err error) error {
 	}
 }
 
-func (c *Client) getURL(path string) string {
+func (c *Client) getURL(path string, unversioned bool) string {
+
 	urlStr := strings.TrimRight(c.endpointURL.String(), "/")
+	path = strings.TrimLeft(path, "/")
 	if c.endpointURL.Scheme == unixProtocol || c.endpointURL.Scheme == namedPipeProtocol {
 		urlStr = ""
 	}
-	if c.requestedAPIVersion != 0 {
-		return fmt.Sprintf("%s/%s%s", urlStr, c.requestedAPIVersion, path)
+	if unversioned {
+		return fmt.Sprintf("%s/%s", urlStr, path)
 	}
-	return fmt.Sprintf("%s%s", urlStr, path)
+	return fmt.Sprintf("%s/%s/%s", urlStr, c.requestedAPIVersion, path)
+
 }
 
-func (c *Client) getAPIPath(path string, query url.Values) string {
+func (c *Client) getAPIPath(path string, query url.Values, unversioned bool) string {
 	var apiPath string
 	urlStr := strings.TrimRight(c.endpointURL.String(), "/")
+	path = strings.TrimLeft(path, "/")
 	if c.endpointURL.Scheme == unixProtocol || c.endpointURL.Scheme == namedPipeProtocol {
 		urlStr = ""
 	}
 	if !strings.HasPrefix(path, "/") {
 		path = "/" + path
 	}
-	if c.requestedAPIVersion != 0 {
-		apiPath = fmt.Sprintf("%s/%s%s", urlStr, c.requestedAPIVersion, path)
+	if unversioned {
+		apiPath = fmt.Sprintf("%s/%s", urlStr, path)
 	} else {
-		apiPath = fmt.Sprintf("%s%s", urlStr, path)
+		apiPath = fmt.Sprintf("%s/%s/%s", urlStr, c.requestedAPIVersion, path)
 	}
 
 	u := &url.URL{
@@ -447,7 +441,7 @@ func (c *Client) getAPIPath(path string, query url.Values) string {
 
 // getFakeNativeURL returns the URL needed to make an HTTP request over a UNIX
 // domain socket to the given path.
-func (c *Client) getFakeNativeURL(path string) string {
+func (c *Client) getFakeNativeURL(path string, unversioned bool) string {
 	u := *c.endpointURL // Copy.
 
 	// Override URL so that net/http will not complain.
@@ -455,10 +449,11 @@ func (c *Client) getFakeNativeURL(path string) string {
 	u.Host = "unix.sock" // Doesn't matter what this is - it's not used.
 	u.Path = ""
 	urlStr := strings.TrimRight(u.String(), "/")
-	if c.requestedAPIVersion != 0 {
-		return fmt.Sprintf("%s/v%s%s", urlStr, c.requestedAPIVersion, path)
+	path = strings.TrimLeft(path, "/")
+	if unversioned {
+		return fmt.Sprintf("%s/%s", urlStr, path)
 	}
-	return fmt.Sprintf("%s%s", urlStr, path)
+	return fmt.Sprintf("%s/%s/%s", urlStr, c.requestedAPIVersion, path)
 }
 
 type jsonMessage struct {

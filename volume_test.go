@@ -145,7 +145,7 @@ func TestVolumeCreate(t *testing.T) {
 		t.Errorf("VolumeCreate(): Wrong HTTP method. Want %s. Got %s.", expectedMethod, req.Method)
 	}
 	path, _ := namespacedPath(namespace, VolumeAPIPrefix)
-	u, _ := url.Parse(client.getAPIPath(path, url.Values{}))
+	u, _ := url.Parse(client.getAPIPath(path, url.Values{}, false))
 	if req.URL.Path != u.Path {
 		t.Errorf("VolumeCreate(): Wrong request path. Want %q. Got %q.", u.Path, req.URL.Path)
 	}
@@ -204,7 +204,7 @@ func TestVolume(t *testing.T) {
 		t.Errorf("InspectVolume(%q): Wrong HTTP method. Want %s. Got %s.", name, expectedMethod, req.Method)
 	}
 	path, _ := namespacedRefPath(namespace, VolumeAPIPrefix, name)
-	u, _ := url.Parse(client.getAPIPath(path, url.Values{}))
+	u, _ := url.Parse(client.getAPIPath(path, url.Values{}, false))
 	if req.URL.Path != u.Path {
 		t.Errorf("VolumeCreate(%q): Wrong request path. Want %q. Got %q.", name, u.Path, req.URL.Path)
 	}
@@ -230,7 +230,7 @@ func TestVolumeDelete(t *testing.T) {
 		t.Errorf("VolumeDelete(%q): Wrong HTTP method. Want %s. Got %s.", name, expectedMethod, req.Method)
 	}
 	path, _ := namespacedRefPath(namespace, VolumeAPIPrefix, name)
-	u, _ := url.Parse(client.getAPIPath(path, url.Values{}))
+	u, _ := url.Parse(client.getAPIPath(path, url.Values{}, false))
 	if req.URL.Path != u.Path {
 		t.Errorf("VolumeDelete(%q): Wrong request path. Want %q. Got %q.", name, u.Path, req.URL.Path)
 	}
@@ -304,7 +304,7 @@ func TestVolumeMount(t *testing.T) {
 		t.Errorf("VolumeMount(%q): Wrong HTTP method. Want %s. Got %s.", name, expectedMethod, req.Method)
 	}
 	path, _ := namespacedRefPath(namespace, VolumeAPIPrefix, name)
-	u, _ := url.Parse(client.getAPIPath(path+"/mount", url.Values{}))
+	u, _ := url.Parse(client.getAPIPath(path+"/mount", url.Values{}, false))
 	if req.URL.Path != u.Path {
 		t.Errorf("VolumeMount(%q): Wrong request path. Want %q. Got %q.", name, u.Path, req.URL.Path)
 	}
@@ -331,7 +331,7 @@ func TestVolumeUnmount(t *testing.T) {
 		t.Errorf("VolumeUnmount(%q): Wrong HTTP method. Want %s. Got %s.", name, expectedMethod, req.Method)
 	}
 	path, _ := namespacedRefPath(namespace, VolumeAPIPrefix, name)
-	u, _ := url.Parse(client.getAPIPath(path+"/unmount", url.Values{}))
+	u, _ := url.Parse(client.getAPIPath(path+"/unmount", url.Values{}, false))
 	if req.URL.Path != u.Path {
 		t.Errorf("VolumeUnount(%q): Wrong request path. Want %q. Got %q.", name, u.Path, req.URL.Path)
 	}
