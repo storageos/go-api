@@ -18,8 +18,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"golang.org/x/net/context/ctxhttp"
 )
 
 const (
@@ -375,9 +373,8 @@ func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	// fmt.Printf("%s: %s\n", req.Method, req.URL)
 
-	resp, err := ctxhttp.Do(ctx, httpClient, req)
+	resp, err := httpClient.Do(req.WithContext(ctx))
 	if err != nil {
 		if strings.Contains(err.Error(), "connection refused") {
 			return nil, ErrConnectionRefused
