@@ -6,6 +6,7 @@ package storageos
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -18,8 +19,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	"golang.org/x/net/context"
 )
 
 func newTestClient(rt http.RoundTripper) Client {
