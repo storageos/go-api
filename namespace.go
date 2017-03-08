@@ -104,8 +104,13 @@ func (c *Client) NamespaceDelete(opts types.DeleteOptions) error {
 			if e.Status == http.StatusConflict {
 				return ErrNamespaceInUse
 			}
+
+			// namespace can't be deleted yet, unless force is supplied
+			if e.Status == http.StatusPreconditionFailed {
+				return err
+			}
 		}
-		return nil
+		return err
 	}
 	defer resp.Body.Close()
 	return nil

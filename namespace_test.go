@@ -162,14 +162,21 @@ func TestNamespaceDelete(t *testing.T) {
 func TestNamespaceDeleteNotFound(t *testing.T) {
 	client := newTestClient(&FakeRoundTripper{message: "no such namespace", status: http.StatusNotFound})
 	if err := client.NamespaceDelete(types.DeleteOptions{Name: "testdeletenotfound"}); err != ErrNoSuchNamespace {
-		t.Errorf("NamespaceDelete: wrong error. Want %#v. Got %#v.", ErrNoSuchNamespace, err)
+		t.Errorf("TestNamespaceDeleteNotFound: wrong error. Want %#v. Got %#v.", ErrNoSuchNamespace, err)
 	}
 }
 
 func TestNamespaceDeleteInUse(t *testing.T) {
 	client := newTestClient(&FakeRoundTripper{message: "namespace in use and cannot be removed", status: http.StatusConflict})
 	if err := client.NamespaceDelete(types.DeleteOptions{Name: "testdeleteinuseme"}); err != ErrNamespaceInUse {
-		t.Errorf("NamespaceDelete: wrong error. Want %#v. Got %#v.", ErrNamespaceInUse, err)
+		t.Errorf("TestNamespaceDeleteInUse: wrong error. Want %#v. Got %#v.", ErrNamespaceInUse, err)
+	}
+}
+
+func TestNamespaceDeleteAnotherError(t *testing.T) {
+	client := newTestClient(&FakeRoundTripper{message: "another error here", status: 410})
+	if err := client.NamespaceDelete(types.DeleteOptions{Name: "testdeleteinuseme"}); err.Error() != "API error (410): another error here" {
+		t.Errorf("TestNamespaceDeleteAnotherError: wrong error. Want %#v. Got %#v.", "another error here", err.Error())
 	}
 }
 
