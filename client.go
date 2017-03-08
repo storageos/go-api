@@ -424,13 +424,11 @@ func (c *Client) getAPIPath(path string, query url.Values, unversioned bool) str
 		apiPath = fmt.Sprintf("%s/%s/%s", urlStr, c.requestedAPIVersion, path)
 	}
 
-	u := &url.URL{
-		Path: apiPath,
-	}
 	if len(query) > 0 {
-		u.RawQuery = query.Encode()
+		apiPath = apiPath + "?" + query.Encode()
 	}
-	return u.String()
+
+	return apiPath
 }
 
 // getFakeNativeURL returns the URL needed to make an HTTP request over a UNIX
