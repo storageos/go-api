@@ -686,6 +686,18 @@ JSON: correct pool data.
 
 SCENARIO:
 - Fresh start - 3 node cluster - N provisioned volumes.
+- Get by id.
+-->
+POST: 172.28.128.3:5705/v1/pools/ea477d68-8193-1179-d889-aa6ea8797082
+<--
+200 OK
+JSON: correct pool data.
+-EXPECTED-
+
+===============================================================================
+
+SCENARIO:
+- Fresh start - 3 node cluster - N provisioned volumes.
 - Get by name. Try passing invalid name.
 -->
 POST: 172.28.128.3:5705/v1/pools/mypool1xxx
