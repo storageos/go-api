@@ -27,7 +27,7 @@ info:
   x-logo:
     url: "http://storageos.com/wp-content/uploads/2016/06/storage-os-logo.png"
   description: |
-    The StorageOS API is an HTTP API used for volume management and management of the StorageOS services. It is the API the StorageOS UI, CLI and platform integartions uses to communicate with StorageOS, so everything they can do can do can be done with the API.
+    The StorageOS API is an HTTP API used for managing volumes and StorageOS services. It is the API that the StorageOS UI, CLI and platform integrations use to communicate with the StorageOS backend.
 
     # Errors
 
@@ -97,7 +97,7 @@ definitions:
   VolumeCreateOptions:
     type: "object"
     description: "Parameters available for creating new volumes."
-    required: [Name, Size]
+    required: [Name]
     properties:
       Name:
         description: "Volume name."
@@ -109,7 +109,7 @@ definitions:
         description: "Volume description."
       Size:
         type: "integer"
-        description: "Size in GB."
+        description: "Size in GB (if 0 or not specified, then defaults to 10 GB)."
         x-nullable: false
       Pool:
         type: "string"
@@ -287,6 +287,30 @@ definitions:
       Labels:
         com.example.some-label: "some-value"
         com.example.some-other-label: "some-other-value"
+
+  PoolCreateOptions:
+    type: "object"
+    description: "Parameters available for creating new pools."
+    required: [Name]
+    properties:
+      Name:
+        description: "Pool name."
+        type: "string"
+        x-nullable: false
+      Description:
+        type: "string"
+        x-nullable: false
+        description: "Pool description."
+      Default:
+        type: "boolean"
+        description: "Default determines whether this pool is the default if a volume is provisioned without a pool specified.  There can only be one default pool."
+        x-nullable: false
+      Labels:
+        type: "object"
+        description: "User-defined key/value metadata."
+        x-nullable: false
+        additionalProperties:
+          type: "string"
 
   Pool:
     type: "object"
@@ -650,6 +674,102 @@ paths:
           description: "Unauthorized"
         407:
           description: "Volume not mounted"
+        500:
+          description: "Server error"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /pools:
+    get:
+      summary: "List pools"
+      description: "List of pools that match the query."
+      produces:
+        - "application/json"
+      tags: ["Pool"]
+      #parameters:
+      #  - $ref: "#/parameters/LabelSelector"
+      #  - $ref: "#/parameters/FieldSelector"
+      #  - $ref: "#/parameters/TimeoutSeconds"
+      #  - $ref: "#/parameters/NamespaceQuery"
+      responses:
+        200:
+          description: "Success"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Pool"
+        500:
+          description: "Server error"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    post:
+      summary: "Create pool"
+      description: "Provisions a new pool."
+      produces:
+        - "application/json"
+      tags: ["Pool"]
+      parameters:
+        - name: "PoolCreateOptions"
+          in: "body"
+          schema:
+            $ref: "#/definitions/PoolCreateOptions"
+      responses:
+        201:
+          description: "Pool created successfully"
+          schema:
+            $ref: "#/definitions/Volume"
+        401:
+          description: "Unauthorized"
+        409:
+          description: "Pool with name already exists"
+        500:
+          description: "Server error"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /pools/{name}:
+    get:
+      summary: "Get a pool"
+      description: "Gets a pool by name or ID.  Returns to whole pool object."
+      produces:
+        - "application/json"
+      tags: ["Pool"]
+      parameters:
+        - $ref: "#/parameters/Name"
+      responses:
+        200:
+          description: "Success"
+          schema:
+            $ref: "#/definitions/Pool"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not found"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        407:
+          description: "Pool already exists"
+        500:
+          description: "Server error"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    delete:
+      summary: "Delete pool"
+      description: "Deletes a pool."
+      produces:
+        - "application/json"
+      tags: ["Pool"]
+      parameters:
+        - name: "name"
+          in: "path"
+          required: true
+          description: "Pool name or ID."
+          type: "string"
+      responses:
+        200:
+          description: "Success"
+        401:
+          description: "Unauthorized"
+        407:
+          description: "Pool in use"
         500:
           description: "Server error"
           schema:
