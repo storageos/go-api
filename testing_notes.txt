@@ -666,6 +666,26 @@ JSON: valid pool data.
 
 ===============================================================================
 
+SCENARIO:
+- Fresh start - 3 node cluster.
+- Trying to create a pool with the defaultDriver string set.
+-->
+POST: 172.28.128.3:5705/v1/volumes
+BODY (JSON):
+{
+	"name": "mypool6",
+	"description": "hello world again!",
+	"default": true,
+	"defautDriver": "I'm the default driver :)"
+}
+<--
+201 CREATED
+JSON: Is correct for the most part, but defaultDriver is an empty string??
+-NOT EXPECTED-
+XXX
+
+===============================================================================
+
 
 Get Pools
 =========
