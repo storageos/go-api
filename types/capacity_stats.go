@@ -7,13 +7,13 @@ const ErrCapacityStatsUnchanged = "no changes"
 type CapacityStats struct {
 
 	// TotalCapacityBytes is the object's total capacity in bytes.
-	TotalCapacityBytes uint64 `json:"total_capacity_bytes"`
+	TotalCapacityBytes uint64 `json:"totalCapacityBytes"`
 
 	// AvailableCapacityBytes is the object's available capacity in bytes.
-	AvailableCapacityBytes uint64 `json:"available_capacity_bytes"`
+	AvailableCapacityBytes uint64 `json:"availableCapacityBytes"`
 
 	// ProvisionedCapacityBytes is the object's provisioned capacity in bytes.
-	ProvisionedCapacityBytes uint64 `json:"provisioned_capacity_bytes"`
+	ProvisionedCapacityBytes uint64 `json:"provisionedCapacityBytes"`
 }
 
 // IsEqual checks if capacity values are the same

@@ -28,17 +28,17 @@ type DriverInstance struct {
 	Labels []string `json:"labels"`
 
 	// ControllerName specifies the controller that this instance is running on.
-	ControllerName string `json:"controller_name"`
+	ControllerName string `json:"controllerName"`
 
 	// PoolID refers to the pool that this driver instance relates to.
-	PoolID string `json:"pool_id"`
+	PoolID string `json:"poolID"`
 
 	// DriverName specifies which capacity driver this is an instance of.
-	DriverName string `json:"driver_name"`
+	DriverName string `json:"driverName"`
 
 	// CapacityStats tracks that capacity usage of this driver instance on the
 	// current controller.
-	CapacityStats CapacityStats `json:"capacity_stats"`
+	CapacityStats CapacityStats `json:"capacityStats"`
 }
 
 // DriverInstances is a collection of Driver instance objects.

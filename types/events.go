@@ -19,27 +19,26 @@ type Event struct {
 	ID string `json:"id"`
 	// Parent is used to specify parent event
 	Parent          string    `json:"parent"`
-	EventType       EventType `json:"event_type"`
+	EventType       EventType `json:"eventType"`
 	Action          string    `json:"action"`
 	Timestamp       int64     `json:"timestamp"`
 	Status          string    `json:"status"`
 	Message         string    `json:"message"`
 	Log             []string  `json:"log"`
-	ProgressPercent int       `json:"progress_percent"`
-	CreatedBy       string    `json:"created_by"`
+	ProgressPercent int       `json:"progressPercent"`
+	CreatedBy       string    `json:"createdBy"`
 
 	Target        string      `json:"target"`
-	ActionPayload interface{} `json:"action_payload"`
+	ActionPayload interface{} `json:"actionPayload"`
 
 	// payload can be encoded into bytes as well
-	// ActionPayloadType  string `json:"action_payload_type"`
-	ActionPayloadBytes []byte `json:"action_payload_bts"`
+	ActionPayloadBytes []byte `json:"actionPayloadBts"`
 
-	UpdatedAt time.Time `json:"updated_at"`
-	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updatedAt"`
+	CreatedAt time.Time `json:"createdAt"`
 	// retry related value
 	Retry     bool      `json:"retry"`
-	RetriedAt time.Time `json:"retried_at"`
+	RetriedAt time.Time `json:"retriedAt"`
 	Attempts  int       `json:"attempts"`
 
 	// optional parameter
@@ -47,12 +46,12 @@ type Event struct {
 
 	// optional events to dispatch
 	Rollback     []*Request `json:"rollback"`
-	RollbackDone bool       `json:"rollback_done"`
+	RollbackDone bool       `json:"rollbackDone"`
 
-	Subject string `json:"subject"` // or "queue""
+	Subject string `json:"subject"` // or "queue"
 
 	// controller ID which created this event
-	OriginController string `json:"origin_controller"`
+	OriginController string `json:"originController"`
 }
 
 // Request is the message structure used for sending request events
