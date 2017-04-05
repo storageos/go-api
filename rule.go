@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/storageos/go-api/types"
 )
@@ -29,6 +30,13 @@ func (c *Client) RuleList(opts types.ListOptions) ([]*types.Rule, error) {
 		namespace:     opts.Namespace,
 		context:       opts.Context,
 	}
+
+	if opts.LabelSelector != "" {
+		query := url.Values{}
+		query.Add("labelSelector", opts.LabelSelector)
+		listOpts.values = query
+	}
+
 	resp, err := c.do("GET", RuleAPIPrefix, listOpts)
 	if err != nil {
 		return nil, err

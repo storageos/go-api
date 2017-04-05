@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"net/url"
 
 	"github.com/storageos/go-api/types"
 )
@@ -28,6 +29,13 @@ func (c *Client) NamespaceList(opts types.ListOptions) ([]*types.Namespace, erro
 		namespace:     opts.Namespace,
 		context:       opts.Context,
 	}
+
+	if opts.LabelSelector != "" {
+		query := url.Values{}
+		query.Add("labelSelector", opts.LabelSelector)
+		listOpts.values = query
+	}
+
 	resp, err := c.do("GET", NamespaceAPIPrefix, listOpts)
 	if err != nil {
 		return nil, err

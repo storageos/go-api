@@ -83,6 +83,24 @@ func TestVolumeList(t *testing.T) {
 	}
 }
 
+func TestVolumeListLabelSelector(t *testing.T) {
+
+	fakeRT := &FakeRoundTripper{message: `[]`, status: http.StatusOK}
+	client := newTestClient(fakeRT)
+	_, err := client.VolumeList(types.ListOptions{LabelSelector: "env=prod"})
+	if err != nil {
+		t.Error(err)
+	}
+
+	req := fakeRT.requests[0]
+	expectedVals := url.Values{}
+	expectedVals.Add("labelSelector", "env=prod")
+	u, _ := url.Parse(client.getAPIPath(VolumeAPIPrefix, expectedVals, false))
+	if req.URL.Path != u.Path {
+		t.Errorf("TestVolumeListLabelSelector(): Wrong request path. Want %q. Got %q.", u.Path, req.URL.Path)
+	}
+}
+
 func TestVolumeCreate(t *testing.T) {
 	body := `{
 				"created_at": "0001-01-01T00:00:00Z",
