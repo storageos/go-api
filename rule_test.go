@@ -21,11 +21,8 @@ func TestRuleList(t *testing.T) {
             "storageos.driver": "filesystem"
         },
         "name": "default driver",
-        "operator": "notin",
         "rule_action": "add",
-        "selectors": {
-            "storageos.driver": "disk,filesystem"
-        },
+		"selector": "storageos.driver notin (disk, filesystem)",
         "weight": 0
     }
 ]`
@@ -53,12 +50,9 @@ func TestRuleCreate(t *testing.T) {
 				"labels": {
 						"storageos.driver": "filesystem"
 				},
-				"name": "default driver",
-				"operator": "notin",
+				"name": "default driver",				
 				"rule_action": "add",
-				"selectors": {
-						"storageos.driver": "disk,filesystem"
-				},
+				"selector": "storageos.driver notin (disk, filesystem)",        
 				"weight": 0
 		}`
 	fakeRT := &FakeRoundTripper{message: body, status: http.StatusOK}
@@ -69,11 +63,8 @@ func TestRuleCreate(t *testing.T) {
 			Description: "Unit test rule",
 			Active:      true,
 			Weight:      5,
-			Operator:    "==",
 			RuleAction:  "add",
-			Selectors: map[string]string{
-				"foo": "bar",
-			},
+			Selector:    "storageos.driver notin (disk, filesystem)",
 			Labels: map[string]string{
 				"foo": "bar",
 			},
