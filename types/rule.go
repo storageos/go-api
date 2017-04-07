@@ -65,9 +65,6 @@ type RuleCreateOptions struct {
 	// default: 0
 	Weight int `json:"weight"`
 
-	// Operator is used to compare objects or labels.
-	Operator string `json:"operator"`
-
 	// RuleAction controls whether the action is to add or remove a label from the
 	// matching object(s).
 	RuleAction string `json:"action"`
