@@ -1,5 +1,5 @@
 
-# A Swagger 2.0 (a.k.a. OpenAPI) definition of the Engine API.
+# A Swagger 2.0 (a.k.a. OpenAPI) definition of the StorageOS API.
 #
 # This is used for generating API documentation and the types used by the
 # client/server. See api/README.md for more information.
@@ -25,7 +25,7 @@ info:
   title: "StorageOS API"
   version: "0.7"
   x-logo:
-    url: "http://storageos.com/wp-content/uploads/2016/06/storage-os-logo.png"
+    url: "http://storageos.wpengine.com/wp-content/uploads/2017/03/cropped-logo-1.png"
   description: |
     The StorageOS API is an HTTP API used for managing volumes and StorageOS services. It is the API that the StorageOS UI, CLI and platform integrations use to communicate with the StorageOS backend.
 
@@ -337,7 +337,7 @@ definitions:
       volumes from.  Typically, each server that makes storage available will be
       added to one or more pools.
 
-      Capacity drivers are also added to the pool to deetermine which backend
+      Capacity drivers are also added to the pool to determine which backend
       storage driver to use.  Currently this is limited to a single type of
       driver per pool, but in the future we will allow multiple, allowing for
       dynamic tiering and snapshots from one driver type to another.
@@ -474,7 +474,7 @@ definitions:
 
   DriverInstances:
     type: "object"
-    description: "DriverInstances is used to track instances of each driver."
+    description: "DriverInstances shows the internal configuration and state of each driver on all the nodes in the pool. Data within DriverInstances can not be modified directly."
     properties:
       ID:
         description: "Instance unique ID."
@@ -485,36 +485,44 @@ definitions:
         description: "Instance name."
         type: "string"
         x-nullable: false
+        readOnly: true
       Description:
         description: "Instance description."
         type: "string"
         x-nullable: false
+        readOnly: true
       Active:
         description: "Flag describing whether the template is active."
         type: "boolean"
         x-nullable: false
+        readOnly: true
       Config:
         description: "Config is JSON struct that is passed directly to the driver.  There is no specific format, and the driver is responsible for validation."
         type: "object"
+        readOnly: true
         additionalProperties:
           type: "string"
       Labels:
         description: "Labels define a list of labels that describe the driver instance.  These are inherited from the pool when the driver instance is created."
         type: "object"
+        readOnly: true
         additionalProperties:
           type: "string"
       ControllerName:
         description: "ControllerName specifies the controller that this instance is running on."
         type: "string"
         x-nullable: false
+        readOnly: true
       PoolID:
         description: "PoolID refers to the pool that this driver instance relates to."
         type: "string"
         x-nullable: false
+        readOnly: true
       DriverName:
         description: "DriverName specifies which capacity driver this is an instance of."
         type: "string"
         x-nullable: false
+        readOnly: true
       CapacityStats:
         $ref: "#/definitions/CapacityStats"
 
