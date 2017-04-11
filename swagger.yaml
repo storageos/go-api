@@ -267,6 +267,10 @@ definitions:
         type: "string"
         description: "Reference to the node that has the volume mounted."
         readOnly: true
+      Mountpoint:
+        type: "string"
+        description: "Mountpoint where the volume was mounted."
+        readOnly: true  
       MountedAt:
         type: "string"
         format: "dateTime"

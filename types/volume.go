@@ -51,9 +51,12 @@ type Volume struct {
 	// Read Only: true
 	Mounted bool `json:"mounted"`
 
+	// Mountpoint, where the volume is mounted
+	Mountpoint string `json:"mountpoint"`
+
 	// When the volume was mounted.
 	// Read Only: true
-	MountedAt string `json:"mountedAt,omitempty"`
+	MountedAt time.Time `json:"mountedAt,omitempty"`
 
 	// Reference to the node that has the volume mounted.
 	// Read Only: true
@@ -92,6 +95,9 @@ type VolumeMountOptions struct {
 
 	// Name is the name of the volume to mount.
 	Name string `json:"name"`
+
+	// Mountpoint, where the volume is mounted
+	Mountpoint string `json:"mountpoint"`
 
 	// Namespace is the object scope, such as for teams and projects.
 	Namespace string `json:"namespace"`
