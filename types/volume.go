@@ -99,6 +99,9 @@ type VolumeMountOptions struct {
 	// Mountpoint, where the volume is mounted
 	Mountpoint string `json:"mountpoint"`
 
+	// Filesystem type, optional but expected when mounting raw volume
+	FsType string `json:"fsType"`
+
 	// Namespace is the object scope, such as for teams and projects.
 	Namespace string `json:"namespace"`
 
