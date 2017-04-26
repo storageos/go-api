@@ -12,7 +12,7 @@ import (
 var (
 
 	// ControllerAPIPrefix is a partial path to the HTTP endpoint.
-	ControllerAPIPrefix = "controllers"
+	ControllerAPIPrefix = "controller"
 
 	// ErrNoSuchController is the error returned when the controller does not exist.
 	ErrNoSuchController = errors.New("no such controller")
