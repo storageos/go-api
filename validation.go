@@ -10,7 +10,7 @@ const (
 	IDFormat = `[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}`
 
 	// NameFormat are the characters allowed to represent a name.
-	NameFormat = `[a-zA-Z0-9][a-zA-Z0-9_.-]+`
+	NameFormat = `[a-zA-Z0-9][a-zA-Z0-9~_.-]+`
 )
 
 var (
