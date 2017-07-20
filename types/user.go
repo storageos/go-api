@@ -10,7 +10,7 @@ type User struct {
 	UUID     string   `json:"id"`
 	Username string   `json:"username"`
 	Groups   []string `json:"groups"`
-	Password string   `json:"password"`
+	Password string   `json:"password,omitempty"`
 	Role     string   `json:"role"`
 }
 
@@ -19,7 +19,7 @@ func (u *User) MarshalJSON() ([]byte, error) {
 		UUID     string `json:"id"`
 		Username string `json:"username"`
 		Groups   string `json:"groups"`
-		Password string `json:"password"`
+		Password string `json:"password,omitempty"`
 		Role     string `json:"role"`
 	}{
 		UUID:     u.UUID,

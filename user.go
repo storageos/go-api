@@ -41,12 +41,13 @@ func (c *Client) UserList(opts types.ListOptions) ([]*types.User, error) {
 	defer resp.Body.Close()
 
 	var users struct {
-		users []*types.User `json:"data"`
+		Users []*types.User `json:"data"`
 	}
+
 	if err := json.NewDecoder(resp.Body).Decode(&users); err != nil {
 		return nil, err
 	}
-	return users.users, nil
+	return users.Users, nil
 }
 
 // User returns a user by its username/id.
@@ -61,11 +62,13 @@ func (c *Client) User(username string) (*types.User, error) {
 	}
 	defer resp.Body.Close()
 
-	var user types.User
+	var user struct {
+		User *types.User `json:"data"`
+	}
 	if err := json.NewDecoder(resp.Body).Decode(&user); err != nil {
 		return nil, err
 	}
-	return &user, nil
+	return user.User, nil
 }
 
 // UserCreate creates a user on the server and returns the new object.
