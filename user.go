@@ -40,11 +40,13 @@ func (c *Client) UserList(opts types.ListOptions) ([]*types.User, error) {
 	}
 	defer resp.Body.Close()
 
-	var users []*types.User
+	var users struct {
+		users []*types.User `json:"data"`
+	}
 	if err := json.NewDecoder(resp.Body).Decode(&users); err != nil {
 		return nil, err
 	}
-	return users, nil
+	return users.users, nil
 }
 
 // User returns a user by its username/id.
