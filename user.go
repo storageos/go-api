@@ -1,6 +1,7 @@
 package storageos
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -43,7 +44,6 @@ func (c *Client) UserList(opts types.ListOptions) ([]*types.User, error) {
 	var users struct {
 		Users []*types.User `json:"data"`
 	}
-
 	if err := json.NewDecoder(resp.Body).Decode(&users); err != nil {
 		return nil, err
 	}
@@ -89,30 +89,21 @@ func (c *Client) UserCreate(opts types.UserCreateOptions) (*types.User, error) {
 }
 
 // UserUpdate updates a user on the server.
-//func (c *Client) UserUpdate(opts types.UserUpdateOptions) (*types.User, error) {
-//	ref := opts.Name
-//	if IsUUID(opts.ID) {
-//		ref = opts.ID
-//	}
-//	fmt.Printf("%#v\n", opts)
-//	path, err := namespacedRefPath(opts.Namespace, UserAPIPrefix, ref)
-//	if err != nil {
-//		return nil, err
-//	}
-//	resp, err := c.do("PUT", path, doOptions{
-//		data:    opts,
-//		context: opts.Context,
-//	})
-//	if err != nil {
-//		return nil, err
-//	}
-//	defer resp.Body.Close()
-//	var user types.User
-//	if err := json.NewDecoder(resp.Body).Decode(&user); err != nil {
-//		return nil, err
-//	}
-//	return &user, nil
-//}
+func (c *Client) UserUpdate(username string, form url.Values, ctx context.Context) error {
+	path := fmt.Sprintf("%s/%s", UserAPIPrefix, username)
+	resp, err := c.do("POST", path, doOptions{
+		values:  form,
+		context: ctx,
+	})
+	if err != nil {
+		if e, ok := err.(*Error); ok && e.Status == http.StatusNotFound {
+			return ErrNoSuchUser
+		}
+		return err
+	}
+	defer resp.Body.Close()
+	return nil
+}
 
 // UserDelete removes a user by its reference.
 func (c *Client) UserDelete(opts types.DeleteOptions) error {
@@ -123,7 +114,7 @@ func (c *Client) UserDelete(opts types.DeleteOptions) error {
 				return ErrNoSuchUser
 			}
 		}
-		return nil
+		return err
 	}
 	defer resp.Body.Close()
 	return nil

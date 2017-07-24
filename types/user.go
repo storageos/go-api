@@ -62,3 +62,18 @@ type UserCreateOptions struct {
 	// Context can be set with a timeout or can be used to cancel a request.
 	Context context.Context `json:"-"`
 }
+
+func (u *UserCreateOptions) MarshalJSON() ([]byte, error) {
+	return json.Marshal(&struct {
+		Username string `json:"username"`
+		Groups   string `json:"groups"`
+		Password string `json:"password"`
+		Role     string `json:"role"`
+	}{
+		Username: u.Username,
+		Groups:   strings.Join(u.Groups, ","),
+		Password: u.Password,
+		Role:     u.Role,
+	})
+
+}
