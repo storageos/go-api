@@ -19,6 +19,10 @@ var (
 	ErrNoSuchPolicy = errors.New("no such policy")
 )
 
+// nopMarshaler is an alias to a []byte that implements json.Marshaler
+// it bypasses the base64 encoded string representation that json will give byte slices.
+// It should only be used to wrap []byte types containing pre-rendered valid json that will later
+// (out of the caller's control) be run through json.Marshal
 type nopMarshaler []byte
 
 func (n *nopMarshaler) MarshalJSON() ([]byte, error) {
@@ -36,6 +40,7 @@ func (c *Client) PolicyCreate(jsonl []byte, ctx context.Context) error {
 	return err
 }
 
+// PolicyCreate returns a policy on the server by ID.
 func (c *Client) Policy(id string) (*types.Policy, error) {
 	path := fmt.Sprintf("%s/%s", PolicyAPIPrefix, id)
 	resp, err := c.do("GET", path, doOptions{})
@@ -54,6 +59,7 @@ func (c *Client) Policy(id string) (*types.Policy, error) {
 	return policy, nil
 }
 
+// PolicyCreate returns the list of policies on the server.
 func (c *Client) PolicyList(opts types.ListOptions) (types.PolicySet, error) {
 	listOpts := doOptions{
 		fieldSelector: opts.FieldSelector,
@@ -81,6 +87,7 @@ func (c *Client) PolicyList(opts types.ListOptions) (types.PolicySet, error) {
 	return policies, nil
 }
 
+// PolicyCreate deletes a policy on the server by ID.
 func (c *Client) PolicyDelete(opts types.DeleteOptions) error {
 	resp, err := c.do("DELETE", PolicyAPIPrefix+"/"+opts.Name, doOptions{})
 	if err != nil {

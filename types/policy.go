@@ -16,15 +16,19 @@ type Policy struct {
 	} `json:"spec"`
 }
 
+// PolicyWithId is used as an internal type to render table formated versions of the json response
 type PolicyWithID struct {
 	*Policy
 	ID string
 }
 
+// MarshalJSON returns a marshaled copy of the internal policy object, so it is still valid to use
+// with the REST API
 func (p *PolicyWithID) MarshalJSON() ([]byte, error) {
 	return json.Marshal(p.Policy)
 }
 
+// PolicySet is a representation of the data structure returned from the REST API
 type PolicySet map[string]*Policy
 
 func (p PolicySet) GetPoliciesWithID() []*PolicyWithID {
