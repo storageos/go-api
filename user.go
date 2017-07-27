@@ -71,21 +71,13 @@ func (c *Client) User(username string) (*types.User, error) {
 	return user.User, nil
 }
 
-// UserCreate creates a user on the server and returns the new object.
-func (c *Client) UserCreate(opts types.UserCreateOptions) (*types.User, error) {
-	resp, err := c.do("POST", UserAPIPrefix, doOptions{
+// UserCreate creates a user on the server.
+func (c *Client) UserCreate(opts types.UserCreateOptions) error {
+	_, err := c.do("POST", UserAPIPrefix, doOptions{
 		data:    opts,
 		context: opts.Context,
 	})
-	if err != nil {
-		return nil, err
-	}
-
-	var user types.User
-	if err := json.NewDecoder(resp.Body).Decode(&user); err != nil {
-		return nil, err
-	}
-	return &user, nil
+	return err
 }
 
 // UserUpdate updates a user on the server.
