@@ -40,7 +40,7 @@ func (c *Client) PolicyCreate(jsonl []byte, ctx context.Context) error {
 	return err
 }
 
-// PolicyCreate returns a policy on the server by ID.
+// Policy returns a policy on the server by ID.
 func (c *Client) Policy(id string) (*types.Policy, error) {
 	path := fmt.Sprintf("%s/%s", PolicyAPIPrefix, id)
 	resp, err := c.do("GET", path, doOptions{})
@@ -59,7 +59,7 @@ func (c *Client) Policy(id string) (*types.Policy, error) {
 	return policy, nil
 }
 
-// PolicyCreate returns the list of policies on the server.
+// PolicyList returns the list of policies on the server.
 func (c *Client) PolicyList(opts types.ListOptions) (types.PolicySet, error) {
 	listOpts := doOptions{
 		fieldSelector: opts.FieldSelector,
@@ -87,7 +87,7 @@ func (c *Client) PolicyList(opts types.ListOptions) (types.PolicySet, error) {
 	return policies, nil
 }
 
-// PolicyCreate deletes a policy on the server by ID.
+// PolicyDelete deletes a policy on the server by ID.
 func (c *Client) PolicyDelete(opts types.DeleteOptions) error {
 	resp, err := c.do("DELETE", PolicyAPIPrefix+"/"+opts.Name, doOptions{})
 	if err != nil {
