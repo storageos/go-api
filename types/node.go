@@ -8,6 +8,7 @@ type SubModuleStatus struct {
 	Status    string `json:"status"`
 	UpdatedAt string `json:"updatedAt"`
 	ChangedAt string `json:"changedAt"`
+	Message   string `json:"message"`
 }
 
 type NamedSubModuleStatus struct {
