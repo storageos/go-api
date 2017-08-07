@@ -10,11 +10,25 @@ type SubModuleStatus struct {
 	ChangedAt string `json:"changedAt"`
 }
 
+type NamedSubModuleStatus struct {
+	Name string
+	SubModuleStatus
+}
+
 type CPHealthStatus struct {
 	KV        SubModuleStatus
 	KVWrite   SubModuleStatus
 	NATS      SubModuleStatus
 	Scheduler SubModuleStatus
+}
+
+func (c *CPHealthStatus) ToNamedSubmodules() []NamedSubModuleStatus {
+	return []NamedSubModuleStatus{
+		{Name: "NATS", SubModuleStatus: c.NATS},
+		{Name: "KV", SubModuleStatus: c.KV},
+		{Name: "KV_WRITE", SubModuleStatus: c.KVWrite},
+		{Name: "SCHEDULER", SubModuleStatus: c.Scheduler},
+	}
 }
 
 func (c *CPHealthStatus) UnmarshalJSON(data []byte) error {
@@ -45,6 +59,16 @@ type DPHealthStatus struct {
 	Director       SubModuleStatus
 	FSDriver       SubModuleStatus
 	FS             SubModuleStatus
+}
+
+func (d *DPHealthStatus) ToNamedSubmodules() []NamedSubModuleStatus {
+	return []NamedSubModuleStatus{
+		{Name: "DFS_CLIENT", SubModuleStatus: d.DirectFSClient},
+		{Name: "DFS_SERVER", SubModuleStatus: d.DirectFSServer},
+		{Name: "DIRECTOR", SubModuleStatus: d.Director},
+		{Name: "FS_DRIVER", SubModuleStatus: d.FSDriver},
+		{Name: "FS", SubModuleStatus: d.FS},
+	}
 }
 
 func (d *DPHealthStatus) UnmarshalJSON(data []byte) error {
