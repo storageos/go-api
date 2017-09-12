@@ -19,6 +19,10 @@ func (c *Client) Login() (token string, err error) {
 	}{c.username, c.secret}})
 
 	if err != nil {
+		if _, ok := err.(*Error); ok {
+			return "", ErrLoginFailed
+		}
+
 		return "", err
 	}
 
