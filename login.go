@@ -38,5 +38,5 @@ func (c *Client) Login() (token string, err error) {
 		return "", ErrLoginFailed
 	}
 
-	return token, nil
+	return unmarsh.Token, nil
 }
