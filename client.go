@@ -29,6 +29,9 @@ const (
 	defaultNamespace  = "default"
 )
 
+const DefaultUsername = "storageos"
+const DefaultPassword = "storageos"
+
 var (
 	// ErrInvalidEndpoint is returned when the endpoint is not a valid HTTP URL.
 	ErrInvalidEndpoint = errors.New("invalid endpoint")
