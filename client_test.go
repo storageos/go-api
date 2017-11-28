@@ -8,8 +8,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	//"github.com/storageos/go-api/netutil"
 	"io/ioutil"
-	"net"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -21,19 +21,18 @@ import (
 	"time"
 )
 
-func newTestClient(rt http.RoundTripper) Client {
-	endpoint := "http://localhost:4243"
-	u, _ := parseEndpoint("http://localhost:4243", false)
+func newTestClient(rt http.RoundTripper) *Client {
+	//d, err := netutil.NewMultiDialer([]string{"localhost"}, nil)
+	//if err != nil {
+	//	return nil
+	//}
+
 	testAPIVersion, _ := NewAPIVersion("1")
-	client := Client{
+	return &Client{
 		HTTPClient:             &http.Client{Transport: rt},
-		Dialer:                 &net.Dialer{},
-		endpoint:               endpoint,
-		endpointURL:            u,
 		SkipServerVersionCheck: true,
 		serverAPIVersion:       testAPIVersion,
 	}
-	return client
 }
 
 type stdoutMock struct {
@@ -54,21 +53,9 @@ func (m stdinMock) Close() error {
 
 func TestNewAPIClient(t *testing.T) {
 	endpoint := "http://localhost:4243"
-	client, err := NewClient(endpoint)
+	client, err := NewClient([]string{endpoint})
 	if err != nil {
 		t.Fatal(err)
-	}
-	if client.endpoint != endpoint {
-		t.Errorf("Expected endpoint %s. Got %s.", endpoint, client.endpoint)
-	}
-	// test native endpoints
-	endpoint = nativeRealEndpoint
-	client, err = NewClient(endpoint)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if client.endpoint != endpoint {
-		t.Errorf("Expected endpoint %s. Got %s.", endpoint, client.endpoint)
 	}
 	if !client.SkipServerVersionCheck {
 		t.Error("Expected SkipServerVersionCheck to be true, got false")
@@ -78,8 +65,8 @@ func TestNewAPIClient(t *testing.T) {
 	}
 }
 
-func newTLSClient(endpoint string) (*Client, error) {
-	return NewTLSClient(endpoint,
+func newTLSClient(nodes []string) (*Client, error) {
+	return NewTLSClient(nodes,
 		"testing/data/cert.pem",
 		"testing/data/key.pem",
 		"testing/data/ca.pem")
@@ -87,12 +74,9 @@ func newTLSClient(endpoint string) (*Client, error) {
 
 func TestNewTSLAPIClient(t *testing.T) {
 	endpoint := "https://localhost:4243"
-	client, err := newTLSClient(endpoint)
+	client, err := newTLSClient([]string{endpoint})
 	if err != nil {
 		t.Fatal(err)
-	}
-	if client.endpoint != endpoint {
-		t.Errorf("Expected endpoint %s. Got %s.", endpoint, client.endpoint)
 	}
 	if !client.SkipServerVersionCheck {
 		t.Error("Expected SkipServerVersionCheck to be true, got false")
@@ -104,12 +88,9 @@ func TestNewTSLAPIClient(t *testing.T) {
 
 func TestNewVersionedClient(t *testing.T) {
 	endpoint := "http://localhost:4243"
-	client, err := NewVersionedClient(endpoint, "1")
+	client, err := NewVersionedClient([]string{endpoint}, "1")
 	if err != nil {
 		t.Fatal(err)
-	}
-	if client.endpoint != endpoint {
-		t.Errorf("Expected endpoint %s. Got %s.", endpoint, client.endpoint)
 	}
 	if reqVersion := client.requestedAPIVersion; reqVersion != 1 {
 		t.Errorf("Wrong requestAPIVersion. Want %d. Got %d.", 1, reqVersion)
@@ -124,12 +105,9 @@ func TestNewTLSVersionedClient(t *testing.T) {
 	keyPath := "testing/data/key.pem"
 	caPath := "testing/data/ca.pem"
 	endpoint := "https://localhost:4243"
-	client, err := NewVersionedTLSClient(endpoint, certPath, keyPath, caPath, "1")
+	client, err := NewVersionedTLSClient([]string{endpoint}, certPath, keyPath, caPath, "1")
 	if err != nil {
 		t.Fatal(err)
-	}
-	if client.endpoint != endpoint {
-		t.Errorf("Expected endpoint %s. Got %s.", endpoint, client.endpoint)
 	}
 	if reqVersion := client.requestedAPIVersion; reqVersion != 1 {
 		t.Errorf("Wrong requestAPIVersion. Want %d. Got %d.", 1, reqVersion)
@@ -144,12 +122,9 @@ func TestNewTLSVersionedClientNoClientCert(t *testing.T) {
 	keyPath := "testing/data/key_doesnotexist.pem"
 	caPath := "testing/data/ca.pem"
 	endpoint := "https://localhost:4243"
-	client, err := NewVersionedTLSClient(endpoint, certPath, keyPath, caPath, "1")
+	client, err := NewVersionedTLSClient([]string{endpoint}, certPath, keyPath, caPath, "1")
 	if err != nil {
 		t.Fatal(err)
-	}
-	if client.endpoint != endpoint {
-		t.Errorf("Expected endpoint %s. Got %s.", endpoint, client.endpoint)
 	}
 	if reqVersion := client.requestedAPIVersion; reqVersion != 1 {
 		t.Errorf("Wrong requestAPIVersion. Want %d. Got %d.", 1, reqVersion)
@@ -164,7 +139,7 @@ func TestNewTLSVersionedClientInvalidCA(t *testing.T) {
 	keyPath := "testing/data/key.pem"
 	caPath := "testing/data/key.pem"
 	endpoint := "https://localhost:4243"
-	_, err := NewVersionedTLSClient(endpoint, certPath, keyPath, caPath, "1")
+	_, err := NewVersionedTLSClient([]string{endpoint}, certPath, keyPath, caPath, "1")
 	if err == nil {
 		t.Errorf("Expected invalid ca at %s", caPath)
 	}
@@ -175,7 +150,7 @@ func TestNewTLSVersionedClientInvalidCANoClientCert(t *testing.T) {
 	keyPath := "testing/data/key_doesnotexist.pem"
 	caPath := "testing/data/key.pem"
 	endpoint := "https://localhost:4243"
-	_, err := NewVersionedTLSClient(endpoint, certPath, keyPath, caPath, "1")
+	_, err := NewVersionedTLSClient([]string{endpoint}, certPath, keyPath, caPath, "1")
 	if err == nil {
 		t.Errorf("Expected invalid ca at %s", caPath)
 	}
@@ -188,12 +163,12 @@ func TestNewClientInvalidEndpoint(t *testing.T) {
 		"https://localhost:-20",
 	}
 	for _, c := range cases {
-		client, err := NewClient(c)
+		client, err := NewClient([]string{c})
 		if client != nil {
-			t.Errorf("Want <nil> client for invalid endpoint, got %#v.", client)
+			t.Errorf("Want <nil> client for invalid endpoint (%v), got %#v.", c, client)
 		}
-		if !reflect.DeepEqual(err, ErrInvalidEndpoint) {
-			t.Errorf("NewClient(%q): Got invalid error for invalid endpoint. Want %#v. Got %#v.", c, ErrInvalidEndpoint, err)
+		if _, ok := err.(*InvalidNodeError); !ok {
+			t.Errorf("NewClient(%q): Got invalid error for invalid endpoint. Want (*netutil.InvalidNodeError). Got %#v.", c, err)
 		}
 	}
 }
@@ -201,7 +176,7 @@ func TestNewClientInvalidEndpoint(t *testing.T) {
 func TestNewClientNoSchemeEndpoint(t *testing.T) {
 	cases := []string{"localhost", "localhost:8080"}
 	for _, c := range cases {
-		client, err := NewClient(c)
+		client, err := NewClient([]string{c})
 		if client == nil {
 			t.Errorf("Want client for scheme-less endpoint, got <nil>")
 		}
@@ -211,106 +186,89 @@ func TestNewClientNoSchemeEndpoint(t *testing.T) {
 	}
 }
 
-func TestNewTLSClient(t *testing.T) {
-	var tests = []struct {
-		endpoint string
-		expected string
-	}{
-		{"tcp://localhost:2376", "https"},
-		{"tcp://localhost:2375", "https"},
-		{"tcp://localhost:4000", "https"},
-		{"http://localhost:4000", "https"},
-	}
-	for _, tt := range tests {
-		client, err := newTLSClient(tt.endpoint)
-		if err != nil {
-			t.Error(err)
-		}
-		got := client.endpointURL.Scheme
-		if got != tt.expected {
-			t.Errorf("endpointURL.Scheme: Got %s. Want %s.", got, tt.expected)
-		}
-	}
-}
+// TODO: replace with equivalent
+//func TestNewTLSClient(t *testing.T) {
+//	var tests = []struct {
+//		endpoint string
+//		expected string
+//	}{
+//		{"tcp://localhost:2376", "https"},
+//		{"tcp://localhost:2375", "https"},
+//		{"tcp://localhost:4000", "https"},
+//		{"http://localhost:4000", "https"},
+//	}
+//	for _, tt := range tests {
+//		client, err := newTLSClient(tt.endpoint)
+//		if err != nil {
+//			t.Error(err)
+//		}
+//		got := client.endpointURL.Scheme
+//		if got != tt.expected {
+//			t.Errorf("endpointURL.Scheme: Got %s. Want %s.", got, tt.expected)
+//		}
+//	}
+//}
 
-func TestEndpoint(t *testing.T) {
-	client, err := NewVersionedClient("http://localhost:4243", "1")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if endpoint := client.Endpoint(); endpoint != client.endpoint {
-		t.Errorf("Client.Endpoint(): want %q. Got %q", client.endpoint, endpoint)
-	}
-}
+// TODO: replace with equivalent
+//func TestEndpoint(t *testing.T) {
+//	client, err := NewVersionedClient("http://localhost:4243", "1")
+//	if err != nil {
+//		t.Fatal(err)
+//	}
+//	if endpoint := client.Endpoint(); endpoint != client.endpoint {
+//		t.Errorf("Client.Endpoint(): want %q. Got %q", client.endpoint, endpoint)
+//	}
+//}
 
-func TestGetURLVersioned(t *testing.T) {
-	var tests = []struct {
-		endpoint string
-		path     string
-		expected string
-	}{
-		{"http://localhost:4243/", "/", "http://localhost:4243/v0/"},
-		{"http://localhost:4243", "/", "http://localhost:4243/v0/"},
-		{"http://localhost:4243", "/containers/ps", "http://localhost:4243/v0/containers/ps"},
-		{"tcp://localhost:4243", "/containers/ps", "http://localhost:4243/v0/containers/ps"},
-		{"http://localhost:4243/////", "/", "http://localhost:4243/v0/"},
-		{nativeRealEndpoint, "/containers", "/v0/containers"},
-	}
-	for _, tt := range tests {
-		client, _ := NewClient(tt.endpoint)
-		client.endpoint = tt.endpoint
-		client.SkipServerVersionCheck = true
-		got := client.getURL(tt.path, false)
-		if got != tt.expected {
-			t.Errorf("getURL(%q): Got %s. Want %s.", tt.path, got, tt.expected)
-		}
-	}
-}
+// TODO: replace with equivalent
+//func TestGetURLVersioned(t *testing.T) {
+//	var tests = []struct {
+//		endpoint string
+//		path     string
+//		expected string
+//	}{
+//		{"http://localhost:4243/", "/", "http://localhost:4243/v0/"},
+//		{"http://localhost:4243", "/", "http://localhost:4243/v0/"},
+//		{"http://localhost:4243", "/containers/ps", "http://localhost:4243/v0/containers/ps"},
+//		{"tcp://localhost:4243", "/containers/ps", "http://localhost:4243/v0/containers/ps"},
+//		{"http://localhost:4243/////", "/", "http://localhost:4243/v0/"},
+//		{nativeRealEndpoint, "/containers", "/v0/containers"},
+//	}
+//	for _, tt := range tests {
+//		client, _ := NewClient(tt.endpoint)
+//		client.endpoint = tt.endpoint
+//		client.SkipServerVersionCheck = true
+//		got := client.getURL(tt.path, false)
+//		if got != tt.expected {
+//			t.Errorf("getURL(%q): Got %s. Want %s.", tt.path, got, tt.expected)
+//		}
+//	}
+//}
 
-func TestGetURLUnversioned(t *testing.T) {
-	var tests = []struct {
-		endpoint string
-		path     string
-		expected string
-	}{
-		{"http://localhost:4243/", "/", "http://localhost:4243/"},
-		{"http://localhost:4243", "/", "http://localhost:4243/"},
-		{"http://localhost:4243", "/version", "http://localhost:4243/version"},
-		{"http://localhost:4243", "/_ping", "http://localhost:4243/_ping"},
-		{"http://localhost:4243/////", "/", "http://localhost:4243/"},
-		{nativeRealEndpoint, "/_ping", "/_ping"},
-	}
-	for _, tt := range tests {
-		client, _ := NewClient(tt.endpoint)
-		client.endpoint = tt.endpoint
-		client.SkipServerVersionCheck = true
-		got := client.getURL(tt.path, true)
-		if got != tt.expected {
-			t.Errorf("getURL(%q): Got %s. Want %s.", tt.path, got, tt.expected)
-		}
-	}
-}
-
-func TestGetFakeNativeURL(t *testing.T) {
-	var tests = []struct {
-		endpoint string
-		path     string
-		expected string
-	}{
-		{nativeRealEndpoint, "/", "http://unix.sock/v0/"},
-		{nativeRealEndpoint, "/", "http://unix.sock/v0/"},
-		{nativeRealEndpoint, "/containers/ps", "http://unix.sock/v0/containers/ps"},
-	}
-	for _, tt := range tests {
-		client, _ := NewClient(tt.endpoint)
-		client.endpoint = tt.endpoint
-		client.SkipServerVersionCheck = true
-		got := client.getFakeNativeURL(tt.path, false)
-		if got != tt.expected {
-			t.Errorf("getURL(%q): Got %s. Want %s.", tt.path, got, tt.expected)
-		}
-	}
-}
+// TODO: replace with equivalent
+//func TestGetURLUnversioned(t *testing.T) {
+//	var tests = []struct {
+//		endpoint string
+//		path     string
+//		expected string
+//	}{
+//		{"http://localhost:4243/", "/", "http://localhost:4243/"},
+//		{"http://localhost:4243", "/", "http://localhost:4243/"},
+//		{"http://localhost:4243", "/version", "http://localhost:4243/version"},
+//		{"http://localhost:4243", "/_ping", "http://localhost:4243/_ping"},
+//		{"http://localhost:4243/////", "/", "http://localhost:4243/"},
+//		{nativeRealEndpoint, "/_ping", "/_ping"},
+//	}
+//	for _, tt := range tests {
+//		client, _ := NewClient(tt.endpoint)
+//		client.endpoint = tt.endpoint
+//		client.SkipServerVersionCheck = true
+//		got := client.getURL(tt.path, true)
+//		if got != tt.expected {
+//			t.Errorf("getURL(%q): Got %s. Want %s.", tt.path, got, tt.expected)
+//		}
+//	}
+//}
 
 func TestError(t *testing.T) {
 	fakeBody := ioutil.NopCloser(bytes.NewBufferString("bad parameter"))
@@ -387,7 +345,8 @@ func TestSetAuth(t *testing.T) {
 			return
 		}
 	}))
-	client, err := NewClient(srv.URL)
+	t.Log(srv.URL)
+	client, err := NewClient([]string{srv.URL})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -431,27 +390,6 @@ func TestPingFailingWrongStatus(t *testing.T) {
 	expectedErrMsg := "API error (Accepted): "
 	if err.Error() != expectedErrMsg {
 		t.Fatalf("Expected error to be %q, got: %q", expectedErrMsg, err.Error())
-	}
-}
-
-func TestPingErrorWithNativeClient(t *testing.T) {
-	srv, cleanup, err := newNativeServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("aaaaaaaaaaa-invalid-aaaaaaaaaaa"))
-	}))
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer cleanup()
-	srv.Start()
-	defer srv.Close()
-	endpoint := nativeBadEndpoint
-	client, err := NewClient(endpoint)
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = client.Ping()
-	if err == nil {
-		t.Fatal("Expected non nil error, got nil")
 	}
 }
 
@@ -701,7 +639,7 @@ func TestClientDoContextDeadline(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		time.Sleep(500 * time.Millisecond)
 	}))
-	client, err := NewClient(srv.URL)
+	client, err := NewClient([]string{srv.URL})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -720,7 +658,7 @@ func TestClientDoContextCancel(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		time.Sleep(500 * time.Millisecond)
 	}))
-	client, err := NewClient(srv.URL)
+	client, err := NewClient([]string{srv.URL})
 	if err != nil {
 		t.Fatal(err)
 	}

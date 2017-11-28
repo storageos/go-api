@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/storageos/go-api/netutil"
 	"io"
 	"io/ioutil"
 	"net"
@@ -22,17 +23,15 @@ import (
 
 const (
 	userAgent         = "go-storageosclient"
-	unixProtocol      = "unix"
-	namedPipeProtocol = "npipe"
 	DefaultVersionStr = "1"
 	DefaultVersion    = 1
 	defaultNamespace  = "default"
 )
 
-var (
-	// ErrInvalidEndpoint is returned when the endpoint is not a valid HTTP URL.
-	ErrInvalidEndpoint = errors.New("invalid endpoint")
+// ErrInvalidEndpoint is returned when the endpoint is not a valid HTTP URL.
+type InvalidNodeError = netutil.InvalidNodeError
 
+var (
 	// ErrConnectionRefused is returned when the client cannot connect to the given endpoint.
 	ErrConnectionRefused = errors.New("cannot connect to StorageOS API endpoint")
 
@@ -79,15 +78,13 @@ type Client struct {
 	SkipServerVersionCheck bool
 	HTTPClient             *http.Client
 	TLSConfig              *tls.Config
-	Dialer                 Dialer
-	endpoint               string
-	endpointURL            *url.URL
 	username               string
 	secret                 string
 	requestedAPIVersion    APIVersion
 	serverAPIVersion       APIVersion
 	expectedAPIVersion     APIVersion
 	nativeHTTPClient       *http.Client
+	useTLS                 bool
 }
 
 // ClientVersion returns the API version of the client
@@ -105,8 +102,8 @@ type Dialer interface {
 // NewClient returns a Client instance ready for communication with the given
 // server endpoint. It will use the latest remote API version available in the
 // server.
-func NewClient(endpoint string) (*Client, error) {
-	client, err := NewVersionedClient(endpoint, "")
+func NewClient(nodes []string) (*Client, error) {
+	client, err := NewVersionedClient(nodes, "")
 	if err != nil {
 		return nil, err
 	}
@@ -117,8 +114,8 @@ func NewClient(endpoint string) (*Client, error) {
 // NewTLSClient returns a Client instance ready for TLS communications with the given
 // server endpoint, key and certificates . It will use the latest remote API version
 // available in the server.
-func NewTLSClient(endpoint string, cert, key, ca string) (*Client, error) {
-	client, err := NewVersionedTLSClient(endpoint, cert, key, ca, "")
+func NewTLSClient(nodes []string, cert, key, ca string) (*Client, error) {
+	client, err := NewVersionedTLSClient(nodes, cert, key, ca, "")
 	if err != nil {
 		return nil, err
 	}
@@ -128,17 +125,22 @@ func NewTLSClient(endpoint string, cert, key, ca string) (*Client, error) {
 
 // NewVersionedClient returns a Client instance ready for communication with
 // the given server endpoint, using a specific remote API version.
-func NewVersionedClient(endpoint string, apiVersionString string) (*Client, error) {
-	u, err := parseEndpoint(endpoint, false)
+func NewVersionedClient(nodes []string, apiVersionString string) (*Client, error) {
+	d, err := netutil.NewMultiDialer(nodes, nil)
 	if err != nil {
 		return nil, err
 	}
 
+	var useTLS bool
+	if len(nodes) > 0 {
+		if u, err := url.Parse(nodes[0]); err != nil && u.Scheme == "https" {
+			useTLS = true
+		}
+	}
+
 	c := &Client{
-		HTTPClient:  defaultClient(),
-		Dialer:      &net.Dialer{},
-		endpoint:    endpoint,
-		endpointURL: u,
+		HTTPClient: defaultClient(d),
+		useTLS:     useTLS,
 	}
 
 	if apiVersionString != "" {
@@ -149,13 +151,12 @@ func NewVersionedClient(endpoint string, apiVersionString string) (*Client, erro
 		c.requestedAPIVersion = APIVersion(version)
 	}
 
-	c.initializeNativeClient()
 	return c, nil
 }
 
 // NewVersionedTLSClient returns a Client instance ready for TLS communications with the givens
 // server endpoint, key and certificates, using a specific remote API version.
-func NewVersionedTLSClient(endpoint string, cert, key, ca, apiVersionString string) (*Client, error) {
+func NewVersionedTLSClient(nodes []string, cert, key, ca, apiVersionString string) (*Client, error) {
 	var certPEMBlock []byte
 	var keyPEMBlock []byte
 	var caPEMCert []byte
@@ -177,18 +178,13 @@ func NewVersionedTLSClient(endpoint string, cert, key, ca, apiVersionString stri
 			return nil, err
 		}
 	}
-	return NewVersionedTLSClientFromBytes(endpoint, certPEMBlock, keyPEMBlock, caPEMCert, apiVersionString)
+	return NewVersionedTLSClientFromBytes(nodes, certPEMBlock, keyPEMBlock, caPEMCert, apiVersionString)
 }
 
 // NewVersionedTLSClientFromBytes returns a Client instance ready for TLS communications with the givens
 // server endpoint, key and certificates (passed inline to the function as opposed to being
 // read from a local file), using a specific remote API version.
-func NewVersionedTLSClientFromBytes(endpoint string, certPEMBlock, keyPEMBlock, caPEMCert []byte, apiVersionString string) (*Client, error) {
-	u, err := parseEndpoint(endpoint, true)
-	if err != nil {
-		return nil, err
-	}
-
+func NewVersionedTLSClientFromBytes(nodes []string, certPEMBlock, keyPEMBlock, caPEMCert []byte, apiVersionString string) (*Client, error) {
 	tlsConfig := &tls.Config{}
 	if certPEMBlock != nil && keyPEMBlock != nil {
 		tlsCert, err := tls.X509KeyPair(certPEMBlock, keyPEMBlock)
@@ -206,17 +202,18 @@ func NewVersionedTLSClientFromBytes(endpoint string, certPEMBlock, keyPEMBlock, 
 		}
 		tlsConfig.RootCAs = caPool
 	}
-	tr := defaultTransport()
-	tr.TLSClientConfig = tlsConfig
+
+	d, err := netutil.NewMultiDialer(nodes, nil)
 	if err != nil {
 		return nil, err
 	}
+
+	tr := defaultTransport(d)
+	tr.TLSClientConfig = tlsConfig
+
 	c := &Client{
-		HTTPClient:  &http.Client{Transport: tr},
-		TLSConfig:   tlsConfig,
-		Dialer:      &net.Dialer{},
-		endpoint:    endpoint,
-		endpointURL: u,
+		HTTPClient: &http.Client{Transport: tr},
+		TLSConfig:  tlsConfig,
 	}
 
 	if apiVersionString != "" {
@@ -227,7 +224,6 @@ func NewVersionedTLSClientFromBytes(endpoint string, certPEMBlock, keyPEMBlock, 
 		c.requestedAPIVersion = APIVersion(version)
 	}
 
-	c.initializeNativeClient()
 	return c, nil
 }
 
@@ -269,13 +265,6 @@ func (c *Client) checkAPIVersion() error {
 		c.expectedAPIVersion = c.requestedAPIVersion
 	}
 	return nil
-}
-
-// Endpoint returns the current endpoint. It's useful for getting the endpoint
-// when using functions that get this data from the environment (like
-// NewClientFromEnv.
-func (c *Client) Endpoint() string {
-	return c.endpoint
 }
 
 // Ping pings the API server
@@ -347,15 +336,7 @@ func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response
 	}
 
 	httpClient := c.HTTPClient
-	protocol := c.endpointURL.Scheme
-	var u string
-	switch protocol {
-	case unixProtocol, namedPipeProtocol:
-		httpClient = c.nativeHTTPClient
-		u = c.getFakeNativeURL(urlpath, doOptions.unversioned)
-	default:
-		u = c.getAPIPath(urlpath, query, doOptions.unversioned)
-	}
+	u := c.getAPIPath(urlpath, query, doOptions.unversioned)
 
 	req, err := http.NewRequest(method, u, params)
 	if err != nil {
@@ -403,27 +384,18 @@ func chooseError(ctx context.Context, err error) error {
 	}
 }
 
-func (c *Client) getURL(path string, unversioned bool) string {
-
-	urlStr := strings.TrimRight(c.endpointURL.String(), "/")
-	path = strings.TrimLeft(path, "/")
-	if c.endpointURL.Scheme == unixProtocol || c.endpointURL.Scheme == namedPipeProtocol {
-		urlStr = ""
-	}
-	if unversioned {
-		return fmt.Sprintf("%s/%s", urlStr, path)
-	}
-	return fmt.Sprintf("%s/%s/%s", urlStr, c.requestedAPIVersion, path)
-
-}
-
 func (c *Client) getAPIPath(path string, query url.Values, unversioned bool) string {
-	var apiPath string
-	urlStr := strings.TrimRight(c.endpointURL.String(), "/")
-	path = strings.TrimLeft(path, "/")
-	if c.endpointURL.Scheme == unixProtocol || c.endpointURL.Scheme == namedPipeProtocol {
-		urlStr = ""
+	// The custom dialer contacts the hosts for us, making this hosname irrelevant
+	var urlStr string
+	if c.useTLS {
+		urlStr = "https://storageos-cluster"
+	} else {
+		urlStr = "http://storageos-cluster"
 	}
+
+	var apiPath string
+
+	path = strings.TrimLeft(path, "/")
 	if unversioned {
 		apiPath = fmt.Sprintf("%s/%s", urlStr, path)
 	} else {
@@ -435,23 +407,6 @@ func (c *Client) getAPIPath(path string, query url.Values, unversioned bool) str
 	}
 
 	return apiPath
-}
-
-// getFakeNativeURL returns the URL needed to make an HTTP request over a UNIX
-// domain socket to the given path.
-func (c *Client) getFakeNativeURL(path string, unversioned bool) string {
-	u := *c.endpointURL // Copy.
-
-	// Override URL so that net/http will not complain.
-	u.Scheme = "http"
-	u.Host = "unix.sock" // Doesn't matter what this is - it's not used.
-	u.Path = ""
-	urlStr := strings.TrimRight(u.String(), "/")
-	path = strings.TrimLeft(path, "/")
-	if unversioned {
-		return fmt.Sprintf("%s/%s", urlStr, path)
-	}
-	return fmt.Sprintf("%s/%s/%s", urlStr, c.requestedAPIVersion, path)
 }
 
 type jsonMessage struct {
@@ -576,51 +531,49 @@ func (e *Error) Error() string {
 	return fmt.Sprintf("API error (%s): %s", http.StatusText(e.Status), e.Message)
 }
 
-func parseEndpoint(endpoint string, tls bool) (*url.URL, error) {
-	if endpoint != "" && !strings.Contains(endpoint, "://") {
-		endpoint = "tcp://" + endpoint
-	}
-	u, err := url.Parse(endpoint)
-	if err != nil {
-		return nil, ErrInvalidEndpoint
-	}
-	if tls && u.Scheme != "unix" {
-		u.Scheme = "https"
-	}
-	switch u.Scheme {
-	case unixProtocol, namedPipeProtocol:
-		return u, nil
-	case "http", "https", "tcp":
-		_, port, err := net.SplitHostPort(u.Host)
-		if err != nil {
-			if e, ok := err.(*net.AddrError); ok {
-				if e.Err == "missing port in address" {
-					return u, nil
-				}
-			}
-			return nil, ErrInvalidEndpoint
-		}
-		number, err := strconv.ParseInt(port, 10, 64)
-		if err == nil && number > 0 && number < 65536 {
-			if u.Scheme == "tcp" {
-				if tls {
-					u.Scheme = "https"
-				} else {
-					u.Scheme = "http"
-				}
-			}
-			return u, nil
-		}
-		return nil, ErrInvalidEndpoint
-	default:
-		return nil, ErrInvalidEndpoint
-	}
-}
+//func parseEndpoint(endpoint string, tls bool) (*url.URL, error) {
+//	if endpoint != "" && !strings.Contains(endpoint, "://") {
+//		endpoint = "tcp://" + endpoint
+//	}
+//	u, err := url.Parse(endpoint)
+//	if err != nil {
+//		return nil, ErrInvalidEndpoint
+//	}
+//	if tls && u.Scheme != "unix" {
+//		u.Scheme = "https"
+//	}
+//	switch u.Scheme {
+//	case "http", "https", "tcp":
+//		_, port, err := net.SplitHostPort(u.Host)
+//		if err != nil {
+//			if e, ok := err.(*net.AddrError); ok {
+//				if e.Err == "missing port in address" {
+//					return u, nil
+//				}
+//			}
+//			return nil, ErrInvalidEndpoint
+//		}
+//		number, err := strconv.ParseInt(port, 10, 64)
+//		if err == nil && number > 0 && number < 65536 {
+//			if u.Scheme == "tcp" {
+//				if tls {
+//					u.Scheme = "https"
+//				} else {
+//					u.Scheme = "http"
+//				}
+//			}
+//			return u, nil
+//		}
+//		return nil, ErrInvalidEndpoint
+//	default:
+//		return nil, ErrInvalidEndpoint
+//	}
+//}
 
 // defaultTransport returns a new http.Transport with the same default values
 // as http.DefaultTransport, but with idle connections and keepalives disabled.
-func defaultTransport() *http.Transport {
-	transport := defaultPooledTransport()
+func defaultTransport(d Dialer) *http.Transport {
+	transport := defaultPooledTransport(d)
 	transport.DisableKeepAlives = true
 	transport.MaxIdleConnsPerHost = -1
 	return transport
@@ -630,13 +583,10 @@ func defaultTransport() *http.Transport {
 // values to http.DefaultTransport. Do not use this for transient transports as
 // it can leak file descriptors over time. Only use this for transports that
 // will be re-used for the same host(s).
-func defaultPooledTransport() *http.Transport {
+func defaultPooledTransport(d Dialer) *http.Transport {
 	transport := &http.Transport{
-		Proxy: http.ProxyFromEnvironment,
-		Dial: (&net.Dialer{
-			Timeout:   30 * time.Second,
-			KeepAlive: 30 * time.Second,
-		}).Dial,
+		Proxy:               http.ProxyFromEnvironment,
+		Dial:                d.Dial,
 		TLSHandshakeTimeout: 10 * time.Second,
 		DisableKeepAlives:   false,
 		MaxIdleConnsPerHost: 1,
@@ -647,8 +597,16 @@ func defaultPooledTransport() *http.Transport {
 // defaultClient returns a new http.Client with similar default values to
 // http.Client, but with a non-shared Transport, idle connections disabled, and
 // keepalives disabled.
-func defaultClient() *http.Client {
+// If a custom dialer is not provided, one with sane defaults will be created.
+func defaultClient(d Dialer) *http.Client {
+	if d == nil {
+		d = &net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}
+	}
+
 	return &http.Client{
-		Transport: defaultTransport(),
+		Transport: defaultTransport(d),
 	}
 }
