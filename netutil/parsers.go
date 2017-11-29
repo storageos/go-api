@@ -63,7 +63,11 @@ func parseURL(node string) ([]string, error) {
 	case "tcp", "http", "https":
 		host, port, err := net.SplitHostPort(url.Host)
 		if err != nil {
-			return nil, err
+			// We could be here as there is no port, lets try one last time with default port added
+			host, port, err = net.SplitHostPort(url.Host + ":" + DefaultDialPort)
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		if port == "" {
