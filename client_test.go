@@ -13,7 +13,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"os"
 	"reflect"
 	"strconv"
 	"strings"
@@ -28,22 +27,6 @@ func newTestClient(rt http.RoundTripper) *Client {
 		SkipServerVersionCheck: true,
 		serverAPIVersion:       testAPIVersion,
 	}
-}
-
-type stdoutMock struct {
-	*bytes.Buffer
-}
-
-func (m stdoutMock) Close() error {
-	return nil
-}
-
-type stdinMock struct {
-	*bytes.Buffer
-}
-
-func (m stdinMock) Close() error {
-	return nil
 }
 
 func TestNewAPIClient(t *testing.T) {
@@ -355,18 +338,6 @@ func TestPingFailingWrongStatus(t *testing.T) {
 	if err.Error() != expectedErrMsg {
 		t.Fatalf("Expected error to be %q, got: %q", expectedErrMsg, err.Error())
 	}
-}
-
-type terminalBuffer struct {
-	bytes.Buffer
-}
-
-func (b *terminalBuffer) FD() uintptr {
-	return os.Stdout.Fd()
-}
-
-func (b *terminalBuffer) IsTerminal() bool {
-	return true
 }
 
 func TestClientDoContextDeadline(t *testing.T) {

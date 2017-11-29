@@ -25,7 +25,6 @@ const (
 	userAgent         = "go-storageosclient"
 	DefaultVersionStr = "1"
 	DefaultVersion    = 1
-	defaultNamespace  = "default"
 )
 
 // ErrInvalidEndpoint is returned when the endpoint is not a valid HTTP URL.
@@ -408,13 +407,6 @@ func (c *Client) getAPIPath(path string, query url.Values, unversioned bool) str
 	}
 
 	return apiPath
-}
-
-type jsonMessage struct {
-	Status   string `json:"status,omitempty"`
-	Progress string `json:"progress,omitempty"`
-	Error    string `json:"error,omitempty"`
-	Stream   string `json:"stream,omitempty"`
 }
 
 func queryString(opts interface{}) string {
