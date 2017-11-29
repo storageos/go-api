@@ -13,6 +13,13 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
+// Dialer is an interface that matches *net.Dialer. The intention is to allow either the stdlib
+// dialer or a custom implementation to be passed to the MultiDialer constructor. This also makes
+// the component easier to test.
+type Dialer interface {
+	DialContext(context.Context, string, string) (net.Conn, error)
+}
+
 // MultiDialer is a custom net Dialer (to be used in a net.Transport field) that attemps to dial
 // out to any (potentialy many) of a set of pre-defined addresses. The intended use of this
 // function is to extend the functionality of the stdlib http.Client to transparently support

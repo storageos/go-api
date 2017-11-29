@@ -7,6 +7,11 @@ import (
 	"strings"
 )
 
+// addrsFromNodes takes a list of node hosts and attempts to return a list of hosts in ip:port
+// format along with any error encountered.
+//
+// The function accepts node hosts in URL, ip, ip:port, resolvable-name and resolvable-name:port
+// formats and will append the default port value if needed.
 func addrsFromNodes(nodes []string) ([]string, error) {
 	var addrs []string
 
@@ -52,6 +57,12 @@ func validPort(port string) bool {
 		(intPort <= 65535)
 }
 
+// parseURL takes a valid URL and verifies that it is using a correct scheme, has a resolvable
+// address (or is an IP) and has a valid port (or adds the default if the port is omitted). The
+// function then returns a list of addresses in ip:port format along with any error encountered.
+//
+// The function may return multiple addresses depending on the dns answer received when resolving
+// the host.
 func parseURL(node string) ([]string, error) {
 	url, err := url.Parse(node)
 	if err != nil {
@@ -68,10 +79,6 @@ func parseURL(node string) ([]string, error) {
 			if err != nil {
 				return nil, err
 			}
-		}
-
-		if port == "" {
-			port = DefaultDialPort
 		}
 
 		if !validPort(port) {
@@ -95,6 +102,12 @@ func parseURL(node string) ([]string, error) {
 	}
 }
 
+// parseHostPort takes a string in host:port format and checks it has a resolvable address (or is
+// an IP) and a valid port (or adds the default if the port is omitted). The function then returns
+// a list of addresses in ip:port format along with any error encountered.
+//
+// The function may return multiple addresses depending on the dns answer received when resolving
+// the host.
 func parseHostPort(node string) ([]string, error) {
 	host, port, err := net.SplitHostPort(node)
 	if err != nil {
@@ -118,6 +131,12 @@ func parseHostPort(node string) ([]string, error) {
 	return addrs, nil
 }
 
+// parseHostPort takes a hostname string and checks it is resolvable to an address (or is already
+// an IP) The function then returns a list of addresses in ip:port format (where port is the
+// default port) along with any error encountered.
+//
+// The function may return multiple addresses depending on the dns answer received when resolving
+// the host.
 func parseHost(node string) ([]string, error) {
 	return parseHostPort(node + ":" + DefaultDialPort)
 }
