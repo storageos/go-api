@@ -214,6 +214,7 @@ func NewVersionedTLSClientFromBytes(nodes []string, certPEMBlock, keyPEMBlock, c
 	c := &Client{
 		HTTPClient: &http.Client{Transport: tr},
 		TLSConfig:  tlsConfig,
+		useTLS:     true,
 	}
 
 	if apiVersionString != "" {
