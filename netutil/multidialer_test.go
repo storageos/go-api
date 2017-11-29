@@ -2,6 +2,8 @@ package netutil_test
 
 import (
 	"github.com/storageos/go-api/netutil"
+	"net"
+	"strings"
 	"testing"
 )
 
@@ -35,12 +37,15 @@ func TestAddressResolution(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if len(md.Addresses) != 1 {
-			t.Errorf("Unexpected number of addresses %#v", md.Addresses)
-			return
+		// Get the first IPv4 addr
+		var got string
+		for _, addr := range md.Addresses {
+			if net.ParseIP(strings.Split(addr, ":")[0]).To4() == nil {
+				continue
+			}
+			got = addr
 		}
 
-		got := md.Addresses[0]
 		if got != tt.expected {
 			t.Errorf("Got %s. Want %s.", got, tt.expected)
 		}
