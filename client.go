@@ -532,45 +532,6 @@ func (e *Error) Error() string {
 	return fmt.Sprintf("API error (%s): %s", http.StatusText(e.Status), e.Message)
 }
 
-//func parseEndpoint(endpoint string, tls bool) (*url.URL, error) {
-//	if endpoint != "" && !strings.Contains(endpoint, "://") {
-//		endpoint = "tcp://" + endpoint
-//	}
-//	u, err := url.Parse(endpoint)
-//	if err != nil {
-//		return nil, ErrInvalidEndpoint
-//	}
-//	if tls && u.Scheme != "unix" {
-//		u.Scheme = "https"
-//	}
-//	switch u.Scheme {
-//	case "http", "https", "tcp":
-//		_, port, err := net.SplitHostPort(u.Host)
-//		if err != nil {
-//			if e, ok := err.(*net.AddrError); ok {
-//				if e.Err == "missing port in address" {
-//					return u, nil
-//				}
-//			}
-//			return nil, ErrInvalidEndpoint
-//		}
-//		number, err := strconv.ParseInt(port, 10, 64)
-//		if err == nil && number > 0 && number < 65536 {
-//			if u.Scheme == "tcp" {
-//				if tls {
-//					u.Scheme = "https"
-//				} else {
-//					u.Scheme = "http"
-//				}
-//			}
-//			return u, nil
-//		}
-//		return nil, ErrInvalidEndpoint
-//	default:
-//		return nil, ErrInvalidEndpoint
-//	}
-//}
-
 // defaultTransport returns a new http.Transport with the same default values
 // as http.DefaultTransport, but with idle connections and keepalives disabled.
 func defaultTransport(d Dialer) *http.Transport {
