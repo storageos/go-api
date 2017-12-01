@@ -43,27 +43,6 @@ func TestNewAPIClient(t *testing.T) {
 	}
 }
 
-//func newTLSClient(nodes []string) (*Client, error) {
-//	return NewTLSClient(nodes,
-//		"testing/data/cert.pem",
-//		"testing/data/key.pem",
-//		"testing/data/ca.pem")
-//}
-
-//func TestNewTSLAPIClient(t *testing.T) {
-//	endpoint := "https://localhost:4243"
-//	client, err := newTLSClient(endpoint)
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//	if !client.SkipServerVersionCheck {
-//		t.Error("Expected SkipServerVersionCheck to be true, got false")
-//	}
-//	if client.requestedAPIVersion != 0 {
-//		t.Errorf("Expected requestedAPIVersion to be nil, got %#v.", client.requestedAPIVersion)
-//	}
-//}
-
 func TestNewVersionedClient(t *testing.T) {
 	endpoint := "http://localhost:4243"
 	client, err := NewVersionedClient("1", endpoint)
@@ -77,62 +56,6 @@ func TestNewVersionedClient(t *testing.T) {
 		t.Error("Expected SkipServerVersionCheck to be false, got true")
 	}
 }
-
-//func TestNewTLSVersionedClient(t *testing.T) {
-//	certPath := "testing/data/cert.pem"
-//	keyPath := "testing/data/key.pem"
-//	caPath := "testing/data/ca.pem"
-//	endpoint := "https://localhost:4243"
-//	client, err := NewVersionedTLSClient(endpoint, certPath, keyPath, caPath, "1")
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//	if reqVersion := client.requestedAPIVersion; reqVersion != 1 {
-//		t.Errorf("Wrong requestAPIVersion. Want %d. Got %d.", 1, reqVersion)
-//	}
-//	if client.SkipServerVersionCheck {
-//		t.Error("Expected SkipServerVersionCheck to be false, got true")
-//	}
-//}
-
-//func TestNewTLSVersionedClientNoClientCert(t *testing.T) {
-//	certPath := "testing/data/cert_doesnotexist.pem"
-//	keyPath := "testing/data/key_doesnotexist.pem"
-//	caPath := "testing/data/ca.pem"
-//	endpoint := "https://localhost:4243"
-//	client, err := NewVersionedTLSClient(endpoint, certPath, keyPath, caPath, "1")
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//	if reqVersion := client.requestedAPIVersion; reqVersion != 1 {
-//		t.Errorf("Wrong requestAPIVersion. Want %d. Got %d.", 1, reqVersion)
-//	}
-//	if client.SkipServerVersionCheck {
-//		t.Error("Expected SkipServerVersionCheck to be false, got true")
-//	}
-//}
-
-//func TestNewTLSVersionedClientInvalidCA(t *testing.T) {
-//	certPath := "testing/data/cert.pem"
-//	keyPath := "testing/data/key.pem"
-//	caPath := "testing/data/key.pem"
-//	endpoint := "https://localhost:4243"
-//	_, err := NewVersionedTLSClient(endpoint, certPath, keyPath, caPath, "1")
-//	if err == nil {
-//		t.Errorf("Expected invalid ca at %s", caPath)
-//	}
-//}
-
-//func TestNewTLSVersionedClientInvalidCANoClientCert(t *testing.T) {
-//	certPath := "testing/data/cert_doesnotexist.pem"
-//	keyPath := "testing/data/key_doesnotexist.pem"
-//	caPath := "testing/data/key.pem"
-//	endpoint := "https://localhost:4243"
-//	_, err := NewVersionedTLSClient(endpoint, certPath, keyPath, caPath, "1")
-//	if err == nil {
-//		t.Errorf("Expected invalid ca at %s", caPath)
-//	}
-//}
 
 func TestNewClientInvalidEndpoint(t *testing.T) {
 	cases := []string{
@@ -163,28 +86,6 @@ func TestNewClientNoSchemeEndpoint(t *testing.T) {
 		}
 	}
 }
-
-//func TestNewTLSClient(t *testing.T) {
-//	var tests = []struct {
-//		endpoint       string
-//		expectedUseTLS bool
-//	}{
-//		{"tcp://localhost:2376", true},
-//		{"tcp://localhost:2375", true},
-//		{"tcp://localhost:4000", true},
-//		{"http://localhost:4000", true},
-//	}
-//	for _, tt := range tests {
-//		client, err := newTLSClient([]string{tt.endpoint})
-//		if err != nil {
-//			t.Error(err)
-//		}
-//		got := client.useTLS
-//		if got != tt.expectedUseTLS {
-//			t.Errorf("useTLS: Got %t. Want %t.", got, tt.expectedUseTLS)
-//		}
-//	}
-//}
 
 func TestGetURLVersioned(t *testing.T) {
 	fakeRT := &FakeRoundTripper{message: "", status: http.StatusOK}

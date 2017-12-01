@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"crypto/tls"
-	//"crypto/x509"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -14,7 +13,6 @@ import (
 	"net"
 	"net/http"
 	"net/url"
-	//"os"
 	"reflect"
 	"strconv"
 	"strings"
@@ -110,18 +108,6 @@ func NewClient(nodes ...string) (*Client, error) {
 	return client, nil
 }
 
-// NewTLSClient returns a Client instance ready for TLS communications with the given
-// server endpoint, key and certificates . It will use the latest remote API version
-// available in the server.
-//func NewTLSClient(nodes []string, cert, key, ca string) (*Client, error) {
-//	client, err := NewVersionedTLSClient(nodes, cert, key, ca, "")
-//	if err != nil {
-//		return nil, err
-//	}
-//	client.SkipServerVersionCheck = true
-//	return client, nil
-//}
-
 // NewVersionedClient returns a Client instance ready for communication with
 // the given server endpoint, using a specific remote API version.
 func NewVersionedClient(apiVersionString string, nodes ...string) (*Client, error) {
@@ -152,80 +138,6 @@ func NewVersionedClient(apiVersionString string, nodes ...string) (*Client, erro
 
 	return c, nil
 }
-
-// NewVersionedTLSClient returns a Client instance ready for TLS communications with the givens
-// server endpoint, key and certificates, using a specific remote API version.
-//func NewVersionedTLSClient(nodes []string, cert, key, ca, apiVersionString string) (*Client, error) {
-//	var certPEMBlock []byte
-//	var keyPEMBlock []byte
-//	var caPEMCert []byte
-//	if _, err := os.Stat(cert); !os.IsNotExist(err) {
-//		certPEMBlock, err = ioutil.ReadFile(cert)
-//		if err != nil {
-//			return nil, err
-//		}
-//	}
-//	if _, err := os.Stat(key); !os.IsNotExist(err) {
-//		keyPEMBlock, err = ioutil.ReadFile(key)
-//		if err != nil {
-//			return nil, err
-//		}
-//	}
-//	if _, err := os.Stat(ca); !os.IsNotExist(err) {
-//		caPEMCert, err = ioutil.ReadFile(ca)
-//		if err != nil {
-//			return nil, err
-//		}
-//	}
-//	return NewVersionedTLSClientFromBytes(nodes, certPEMBlock, keyPEMBlock, caPEMCert, apiVersionString)
-//}
-
-// NewVersionedTLSClientFromBytes returns a Client instance ready for TLS communications with the givens
-// server endpoint, key and certificates (passed inline to the function as opposed to being
-// read from a local file), using a specific remote API version.
-//func NewVersionedTLSClientFromBytes(nodes []string, certPEMBlock, keyPEMBlock, caPEMCert []byte, apiVersionString string) (*Client, error) {
-//	tlsConfig := &tls.Config{}
-//	if certPEMBlock != nil && keyPEMBlock != nil {
-//		tlsCert, err := tls.X509KeyPair(certPEMBlock, keyPEMBlock)
-//		if err != nil {
-//			return nil, err
-//		}
-//		tlsConfig.Certificates = []tls.Certificate{tlsCert}
-//	}
-//	if caPEMCert == nil {
-//		tlsConfig.InsecureSkipVerify = true
-//	} else {
-//		caPool := x509.NewCertPool()
-//		if !caPool.AppendCertsFromPEM(caPEMCert) {
-//			return nil, errors.New("Could not add RootCA pem")
-//		}
-//		tlsConfig.RootCAs = caPool
-//	}
-//
-//	d, err := netutil.NewMultiDialer(nodes, nil)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	tr := defaultTransport(d)
-//	tr.TLSClientConfig = tlsConfig
-//
-//	c := &Client{
-//		HTTPClient: &http.Client{Transport: tr},
-//		TLSConfig:  tlsConfig,
-//		useTLS:     true,
-//	}
-//
-//	if apiVersionString != "" {
-//		version, err := strconv.Atoi(apiVersionString)
-//		if err != nil {
-//			return nil, err
-//		}
-//		c.requestedAPIVersion = APIVersion(version)
-//	}
-//
-//	return c, nil
-//}
 
 // SetAuth sets the API username and secret to be used for all API requests.
 // It should not be called concurrently with any other Client methods.
