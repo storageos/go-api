@@ -42,8 +42,8 @@ func NewMultiDialer(nodes []string, dialer *net.Dialer) (*MultiDialer, error) {
 	// If a dialer is not provided, initialise one with sane defaults
 	if dialer == nil {
 		dialer = &net.Dialer{
-			Timeout:   30 * time.Second,
-			KeepAlive: 30 * time.Second,
+			Timeout:   5 * time.Second,
+			KeepAlive: 5 * time.Second,
 		}
 	}
 

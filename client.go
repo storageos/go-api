@@ -541,7 +541,7 @@ func defaultPooledTransport(d Dialer) *http.Transport {
 	transport := &http.Transport{
 		Proxy:               http.ProxyFromEnvironment,
 		Dial:                d.Dial,
-		TLSHandshakeTimeout: 10 * time.Second,
+		TLSHandshakeTimeout: 5 * time.Second,
 		DisableKeepAlives:   false,
 		MaxIdleConnsPerHost: 1,
 	}
@@ -555,8 +555,8 @@ func defaultPooledTransport(d Dialer) *http.Transport {
 func defaultClient(d Dialer) *http.Client {
 	if d == nil {
 		d = &net.Dialer{
-			Timeout:   30 * time.Second,
-			KeepAlive: 30 * time.Second,
+			Timeout:   5 * time.Second,
+			KeepAlive: 5 * time.Second,
 		}
 	}
 
