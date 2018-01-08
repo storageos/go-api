@@ -99,8 +99,8 @@ type Dialer interface {
 // NewClient returns a Client instance ready for communication with the given
 // server endpoint. It will use the latest remote API version available in the
 // server.
-func NewClient(nodes ...string) (*Client, error) {
-	client, err := NewVersionedClient("", nodes...)
+func NewClient(nodes string) (*Client, error) {
+	client, err := NewVersionedClient(nodes, "")
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +110,9 @@ func NewClient(nodes ...string) (*Client, error) {
 
 // NewVersionedClient returns a Client instance ready for communication with
 // the given server endpoint, using a specific remote API version.
-func NewVersionedClient(apiVersionString string, nodes ...string) (*Client, error) {
+func NewVersionedClient(nodestring string, apiVersionString string) (*Client, error) {
+	nodes := strings.Split(nodestring, ",")
+
 	d, err := netutil.NewMultiDialer(nodes, nil)
 	if err != nil {
 		return nil, err

@@ -45,7 +45,7 @@ func TestNewAPIClient(t *testing.T) {
 
 func TestNewVersionedClient(t *testing.T) {
 	endpoint := "http://localhost:4243"
-	client, err := NewVersionedClient("1", endpoint)
+	client, err := NewVersionedClient(endpoint, "1")
 	if err != nil {
 		t.Fatal(err)
 	}
