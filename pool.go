@@ -73,6 +73,26 @@ func (c *Client) Pool(ref string) (*types.Pool, error) {
 	return &pool, nil
 }
 
+func (c *Client) PoolUpdate(opts types.PoolUpdateOptions) (*types.Pool, error) {
+	resp, err := c.do("PUT", PoolAPIPrefix+"/"+opts.ID, doOptions{
+		data:    opts,
+		context: opts.Context,
+	})
+	if err != nil {
+		if e, ok := err.(*Error); ok && e.Status == http.StatusNotFound {
+			return nil, ErrNoSuchPool
+		}
+		// TODO: Handle more errors
+		return nil, err
+	}
+	defer resp.Body.Close()
+	var pool types.Pool
+	if err := json.NewDecoder(resp.Body).Decode(&pool); err != nil {
+		return nil, err
+	}
+	return &pool, nil
+}
+
 // PoolDelete removes a pool by its reference.
 func (c *Client) PoolDelete(opts types.DeleteOptions) error {
 	deleteOpts := doOptions{
