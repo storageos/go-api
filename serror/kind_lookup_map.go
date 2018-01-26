@@ -1,4 +1,4 @@
-package soserror
+package serror
 
 import (
 	"encoding/json"

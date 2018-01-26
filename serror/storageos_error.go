@@ -1,4 +1,4 @@
-package soserror
+package serror
 
 import (
 	"encoding/json"
@@ -22,8 +22,8 @@ type StorageOSError interface {
 }
 
 func ErrorKind(err error) StorageOSErrorKind {
-	if soserr, ok := err.(StorageOSError); ok {
-		return soserr.Kind()
+	if serr, ok := err.(StorageOSError); ok {
+		return serr.Kind()
 	}
 	return UnknownError
 }

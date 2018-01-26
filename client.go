@@ -8,7 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/storageos/go-api/netutil"
-	"github.com/storageos/go-api/soserror"
+	"github.com/storageos/go-api/serror"
 	"io"
 	"io/ioutil"
 	"net"
@@ -276,7 +276,7 @@ func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response
 	resp, err := httpClient.Do(req.WithContext(ctx))
 	if err != nil {
 		// If it is a custom error, return it. It probably knows more than us
-		if soserror.IsStorageOSError(err) {
+		if serror.IsStorageOSError(err) {
 			return nil, err
 		}
 
