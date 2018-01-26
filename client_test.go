@@ -8,7 +8,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	//"github.com/storageos/go-api/netutil"
+	"github.com/storageos/go-api/soserror"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -68,8 +68,10 @@ func TestNewClientInvalidEndpoint(t *testing.T) {
 		if client != nil {
 			t.Errorf("Want <nil> client for invalid endpoint (%v), got %#v.", c, client)
 		}
-		if _, ok := err.(*InvalidNodeError); !ok {
-			t.Errorf("NewClient(%q): Got invalid error for invalid endpoint. Want (*netutil.InvalidNodeError). Got %#v.", c, err)
+		if soserror.IsStorageOSError(err) {
+			if soserror.ErrorKind(err) != soserror.InvalidHostConfig {
+				t.Errorf("NewClient(%q): Got invalid error for invalid endpoint. Want soserror.InvalidHostConfig. Got %#v.", c, err)
+			}
 		}
 	}
 }
