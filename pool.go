@@ -74,7 +74,11 @@ func (c *Client) Pool(ref string) (*types.Pool, error) {
 }
 
 func (c *Client) PoolUpdate(opts types.PoolUpdateOptions) (*types.Pool, error) {
-	resp, err := c.do("PUT", PoolAPIPrefix+"/"+opts.ID, doOptions{
+	ref := opts.Name
+	if IsUUID(opts.ID) {
+		ref = opts.ID
+	}
+	resp, err := c.do("PUT", PoolAPIPrefix+"/"+ref, doOptions{
 		data:    opts,
 		context: opts.Context,
 	})
@@ -82,7 +86,6 @@ func (c *Client) PoolUpdate(opts types.PoolUpdateOptions) (*types.Pool, error) {
 		if e, ok := err.(*Error); ok && e.Status == http.StatusNotFound {
 			return nil, ErrNoSuchPool
 		}
-		// TODO: Handle more errors
 		return nil, err
 	}
 	defer resp.Body.Close()
