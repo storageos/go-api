@@ -15,13 +15,13 @@ var (
 	NodeAPIPrefix = "nodes"
 
 	// ErrNoSuchNode is the error returned when the node does not exist.
-	ErrNoSuchNode = errors.New("no such controller")
+	ErrNoSuchNode = errors.New("no such node")
 
-	// ErrNodeInUse is the error returned when the controller requested to be removed is still in use.
-	ErrNodeInUse = errors.New("controller in use and cannot be removed")
+	// ErrNodeInUse is the error returned when the node requested to be removed is still in use.
+	ErrNodeInUse = errors.New("node in use and cannot be removed")
 )
 
-// NodeList returns the list of available controllers.
+// NodeList returns the list of available nodes.
 func (c *Client) NodeList(opts types.ListOptions) ([]*types.Node, error) {
 	listOpts := doOptions{
 		fieldSelector: opts.FieldSelector,
