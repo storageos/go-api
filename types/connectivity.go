@@ -1,10 +1,12 @@
 package types
 
-type ConnectivityStatus struct {
-	CanConnect  bool     `json:"canConnect"`
-	FailedTests []string `json:"failedTests,omitempty"`
-}
+type ConnectivityResult struct {
+	Target *Node `json:"target"`
 
-type NodeConnectivity struct {
-	Nodes map[string]ConnectivityStatus `json:"nodes"`
+	APIConnectivity bool `json:"apiConnectivity"`
+	// TODO: fields for testing other services, eg DFS or ETCD
+
+	Pass    bool    `json:"pass"`    // logical and of all connectivity tests (eg. API && etcd && DFS etc)
+	Timeout bool    `json:"timeout"` // true iff the test timed out before completion
+	Errors  []error `json:"errors"`  // errors encountered during testing
 }

@@ -13,7 +13,7 @@ var (
 )
 
 // Connectivity returns a node by its reference.
-func (c *Client) Connectivity(ref string) (*types.NodeConnectivity, error) {
+func (c *Client) Connectivity(ref string) ([]types.ConnectivityResult, error) {
 	resp, err := c.do("GET", ConnectivityAPIPrefix+"/"+ref, doOptions{})
 	if err != nil {
 		if e, ok := err.(*Error); ok && e.Status == http.StatusNotFound {
@@ -23,9 +23,9 @@ func (c *Client) Connectivity(ref string) (*types.NodeConnectivity, error) {
 	}
 	defer resp.Body.Close()
 
-	var nodecon types.NodeConnectivity
+	var nodecon []types.ConnectivityResult
 	if err := json.NewDecoder(resp.Body).Decode(&nodecon); err != nil {
 		return nil, err
 	}
-	return &nodecon, nil
+	return nodecon, nil
 }
