@@ -22,9 +22,12 @@ import (
 )
 
 const (
-	DefaultUserAgent  = "go-storageosclient"
+	// DefaultUserAgent is the default User-Agent header to include in HTTP requests.
+	DefaultUserAgent = "go-storageosclient"
+	// DefaultVersionStr is the string value of the default API version.
 	DefaultVersionStr = "1"
-	DefaultVersion    = 1
+	// DefaultVersion is the default API version.
+	DefaultVersion = 1
 )
 
 var (
@@ -37,13 +40,16 @@ var (
 	// ErrInvalidVersion is returned when a versioned client was requested but no version specified.
 	ErrInvalidVersion = errors.New("invalid version")
 
-	// DefaultPort is the default API port
+	// ErrProxyNotSupported is returned when a client is unable to set a proxy for http requests.
+	ErrProxyNotSupported = errors.New("client does not support http proxy")
+
+	// DefaultPort is the default API port.
 	DefaultPort = "5705"
 
-	// DataplaneHealthPort is the the port used by the dataplane health-check service
+	// DataplaneHealthPort is the the port used by the dataplane health-check service.
 	DataplaneHealthPort = "5704"
 
-	// DefaultHost is the default API host
+	// DefaultHost is the default API host.
 	DefaultHost = "tcp://localhost:" + DefaultPort
 )
 
@@ -155,6 +161,27 @@ func (c *Client) SetAuth(username string, secret string) {
 	if secret != "" {
 		c.secret = secret
 	}
+}
+
+// SetProxy will set the proxy URL for both the HTTPClient and the
+// nativeHTTPClient. If the transport method does not support usage
+// of proxies, an error will be returned.
+func (c *Client) SetProxy(proxy *url.URL) error {
+	if client := c.HTTPClient; client != nil {
+		transport, supported := client.Transport.(*http.Transport)
+		if !supported {
+			return ErrProxyNotSupported
+		}
+		transport.Proxy = http.ProxyURL(proxy)
+	}
+	if client := c.nativeHTTPClient; client != nil {
+		transport, supported := client.Transport.(*http.Transport)
+		if !supported {
+			return ErrProxyNotSupported
+		}
+		transport.Proxy = http.ProxyURL(proxy)
+	}
+	return nil
 }
 
 // SetTimeout takes a timeout and applies it to both the HTTPClient and
