@@ -120,7 +120,7 @@ func NewVersionedClient(nodestring string, apiVersionString string) (*Client, er
 
 	var useTLS bool
 	if len(nodes) > 0 {
-		if u, err := url.Parse(nodes[0]); err != nil && u.Scheme == "https" {
+		if u, err := url.Parse(nodes[0]); err == nil && u.Scheme == "https" {
 			useTLS = true
 		}
 	}
