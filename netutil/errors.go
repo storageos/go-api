@@ -3,11 +3,14 @@ package netutil
 import (
 	"errors"
 	"fmt"
-	"github.com/storageos/go-api/serror"
 	"strings"
+
+	"github.com/storageos/go-api/serror"
 )
 
-func errAllFailed(addrs []string) error {
+// ErrAllFailed produces a typed StorageOS error which should be used to indicate that
+// the API is not contactable for all of the supplied node addresses.
+func ErrAllFailed(addrs []string) error {
 	msg := fmt.Sprintf("failed to dial all known cluster members, (%s)", strings.Join(addrs, ","))
 	help := "ensure that the value of $STORAGEOS_HOST (or the -H flag) is correct, and that there are healthy StorageOS nodes in this cluster"
 

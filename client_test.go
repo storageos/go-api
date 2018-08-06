@@ -8,7 +8,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/storageos/go-api/serror"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -18,6 +17,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/storageos/go-api/serror"
 )
 
 func newTestClient(rt http.RoundTripper) *Client {
@@ -25,6 +26,7 @@ func newTestClient(rt http.RoundTripper) *Client {
 	return &Client{
 		HTTPClient:             &http.Client{Transport: rt},
 		SkipServerVersionCheck: true,
+		addresses:              []string{"localhost:4243"},
 		serverAPIVersion:       testAPIVersion,
 	}
 }
@@ -97,11 +99,11 @@ func TestGetURLVersioned(t *testing.T) {
 		path     string
 		expected string
 	}{
-		{"http://localhost:4243/", "/", "http://storageos-cluster/v0/"},
-		{"http://localhost:4243", "/", "http://storageos-cluster/v0/"},
-		{"http://localhost:4243", "/containers/ps", "http://storageos-cluster/v0/containers/ps"},
-		{"tcp://localhost:4243", "/containers/ps", "http://storageos-cluster/v0/containers/ps"},
-		{"http://localhost:4243/////", "/", "http://storageos-cluster/v0/"},
+		{"http://localhost:4243/", "/", "http://127.0.0.1:4243/v0/"},
+		{"http://localhost:4243", "/", "http://127.0.0.1:4243/v0/"},
+		{"http://localhost:4243", "/containers/ps", "http://127.0.0.1:4243/v0/containers/ps"},
+		{"tcp://localhost:4243", "/containers/ps", "http://127.0.0.1:4243/v0/containers/ps"},
+		{"http://localhost:4243/////", "/", "http://127.0.0.1:4243/v0/"},
 	}
 	for i, tt := range tests {
 		client, _ := NewClient(tt.endpoint)
@@ -109,6 +111,40 @@ func TestGetURLVersioned(t *testing.T) {
 		// replace the client with a fake
 		client.HTTPClient = &http.Client{Transport: fakeRT}
 		client.SkipServerVersionCheck = true
+
+		// drive a request to capture the url
+		client.do("GET", tt.path, doOptions{})
+
+		got := fakeRT.requests[i].URL.String()
+		if got != tt.expected {
+			t.Errorf("getURL(%q): Got %s. Want %s.", tt.path, got, tt.expected)
+		}
+	}
+}
+
+func TestGetURLVersionedHTTPS(t *testing.T) {
+	fakeRT := &FakeRoundTripper{message: "", status: http.StatusOK}
+
+	var tests = []struct {
+		endpoint string
+		path     string
+		expected string
+	}{
+		{"https://localhost:4243/", "/", "https://127.0.0.1:4243/v0/"},
+		{"https://localhost:4243", "/", "https://127.0.0.1:4243/v0/"},
+		{"https://localhost:4243", "/containers/ps", "https://127.0.0.1:4243/v0/containers/ps"},
+		{"https://localhost:4243/////", "/", "https://127.0.0.1:4243/v0/"},
+	}
+	for i, tt := range tests {
+		client, _ := NewClient(tt.endpoint)
+
+		// replace the client with a fake
+		client.HTTPClient = &http.Client{Transport: fakeRT}
+		client.SkipServerVersionCheck = true
+
+		if client.useTLS != true {
+			t.Errorf("client.useTLS: Got %t. Want %t.", client.useTLS, true)
+		}
 
 		// drive a request to capture the url
 		client.do("GET", tt.path, doOptions{})

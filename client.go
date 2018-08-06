@@ -80,6 +80,7 @@ type Client struct {
 	SkipServerVersionCheck bool
 	HTTPClient             *http.Client
 	TLSConfig              *tls.Config
+	addresses              []string
 	username               string
 	secret                 string
 	requestedAPIVersion    APIVersion
@@ -119,7 +120,7 @@ func NewClient(nodes string) (*Client, error) {
 // the given server endpoint, using a specific remote API version.
 func NewVersionedClient(nodestring string, apiVersionString string) (*Client, error) {
 	nodes := strings.Split(nodestring, ",")
-	d, err := netutil.NewMultiDialer(nodes, nil)
+	addresses, err := netutil.AddressesFromNodes(nodes)
 	if err != nil {
 		return nil, err
 	}
@@ -131,8 +132,9 @@ func NewVersionedClient(nodestring string, apiVersionString string) (*Client, er
 		}
 	}
 
-	c := &Client{
-		HTTPClient: defaultClient(d),
+	client := &Client{
+		HTTPClient: defaultClient(),
+		addresses:  addresses,
 		useTLS:     useTLS,
 	}
 
@@ -141,10 +143,10 @@ func NewVersionedClient(nodestring string, apiVersionString string) (*Client, er
 		if err != nil {
 			return nil, err
 		}
-		c.requestedAPIVersion = APIVersion(version)
+		client.requestedAPIVersion = APIVersion(version)
 	}
 
-	return c, nil
+	return client, nil
 }
 
 // SetUserAgent sets the client useragent.
@@ -238,6 +240,7 @@ func (c *Client) getServerAPIVersionString() (version string, err error) {
 }
 
 type doOptions struct {
+	context       context.Context
 	data          interface{}
 	fieldSelector string
 	labelSelector string
@@ -247,7 +250,6 @@ type doOptions struct {
 	values        url.Values
 	headers       map[string]string
 	unversioned   bool
-	context       context.Context
 }
 
 func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response, error) {
@@ -282,47 +284,73 @@ func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response
 	}
 
 	httpClient := c.HTTPClient
-	u := c.getAPIPath(urlpath, query, doOptions.unversioned)
+	endpoint := c.getAPIPath(urlpath, query, doOptions.unversioned)
 
-	req, err := http.NewRequest(method, u, params)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("User-Agent", c.userAgent)
-	if doOptions.data != nil {
-		req.Header.Set("Content-Type", "application/json")
-	} else if method == "POST" {
-		req.Header.Set("Content-Type", "plain/text")
-	}
-	if c.username != "" && c.secret != "" {
-		req.SetBasicAuth(c.username, c.secret)
-	}
-
-	for k, v := range doOptions.headers {
-		req.Header.Set(k, v)
-	}
-
+	// The doOptions Context is shared for every attempted request in the do.
 	ctx := doOptions.context
 	if ctx == nil {
 		ctx = context.Background()
 	}
 
-	resp, err := httpClient.Do(req.WithContext(ctx))
-	if err != nil {
-		// If it is a custom error, return it. It probably knows more than us
-		if serror.IsStorageOSError(err) {
-			return nil, err
+	for _, address := range c.addresses {
+		target := address + endpoint
+		// Add URL scheme:
+		if c.useTLS {
+			target = "https://" + target
+		} else {
+			target = "http://" + target
 		}
 
-		if strings.Contains(err.Error(), "connection refused") {
-			return nil, ErrConnectionRefused
+		req, err := http.NewRequest(method, target, params)
+		if err != nil {
+			// Probably should not try and continue if we're unable
+			// to create the request.
+			return nil, err
 		}
-		return nil, chooseError(ctx, err)
+		req.Header.Set("User-Agent", c.userAgent)
+		if doOptions.data != nil {
+			req.Header.Set("Content-Type", "application/json")
+		} else if method == "POST" {
+			req.Header.Set("Content-Type", "plain/text")
+		}
+		if c.username != "" && c.secret != "" {
+			req.SetBasicAuth(c.username, c.secret)
+		}
+
+		for k, v := range doOptions.headers {
+			req.Header.Set(k, v)
+		}
+
+		resp, err := httpClient.Do(req.WithContext(ctx))
+		if err != nil {
+			// If it is a custom error, return it. It probably knows more than us
+			if serror.IsStorageOSError(err) {
+				switch serror.ErrorKind(err) {
+				case serror.APIUncontactable:
+					// If API isn't contactable we should try the next address
+					continue
+				case serror.InvalidHostConfig:
+					// If invalid host or unknown error, we should report back
+					fallthrough
+				case serror.UnknownError:
+					return nil, err
+				}
+			}
+
+			if strings.Contains(err.Error(), "connection refused") {
+				// Here we should try the next address
+				continue
+			}
+			// If we have either a context error or http error we should return
+			return nil, chooseError(ctx, err)
+		}
+		if resp.StatusCode < 200 || resp.StatusCode >= 400 {
+			return nil, newError(resp) // These status codes are likely to be fatal
+		}
+		return resp, nil
 	}
-	if resp.StatusCode < 200 || resp.StatusCode >= 400 {
-		return nil, newError(resp)
-	}
-	return resp, nil
+
+	return nil, netutil.ErrAllFailed(c.addresses)
 }
 
 // if error in context, return that instead of generic http error
@@ -336,21 +364,12 @@ func chooseError(ctx context.Context, err error) error {
 }
 
 func (c *Client) getAPIPath(path string, query url.Values, unversioned bool) string {
-	// The custom dialer contacts the hosts for us, making this hosname irrelevant
-	var urlStr string
-	if c.useTLS {
-		urlStr = "https://storageos-cluster"
-	} else {
-		urlStr = "http://storageos-cluster"
-	}
+	var apiPath = strings.TrimLeft(path, "/")
 
-	var apiPath string
-
-	path = strings.TrimLeft(path, "/")
-	if unversioned {
-		apiPath = fmt.Sprintf("%s/%s", urlStr, path)
+	if !unversioned {
+		apiPath = fmt.Sprintf("/%s/%s", c.requestedAPIVersion, apiPath)
 	} else {
-		apiPath = fmt.Sprintf("%s/%s/%s", urlStr, c.requestedAPIVersion, path)
+		apiPath = fmt.Sprintf("/%s", apiPath)
 	}
 
 	if len(query) > 0 {
@@ -488,10 +507,10 @@ func defaultTransport(d Dialer) *http.Transport {
 // values to http.DefaultTransport. Do not use this for transient transports as
 // it can leak file descriptors over time. Only use this for transports that
 // will be re-used for the same host(s).
-func defaultPooledTransport(d Dialer) *http.Transport {
+func defaultPooledTransport(dialer Dialer) *http.Transport {
 	transport := &http.Transport{
 		Proxy:               http.ProxyFromEnvironment,
-		Dial:                d.Dial,
+		Dial:                dialer.Dial,
 		TLSHandshakeTimeout: 5 * time.Second,
 		DisableKeepAlives:   false,
 		MaxIdleConnsPerHost: 1,
@@ -503,15 +522,13 @@ func defaultPooledTransport(d Dialer) *http.Transport {
 // http.Client, but with a non-shared Transport, idle connections disabled, and
 // keepalives disabled.
 // If a custom dialer is not provided, one with sane defaults will be created.
-func defaultClient(d Dialer) *http.Client {
-	if d == nil {
-		d = &net.Dialer{
-			Timeout:   5 * time.Second,
-			KeepAlive: 5 * time.Second,
-		}
+func defaultClient() *http.Client {
+	dialer := &net.Dialer{
+		Timeout:   5 * time.Second,
+		KeepAlive: 5 * time.Second,
 	}
 
 	return &http.Client{
-		Transport: defaultTransport(d),
+		Transport: defaultTransport(dialer),
 	}
 }

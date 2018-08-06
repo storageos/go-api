@@ -7,12 +7,12 @@ import (
 	"strings"
 )
 
-// addrsFromNodes takes a list of node hosts and attempts to return a list of hosts in ip:port
+// AddressesFromNodes takes a list of node hosts and attempts to return a list of hosts in ip:port
 // format along with any error encountered.
 //
 // The function accepts node hosts in URL, ip, ip:port, resolvable-name and resolvable-name:port
 // formats and will append the default port value if needed.
-func addrsFromNodes(nodes []string) ([]string, error) {
+func AddressesFromNodes(nodes []string) ([]string, error) {
 	var addrs []string
 
 	for _, n := range nodes {

@@ -186,7 +186,6 @@ func TestControllerList(t *testing.T) {
 }
 
 func TestControllerListLabelSelector(t *testing.T) {
-
 	fakeRT := &FakeRoundTripper{message: `[]`, status: http.StatusOK}
 	client := newTestClient(fakeRT)
 	_, err := client.ControllerList(types.ListOptions{LabelSelector: "env=prod"})
