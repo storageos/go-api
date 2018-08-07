@@ -24,6 +24,5 @@ func newInvalidNodeError(err error) error {
 	return serror.NewTypedStorageOSError(serror.InvalidHostConfig, err, msg, help)
 }
 
-var errNoAddresses = errors.New("the MultiDialer instance has not been initialised with client addresses")
 var errUnsupportedScheme = errors.New("unsupported URL scheme")
 var errInvalidPortNumber = errors.New("invalid port number")
