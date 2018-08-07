@@ -142,7 +142,7 @@ func TestGetURLVersionedHTTPS(t *testing.T) {
 		client.HTTPClient = &http.Client{Transport: fakeRT}
 		client.SkipServerVersionCheck = true
 
-		if client.useTLS != true {
+		if !client.useTLS {
 			t.Errorf("client.useTLS: Got %t. Want %t.", client.useTLS, true)
 		}
 

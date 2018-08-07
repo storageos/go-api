@@ -77,18 +77,21 @@ func (version APIVersion) String() string {
 // Client is the basic type of this package. It provides methods for
 // interaction with the API.
 type Client struct {
+	HTTPClient       *http.Client
+	nativeHTTPClient *http.Client
+	TLSConfig        *tls.Config
+
+	addresses []string
+	username  string
+	secret    string
+	userAgent string
+
+	requestedAPIVersion APIVersion
+	serverAPIVersion    APIVersion
+	expectedAPIVersion  APIVersion
+
 	SkipServerVersionCheck bool
-	HTTPClient             *http.Client
-	TLSConfig              *tls.Config
-	addresses              []string
-	username               string
-	secret                 string
-	requestedAPIVersion    APIVersion
-	serverAPIVersion       APIVersion
-	expectedAPIVersion     APIVersion
-	nativeHTTPClient       *http.Client
 	useTLS                 bool
-	userAgent              string
 }
 
 // ClientVersion returns the API version of the client
@@ -227,8 +230,7 @@ func (c *Client) Ping() error {
 	if resp.StatusCode != http.StatusOK {
 		return newError(resp)
 	}
-	resp.Body.Close()
-	return nil
+	return resp.Body.Close()
 }
 
 func (c *Client) getServerAPIVersionString() (version string, err error) {
@@ -240,16 +242,19 @@ func (c *Client) getServerAPIVersionString() (version string, err error) {
 }
 
 type doOptions struct {
-	context       context.Context
-	data          interface{}
+	context context.Context
+	data    interface{}
+
+	values  url.Values
+	headers map[string]string
+
 	fieldSelector string
 	labelSelector string
 	namespace     string
-	forceJSON     bool
-	force         bool
-	values        url.Values
-	headers       map[string]string
-	unversioned   bool
+
+	forceJSON   bool
+	force       bool
+	unversioned bool
 }
 
 func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response, error) {
