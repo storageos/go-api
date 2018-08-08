@@ -85,7 +85,8 @@ type Client struct {
 	secret    string
 	userAgent string
 
-	configLock *sync.RWMutex // Lock for config changes
+	configLock  *sync.RWMutex // Lock for config changes
+	addressLock *sync.Mutex   // Lock used to copy/update the address slice
 
 	requestedAPIVersion APIVersion
 	serverAPIVersion    APIVersion
@@ -137,9 +138,10 @@ func NewVersionedClient(nodestring string, apiVersionString string) (*Client, er
 	}
 
 	client := &Client{
-		httpClient: defaultClient(),
-		addresses:  addresses,
-		configLock: &sync.RWMutex{},
+		httpClient:  defaultClient(),
+		addresses:   addresses,
+		configLock:  &sync.RWMutex{},
+		addressLock: &sync.Mutex{},
 	}
 
 	if apiVersionString != "" {
@@ -291,7 +293,7 @@ func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response
 	// Obtain a reader lock to prevent the http client from being
 	// modified underneath us during a do().
 	c.configLock.RLock()
-	defer c.configLock.RUnlock()
+	defer c.configLock.RUnlock() // This defer matches both the initial and the above lock
 
 	httpClient := c.httpClient
 	endpoint := c.getAPIPath(urlpath, query, doOptions.unversioned)
@@ -302,7 +304,14 @@ func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response
 		ctx = context.Background()
 	}
 
-	for _, address := range c.addresses {
+	var failedAddresses = map[string]struct{}{}
+
+	c.addressLock.Lock()
+	var addresses = make([]string, len(c.addresses))
+	copy(addresses, c.addresses)
+	c.addressLock.Unlock()
+
+	for _, address := range addresses {
 		target := address + endpoint
 
 		req, err := http.NewRequest(method, target, params)
@@ -332,6 +341,7 @@ func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response
 				switch serror.ErrorKind(err) {
 				case serror.APIUncontactable:
 					// If API isn't contactable we should try the next address
+					failedAddresses[address] = struct{}{}
 					continue
 				case serror.InvalidHostConfig:
 					// If invalid host or unknown error, we should report back
@@ -345,24 +355,46 @@ func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response
 			case <-ctx.Done():
 				return nil, ctx.Err()
 			default:
-				if err, ok := err.(net.Error); ok {
-					switch {
-					case err.Temporary(), err.Timeout():
-						// Be optimistic and try the next endpoint
-						continue
-					default:
-						return nil, err
-					}
+				if _, ok := err.(net.Error); ok {
+					// Be optimistic and try the next endpoint
+					failedAddresses[address] = struct{}{}
+					continue
+				} else {
+					return nil, err
 				}
 			}
 		}
+
+		// If we get to the point of response, we should move any failed
+		// addresses to the back.
+		failed := len(failedAddresses)
+		if failed > 0 {
+			// Copy addresses we think are okay into the head of the list
+			newOrder := make([]string, len(addresses)-failed)
+			i := 0
+			for _, addr := range addresses {
+				if _, exists := failedAddresses[addr]; !exists {
+					newOrder[i] = addr
+					i++
+				}
+			}
+			for addr := range failedAddresses {
+				newOrder = append(newOrder, addr)
+			}
+
+			c.addressLock.Lock()
+			// Bring in the new order
+			c.addresses = newOrder
+			c.addressLock.Unlock()
+		}
+
 		if resp.StatusCode < 200 || resp.StatusCode >= 400 {
 			return nil, newError(resp) // These status codes are likely to be fatal
 		}
 		return resp, nil
 	}
 
-	return nil, netutil.ErrAllFailed(c.addresses)
+	return nil, netutil.ErrAllFailed(addresses)
 }
 
 func (c *Client) getAPIPath(path string, query url.Values, unversioned bool) string {

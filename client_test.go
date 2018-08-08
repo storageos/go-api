@@ -28,6 +28,7 @@ func newTestClient(rt http.RoundTripper) *Client {
 		httpClient:             &http.Client{Transport: rt},
 		SkipServerVersionCheck: true,
 		addresses:              []string{"http://localhost:4243"},
+		addressLock:            &sync.Mutex{},
 		configLock:             &sync.RWMutex{},
 		serverAPIVersion:       testAPIVersion,
 	}
@@ -316,6 +317,156 @@ func TestClientDoContextCancel(t *testing.T) {
 	if err != context.Canceled {
 		t.Fatalf("expected %s, got: %s", context.Canceled, err)
 	}
+}
+
+func TestClientDoNewOrder(t *testing.T) {
+	var nodes = make([]string, 4)
+	var badNodes = make(map[string]struct{})
+	// Create a series of rogue servers
+	for i := 0; i < 4; i++ {
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			time.Sleep(500 * time.Millisecond)
+		}))
+		srv.Close()
+		nodes[i] = srv.URL
+		badNodes[srv.URL] = struct{}{}
+	}
+	// Create a good server
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer srv.Close()
+
+	client, err := NewClient(strings.Join(nodes, ","))
+	client.addresses = append(client.addresses, srv.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp, err := client.do("POST", VolumeAPIPrefix, doOptions{
+		namespace: "testns",
+	})
+	if err != nil {
+		t.Fatalf("expected: nil error, got: %s", err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("expected: status %d, got: %d", http.StatusOK, resp.StatusCode)
+	}
+
+	// Check that the nodes have been reordered.
+	if client.addresses[0] != srv.URL {
+		t.Fatalf("For first address, expected: %s, got %s.", srv.URL, client.addresses[0])
+	}
+	for i := 1; i < len(client.addresses); i++ {
+		if _, exists := badNodes[client.addresses[i]]; !exists {
+			t.Fatalf("Did not find expected bad node")
+		}
+	}
+}
+
+func TestClientDoNewOrderRetry(t *testing.T) {
+	var nodes = make([]string, 4)
+	var badNodes = make(map[string]struct{})
+	// Create a series of rogue servers
+	for i := 0; i < 4; i++ {
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			time.Sleep(500 * time.Millisecond)
+		}))
+		srv.Close()
+		nodes[i] = srv.URL
+		badNodes[srv.URL] = struct{}{}
+	}
+	// Create a good server
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer srv.Close()
+
+	client, err := NewClient(strings.Join(nodes, ","))
+	client.addresses = append(client.addresses, srv.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp, err := client.do("POST", VolumeAPIPrefix, doOptions{
+		namespace: "testns",
+	})
+	if err != nil {
+		t.Fatalf("expected: nil error, got: %s", err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("expected: status %d, got: %d", http.StatusOK, resp.StatusCode)
+	}
+	resp, err = client.do("POST", VolumeAPIPrefix, doOptions{
+		namespace: "testns",
+	})
+	if err != nil {
+		t.Fatalf("expected: nil error, got: %s", err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("expected: status %d, got: %d", http.StatusOK, resp.StatusCode)
+	}
+	// Check that the nodes have been reordered.
+	if client.addresses[0] != srv.URL {
+		t.Fatalf("For first address, expected: %s, got %s.", srv.URL, client.addresses[0])
+	}
+	for i := 1; i < len(client.addresses); i++ {
+		if _, exists := badNodes[client.addresses[i]]; !exists {
+			t.Fatalf("Did not find expected bad node")
+		}
+	}
+}
+
+func TestClientDoNewOrderParallel(t *testing.T) {
+	var wg sync.WaitGroup
+	var nodes = make([]string, 4)
+	var badNodes = make(map[string]struct{})
+	// Create a series of rogue servers
+	for i := 0; i < 4; i++ {
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			time.Sleep(500 * time.Millisecond)
+		}))
+		srv.Close()
+		nodes[i] = srv.URL
+		badNodes[srv.URL] = struct{}{}
+	}
+	// Create a good server
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer srv.Close()
+
+	client, err := NewClient(strings.Join(nodes, ","))
+	client.addresses = append(client.addresses, srv.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i := 0; i < 3; i++ {
+		// Add to waitgroup
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			resp, err := client.do("POST", VolumeAPIPrefix, doOptions{
+				namespace: "testns",
+			})
+			if err != nil {
+				t.Fatalf("expected: nil error, got: %s", err)
+			}
+			if resp.StatusCode != http.StatusOK {
+				t.Fatalf("expected: status %d, got: %d", http.StatusOK, resp.StatusCode)
+			}
+		}()
+	}
+	wg.Wait()
+
+	// Check that the nodes have been reordered.
+	if client.addresses[0] != srv.URL {
+		t.Fatalf("For first address, expected: %s, got %s.", srv.URL, client.addresses[0])
+	}
+	for i := 1; i < len(client.addresses); i++ {
+		if _, exists := badNodes[client.addresses[i]]; !exists {
+			t.Fatalf("Did not find expected bad node")
+		}
+	}
+
 }
 
 type FakeRoundTripper struct {
