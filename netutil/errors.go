@@ -24,5 +24,8 @@ func newInvalidNodeError(err error) error {
 	return serror.NewTypedStorageOSError(serror.InvalidHostConfig, err, msg, help)
 }
 
-var errUnsupportedScheme = errors.New("unsupported URL scheme")
-var errInvalidPortNumber = errors.New("invalid port number")
+var (
+	errUnsupportedScheme = errors.New("unsupported URL scheme")
+	errInvalidHostName   = errors.New("invalid hostname")
+	errInvalidPortNumber = errors.New("invalid port number")
+)

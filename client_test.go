@@ -15,6 +15,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -24,9 +25,10 @@ import (
 func newTestClient(rt http.RoundTripper) *Client {
 	testAPIVersion, _ := NewAPIVersion("1")
 	return &Client{
-		HTTPClient:             &http.Client{Transport: rt},
+		httpClient:             &http.Client{Transport: rt},
 		SkipServerVersionCheck: true,
-		addresses:              []string{"localhost:4243"},
+		addresses:              []string{"http://localhost:4243"},
+		configLock:             &sync.RWMutex{},
 		serverAPIVersion:       testAPIVersion,
 	}
 }
@@ -99,17 +101,17 @@ func TestGetURLVersioned(t *testing.T) {
 		path     string
 		expected string
 	}{
-		{"http://localhost:4243/", "/", "http://127.0.0.1:4243/v0/"},
-		{"http://localhost:4243", "/", "http://127.0.0.1:4243/v0/"},
-		{"http://localhost:4243", "/containers/ps", "http://127.0.0.1:4243/v0/containers/ps"},
-		{"tcp://localhost:4243", "/containers/ps", "http://127.0.0.1:4243/v0/containers/ps"},
-		{"http://localhost:4243/////", "/", "http://127.0.0.1:4243/v0/"},
+		{"http://localhost:4243/", "/", "http://localhost:4243/v0/"},
+		{"http://localhost:4243", "/", "http://localhost:4243/v0/"},
+		{"http://localhost:4243", "/containers/ps", "http://localhost:4243/v0/containers/ps"},
+		{"tcp://localhost:4243", "/containers/ps", "http://localhost:4243/v0/containers/ps"},
+		{"http://localhost:4243/////", "/", "http://localhost:4243/v0/"},
 	}
 	for i, tt := range tests {
 		client, _ := NewClient(tt.endpoint)
 
 		// replace the client with a fake
-		client.HTTPClient = &http.Client{Transport: fakeRT}
+		client.httpClient = &http.Client{Transport: fakeRT}
 		client.SkipServerVersionCheck = true
 
 		// drive a request to capture the url
@@ -130,21 +132,17 @@ func TestGetURLVersionedHTTPS(t *testing.T) {
 		path     string
 		expected string
 	}{
-		{"https://localhost:4243/", "/", "https://127.0.0.1:4243/v0/"},
-		{"https://localhost:4243", "/", "https://127.0.0.1:4243/v0/"},
-		{"https://localhost:4243", "/containers/ps", "https://127.0.0.1:4243/v0/containers/ps"},
-		{"https://localhost:4243/////", "/", "https://127.0.0.1:4243/v0/"},
+		{"https://localhost:4243/", "/", "https://localhost:4243/v0/"},
+		{"https://localhost:4243", "/", "https://localhost:4243/v0/"},
+		{"https://localhost:4243", "/containers/ps", "https://localhost:4243/v0/containers/ps"},
+		{"https://localhost:4243/////", "/", "https://localhost:4243/v0/"},
 	}
 	for i, tt := range tests {
 		client, _ := NewClient(tt.endpoint)
 
 		// replace the client with a fake
-		client.HTTPClient = &http.Client{Transport: fakeRT}
+		client.httpClient = &http.Client{Transport: fakeRT}
 		client.SkipServerVersionCheck = true
-
-		if !client.useTLS {
-			t.Errorf("client.useTLS: Got %t. Want %t.", client.useTLS, true)
-		}
 
 		// drive a request to capture the url
 		client.do("GET", tt.path, doOptions{})

@@ -3,18 +3,19 @@ package storageos
 import (
 	"bytes"
 	"context"
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"math/rand"
 	"net"
 	"net/http"
 	"net/url"
 	"reflect"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/storageos/go-api/netutil"
@@ -50,7 +51,7 @@ var (
 	DataplaneHealthPort = "5704"
 
 	// DefaultHost is the default API host.
-	DefaultHost = "tcp://localhost:" + DefaultPort
+	DefaultHost = "http://localhost:" + DefaultPort
 )
 
 // APIVersion is an internal representation of a version of the Remote API.
@@ -77,21 +78,20 @@ func (version APIVersion) String() string {
 // Client is the basic type of this package. It provides methods for
 // interaction with the API.
 type Client struct {
-	HTTPClient       *http.Client
-	nativeHTTPClient *http.Client
-	TLSConfig        *tls.Config
+	httpClient *http.Client
 
 	addresses []string
 	username  string
 	secret    string
 	userAgent string
 
+	configLock *sync.RWMutex // Lock for config changes
+
 	requestedAPIVersion APIVersion
 	serverAPIVersion    APIVersion
 	expectedAPIVersion  APIVersion
 
 	SkipServerVersionCheck bool
-	useTLS                 bool
 }
 
 // ClientVersion returns the API version of the client
@@ -128,17 +128,18 @@ func NewVersionedClient(nodestring string, apiVersionString string) (*Client, er
 		return nil, err
 	}
 
-	var useTLS bool
-	if len(nodes) > 0 {
-		if u, err := url.Parse(nodes[0]); err == nil && u.Scheme == "https" {
-			useTLS = true
-		}
+	if len(addresses) > 1 {
+		// Shuffle returned addresses in attempt to spread the load
+		rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
+		rnd.Shuffle(len(addresses), func(i, j int) {
+			addresses[i], addresses[j] = addresses[j], addresses[i]
+		})
 	}
 
 	client := &Client{
-		HTTPClient: defaultClient(),
+		httpClient: defaultClient(),
 		addresses:  addresses,
-		useTLS:     useTLS,
+		configLock: &sync.RWMutex{},
 	}
 
 	if apiVersionString != "" {
@@ -154,12 +155,16 @@ func NewVersionedClient(nodestring string, apiVersionString string) (*Client, er
 
 // SetUserAgent sets the client useragent.
 func (c *Client) SetUserAgent(useragent string) {
+	c.configLock.Lock()
+	defer c.configLock.Unlock()
 	c.userAgent = useragent
 }
 
 // SetAuth sets the API username and secret to be used for all API requests.
 // It should not be called concurrently with any other Client methods.
 func (c *Client) SetAuth(username string, secret string) {
+	c.configLock.Lock()
+	defer c.configLock.Unlock()
 	if username != "" {
 		c.username = username
 	}
@@ -168,18 +173,14 @@ func (c *Client) SetAuth(username string, secret string) {
 	}
 }
 
-// SetProxy will set the proxy URL for both the HTTPClient and the
-// nativeHTTPClient. If the transport method does not support usage
+// SetProxy will set the proxy URL for both the HTTPClient.
+// If the transport method does not support usage
 // of proxies, an error will be returned.
 func (c *Client) SetProxy(proxy *url.URL) error {
-	if client := c.HTTPClient; client != nil {
-		transport, supported := client.Transport.(*http.Transport)
-		if !supported {
-			return ErrProxyNotSupported
-		}
-		transport.Proxy = http.ProxyURL(proxy)
-	}
-	if client := c.nativeHTTPClient; client != nil {
+	c.configLock.Lock()
+	defer c.configLock.Unlock()
+
+	if client := c.httpClient; client != nil {
 		transport, supported := client.Transport.(*http.Transport)
 		if !supported {
 			return ErrProxyNotSupported
@@ -193,11 +194,10 @@ func (c *Client) SetProxy(proxy *url.URL) error {
 // nativeHTTPClient. It should not be called concurrently with any other Client
 // methods.
 func (c *Client) SetTimeout(t time.Duration) {
-	if c.HTTPClient != nil {
-		c.HTTPClient.Timeout = t
-	}
-	if c.nativeHTTPClient != nil {
-		c.nativeHTTPClient.Timeout = t
+	c.configLock.Lock()
+	defer c.configLock.Unlock()
+	if c.httpClient != nil {
+		c.httpClient.Timeout = t
 	}
 }
 
@@ -288,7 +288,12 @@ func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response
 		query.Add("force", "1")
 	}
 
-	httpClient := c.HTTPClient
+	// Obtain a reader lock to prevent the http client from being
+	// modified underneath us during a do().
+	c.configLock.RLock()
+	defer c.configLock.RUnlock()
+
+	httpClient := c.httpClient
 	endpoint := c.getAPIPath(urlpath, query, doOptions.unversioned)
 
 	// The doOptions Context is shared for every attempted request in the do.
@@ -299,12 +304,6 @@ func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response
 
 	for _, address := range c.addresses {
 		target := address + endpoint
-		// Add URL scheme:
-		if c.useTLS {
-			target = "https://" + target
-		} else {
-			target = "http://" + target
-		}
 
 		req, err := http.NewRequest(method, target, params)
 		if err != nil {
@@ -342,12 +341,20 @@ func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response
 				}
 			}
 
-			if strings.Contains(err.Error(), "connection refused") {
-				// Here we should try the next address
-				continue
+			select {
+			case <-ctx.Done():
+				return nil, ctx.Err()
+			default:
+				if err, ok := err.(net.Error); ok {
+					switch {
+					case err.Temporary(), err.Timeout():
+						// Be optimistic and try the next endpoint
+						continue
+					default:
+						return nil, err
+					}
+				}
 			}
-			// If we have either a context error or http error we should return
-			return nil, chooseError(ctx, err)
 		}
 		if resp.StatusCode < 200 || resp.StatusCode >= 400 {
 			return nil, newError(resp) // These status codes are likely to be fatal
@@ -356,16 +363,6 @@ func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response
 	}
 
 	return nil, netutil.ErrAllFailed(c.addresses)
-}
-
-// if error in context, return that instead of generic http error
-func chooseError(ctx context.Context, err error) error {
-	select {
-	case <-ctx.Done():
-		return ctx.Err()
-	default:
-		return err
-	}
 }
 
 func (c *Client) getAPIPath(path string, query url.Values, unversioned bool) string {
@@ -499,15 +496,6 @@ func (e *Error) Error() string {
 	return fmt.Sprintf("API error (%s): %s", http.StatusText(e.Status), e.Message)
 }
 
-// defaultTransport returns a new http.Transport with the same default values
-// as http.DefaultTransport, but with idle connections and keepalives disabled.
-func defaultTransport(d Dialer) *http.Transport {
-	transport := defaultPooledTransport(d)
-	transport.DisableKeepAlives = true
-	transport.MaxIdleConnsPerHost = -1
-	return transport
-}
-
 // defaultPooledTransport returns a new http.Transport with similar default
 // values to http.DefaultTransport. Do not use this for transient transports as
 // it can leak file descriptors over time. Only use this for transports that
@@ -534,6 +522,6 @@ func defaultClient() *http.Client {
 	}
 
 	return &http.Client{
-		Transport: defaultTransport(dialer),
+		Transport: defaultPooledTransport(dialer),
 	}
 }
