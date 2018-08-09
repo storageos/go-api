@@ -361,9 +361,8 @@ func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response
 					// Be optimistic and try the next endpoint
 					failedAddresses[address] = struct{}{}
 					continue
-				} else {
-					return nil, err
 				}
+				return nil, err
 			}
 		}
 
@@ -372,12 +371,11 @@ func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response
 		failed := len(failedAddresses)
 		if failed > 0 {
 			// Copy addresses we think are okay into the head of the list
-			newOrder := make([]string, len(addresses)-failed)
-			i := 0
+			newOrder := make([]string, 0, len(addresses)-failed)
+
 			for _, addr := range addresses {
 				if _, exists := failedAddresses[addr]; !exists {
-					newOrder[i] = addr
-					i++
+					newOrder = append(newOrder, addr)
 				}
 			}
 			for addr := range failedAddresses {
