@@ -204,6 +204,8 @@ func (c *Client) SetTimeout(t time.Duration) {
 }
 
 func (c *Client) checkAPIVersion() error {
+	c.configLock.Lock()
+	defer c.configLock.Lock()
 	serverAPIVersionString, err := c.getServerAPIVersionString()
 	if err != nil {
 		return err
