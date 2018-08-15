@@ -3,18 +3,20 @@ package storageos
 import (
 	"encoding/json"
 	"net/http"
+	"path"
 
 	"github.com/storageos/go-api/types"
 )
 
 var (
-	// ConnectivityAPIPrefix is a partial path to the HTTP endpoint.
-	ConnectivityAPIPrefix = "diagnostics/connectivity"
+	// NetworkDiagnosticsAPIPrefix is a partial path to the HTTP endpoint for
+	// the node connectivity diagnostics report.
+	NetworkDiagnosticsAPIPrefix = "diagnostics/network"
 )
 
 // Connectivity returns a node by its reference.
 func (c *Client) Connectivity(ref string) ([]types.ConnectivityResult, error) {
-	resp, err := c.do("GET", ConnectivityAPIPrefix+"/"+ref, doOptions{})
+	resp, err := c.do("GET", path.Join(NetworkDiagnosticsAPIPrefix, ref), doOptions{})
 	if err != nil {
 		if e, ok := err.(*Error); ok && e.Status == http.StatusNotFound {
 			return nil, ErrNoSuchNode

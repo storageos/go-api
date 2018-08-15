@@ -1,5 +1,7 @@
 package types
 
+import "time"
+
 type TestName string
 
 const (
@@ -10,21 +12,25 @@ const (
 
 // ConnectivityResult capture's a node connectivity report to a given target.
 type ConnectivityResult struct {
-	Target *Node `json:"target"`
+	// Label is a human-readable reference for the service being tested.
+	Label string `json:"label"`
 
-	Connectivity map[TestName]bool `json:"connectivity"`
+	// Address is the host:port of the service being tested.
+	Address string `json:"address"`
 
-	Timeout bool    `json:"timeout"` // true iff the test timed out before completion
-	Errors  []error `json:"errors"`  // errors encountered during testing
+	// Source is a human-readable reference for the source host where the tests
+	// were run from..
+	Source string `json:"source"`
+
+	// LatencyNS is the duration in nanoseconds that the check took to complete.
+	// Will also be set on unsuccessful attempts.
+	LatencyNS time.Duration `json:"latency_ns"`
+
+	// Error is set if the test returned an error.
+	Error string `json:"error"`
 }
 
-// Passes returns true iff all tests passed
+// Passes returns true iff no error
 func (r ConnectivityResult) Passes() bool {
-	passes := len(r.Connectivity) > 0
-
-	for _, v := range r.Connectivity {
-		passes = passes && v
-	}
-
-	return passes
+	return len(r.Error) == 0
 }
