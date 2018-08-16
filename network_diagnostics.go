@@ -14,10 +14,10 @@ var (
 	NetworkDiagnosticsAPIPrefix = "diagnostics/network"
 )
 
-// Connectivity returns a collection of connectivity reports.  If a reference to
-// a node is given, it will only check connectivity from that node.  Otherwise,
-// connectivity between all cluster nodes will be returned.
-func (c *Client) Connectivity(ref string) (types.ConnectivityResults, error) {
+// NetworkDiagnostics returns a collection of network connectivity reports.  If
+// a reference to a node is given, it will only check connectivity from that
+// node.  Otherwise, connectivity between all cluster nodes will be returned.
+func (c *Client) NetworkDiagnostics(ref string) (types.ConnectivityResults, error) {
 	resp, err := c.do("GET", path.Join(NetworkDiagnosticsAPIPrefix, ref), doOptions{})
 	if err != nil {
 		if e, ok := err.(*Error); ok && e.Status == http.StatusNotFound {
