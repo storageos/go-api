@@ -14,8 +14,10 @@ var (
 	NetworkDiagnosticsAPIPrefix = "diagnostics/network"
 )
 
-// Connectivity returns a node by its reference.
-func (c *Client) Connectivity(ref string) ([]types.ConnectivityResult, error) {
+// Connectivity returns a collection of connectivity reports.  If a reference to
+// a node is given, it will only check connectivity from that node.  Otherwise,
+// connectivity between all cluster nodes will be returned.
+func (c *Client) Connectivity(ref string) (types.ConnectivityResults, error) {
 	resp, err := c.do("GET", path.Join(NetworkDiagnosticsAPIPrefix, ref), doOptions{})
 	if err != nil {
 		if e, ok := err.(*Error); ok && e.Status == http.StatusNotFound {
@@ -25,9 +27,9 @@ func (c *Client) Connectivity(ref string) ([]types.ConnectivityResult, error) {
 	}
 	defer resp.Body.Close()
 
-	var nodecon []types.ConnectivityResult
-	if err := json.NewDecoder(resp.Body).Decode(&nodecon); err != nil {
+	var results types.ConnectivityResults
+	if err := json.NewDecoder(resp.Body).Decode(&results); err != nil {
 		return nil, err
 	}
-	return nodecon, nil
+	return results, nil
 }
