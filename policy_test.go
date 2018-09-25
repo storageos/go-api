@@ -45,7 +45,7 @@ func TestPolicyList(t *testing.T) {
 func TestPolicyCreate(t *testing.T) {
 	fakeRT := &FakeRoundTripper{status: http.StatusOK}
 	client := newTestClient(fakeRT)
-	err := client.PolicyCreate([]byte(`{"Spec": {"Group": "foo","NonResourcePath": "*"}}`), context.Background())
+	err := client.PolicyCreate(context.Background(), []byte(`{"Spec": {"Group": "foo","NonResourcePath": "*"}}`))
 	if err != nil {
 		t.Fatal(err)
 	}
