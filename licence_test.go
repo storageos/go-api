@@ -40,27 +40,11 @@ func TestLicence(t *testing.T) {
 }
 
 func TestLicenceCreate(t *testing.T) {
-	body := `{
-  "arrayUUID": "67f36f7d-a281-4070-8227-7e77d4b85dfa",
-  "customerID": "abc",
-  "customerName": "efg",
-  "storage": 100,
-  "validUntil": "0001-01-01T00:00:00Z",
-  "licenceType": "basic",
-  "features": {
-    "HA": true
-  },
-  "unregistered": true
-}`
-
-	licence := &types.Licence{}
-	if err := json.Unmarshal([]byte(body), licence); err != nil {
-		t.Fatal(err)
-	}
+	licenceKey := `ABCDE`
 
 	fakeRT := &FakeRoundTripper{status: http.StatusOK}
 	client := newTestClient(fakeRT)
-	err := client.LicenceCreate(licence)
+	err := client.LicenceCreate(licenceKey)
 	if err != nil {
 		t.Fatal(err)
 	}
