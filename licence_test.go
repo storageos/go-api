@@ -39,23 +39,23 @@ func TestLicence(t *testing.T) {
 	}
 }
 
-func TestLicenceCreate(t *testing.T) {
+func TestLicenceApply(t *testing.T) {
 	licenceKey := `ABCDE`
 
 	fakeRT := &FakeRoundTripper{status: http.StatusOK}
 	client := newTestClient(fakeRT)
-	err := client.LicenceCreate(licenceKey)
+	err := client.LicenceApply(licenceKey)
 	if err != nil {
 		t.Fatal(err)
 	}
 	req := fakeRT.requests[0]
 	expectedMethod := "POST"
 	if req.Method != expectedMethod {
-		t.Errorf("LicenceCreate(): Wrong HTTP method. Want %s. Got %s.", expectedMethod, req.Method)
+		t.Errorf("LicenceApply(): Wrong HTTP method. Want %s. Got %s.", expectedMethod, req.Method)
 	}
 	u, _ := url.Parse(client.getAPIPath(licenceAPIPrefix, url.Values{}, false))
 	if req.URL.Path != u.Path {
-		t.Errorf("LicenceCreate(): Wrong request path. Want %q. Got %q.", u.Path, req.URL.Path)
+		t.Errorf("LicenceApply(): Wrong request path. Want %q. Got %q.", u.Path, req.URL.Path)
 	}
 }
 
