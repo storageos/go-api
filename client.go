@@ -534,11 +534,14 @@ func (e *Error) Error() string {
 // will be re-used for the same host(s).
 func defaultPooledTransport(dialer Dialer) *http.Transport {
 	transport := &http.Transport{
-		Proxy:               http.ProxyFromEnvironment,
-		Dial:                dialer.Dial,
-		TLSHandshakeTimeout: 5 * time.Second,
-		DisableKeepAlives:   false,
-		MaxIdleConnsPerHost: 1,
+		Proxy:                 http.ProxyFromEnvironment,
+		Dial:                  dialer.Dial,
+		TLSHandshakeTimeout:   5 * time.Second,
+		ResponseHeaderTimeout: 5 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+		IdleConnTimeout:       10 * time.Second,
+		DisableKeepAlives:     false,
+		MaxIdleConnsPerHost:   1,
 	}
 	return transport
 }
@@ -555,5 +558,6 @@ func defaultClient() *http.Client {
 
 	return &http.Client{
 		Transport: defaultPooledTransport(dialer),
+		Timeout:   10 * time.Second,
 	}
 }
