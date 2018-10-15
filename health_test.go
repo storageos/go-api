@@ -16,26 +16,26 @@ func TestCPHealth(t *testing.T) {
     "kv": {
       "status": "alive",
       "message": "",
-      "updatedAt": "2017-08-07T12:54:29.304265848Z",
-      "changedAt": "2017-08-07T12:46:43.53977923Z"
+      "updatedAt": "2017-08-07T12:54:29Z",
+      "changedAt": "2017-08-07T12:46:43Z"
     },
     "kv_write": {
       "status": "alive",
       "message": "",
-      "updatedAt": "2017-08-07T12:54:29.304266573Z",
+      "updatedAt": "2017-08-07T12:54:29Z",
       "changedAt": "0001-01-01T00:00:00Z"
     },
     "nats": {
       "status": "alive",
       "message": "",
-      "updatedAt": "2017-08-07T12:54:29.304265286Z",
+      "updatedAt": "2017-08-07T12:54:29Z",
       "changedAt": "0001-01-01T00:00:00Z"
     },
     "scheduler": {
       "status": "alive",
       "message": "",
-      "updatedAt": "2017-08-07T12:54:29.304266169Z",
-      "changedAt": "2017-08-07T12:47:03.207074102Z"
+      "updatedAt": "2017-08-07T12:54:29Z",
+      "changedAt": "2017-08-07T12:47:03Z"
     }
   }
 }`
@@ -51,42 +51,42 @@ func TestCPHealth(t *testing.T) {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(*cpHealth, expected) {
-		t.Errorf("Wrong return value.\nWant %#v.\nGot %#v.", expected, *cpHealth)
+		t.Errorf("Wrong return value.\nWant %#v.\nGot  %#v.", expected, *cpHealth)
 	}
 }
 
 func TestDPHealth(t *testing.T) {
 	data := `{
   "submodules": {
-    "directfs-client": {
+    "directfs-initiator": {
       "status": "alive",
       "message": "",
-      "updatedAt": "2017-08-07T12:55:57.179942558Z",
-      "changedAt": "2017-08-07T12:46:58.975050385Z"
+      "updatedAt": "2017-08-07T12:55:57Z",
+      "changedAt": "2017-08-07T12:46:58Z"
     },
-    "directfs-server": {
+    "directfs-responder": {
       "status": "alive",
       "message": "",
-      "updatedAt": "2017-08-07T12:55:57.179939863Z",
-      "changedAt": "2017-08-07T12:46:58.975047436Z"
+      "updatedAt": "2017-08-07T12:55:57Z",
+      "changedAt": "2017-08-07T12:46:58Z"
     },
     "director": {
       "status": "alive",
       "message": "",
-      "updatedAt": "2017-08-07T12:55:57.17994324Z",
-      "changedAt": "2017-08-07T12:46:58.975051141Z"
+      "updatedAt": "2017-08-07T12:55:57Z",
+      "changedAt": "2017-08-07T12:46:58Z"
     },
-    "filesystem-driver": {
+    "presentation": {
       "status": "alive",
       "message": "",
-      "updatedAt": "2017-08-07T12:55:57.179944197Z",
-      "changedAt": "2017-08-07T12:47:09.418689273Z"
+      "updatedAt": "2017-08-07T12:55:57Z",
+      "changedAt": "2017-08-07T12:47:09Z"
     },
     "fs": {
       "status": "alive",
       "message": "",
-      "updatedAt": "2017-08-07T12:55:57.179945193Z",
-      "changedAt": "2017-08-07T12:47:09.418690078Z"
+      "updatedAt": "2017-08-07T12:55:57Z",
+      "changedAt": "2017-08-07T12:47:09Z"
     }
   }
 }
@@ -102,6 +102,6 @@ func TestDPHealth(t *testing.T) {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(*dpHealth, expected) {
-		t.Errorf("Wrong return value.\nWant %#v.\nGot %#v.", expected, *dpHealth)
+		t.Errorf("Wrong return value.\nWant %#v.\nGot  %#v.", expected, *dpHealth)
 	}
 }

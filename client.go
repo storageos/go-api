@@ -247,6 +247,7 @@ func (c *Client) getServerAPIVersionString() (version string, err error) {
 
 type doOptions struct {
 	context context.Context
+	urlpath string
 	data    interface{}
 
 	values  url.Values
@@ -261,7 +262,7 @@ type doOptions struct {
 	unversioned bool
 }
 
-func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response, error) {
+func (doOptions *doOptions) body() (io.Reader, error) {
 	var params io.Reader
 	if doOptions.data != nil || doOptions.forceJSON {
 		buf, err := json.Marshal(doOptions.data)
@@ -270,12 +271,33 @@ func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response
 		}
 		params = bytes.NewBuffer(buf)
 	}
+	return params, nil
+}
 
+func (c *Client) target(addr string, doOptions *doOptions) string {
+	urlpath := doOptions.urlpath
 	// Prefix the path with the namespace if given.  The caller should only set
 	// the namespace if this is desired.
 	if doOptions.namespace != "" {
 		urlpath = "/" + NamespaceAPIPrefix + "/" + doOptions.namespace + "/" + urlpath
 	}
+
+	return addr + c.getAPIPath(urlpath, doOptions.query(), doOptions.unversioned)
+}
+
+func (doOptions *doOptions) query() url.Values {
+	query := url.Values{}
+	if doOptions.values != nil {
+		query = doOptions.values
+	}
+	if doOptions.force {
+		query.Set("force", "1")
+	}
+	return query
+}
+
+func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response, error) {
+	doOptions.urlpath = urlpath
 
 	if !c.SkipServerVersionCheck && !doOptions.unversioned {
 		err := c.checkAPIVersion()
@@ -284,21 +306,10 @@ func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response
 		}
 	}
 
-	query := url.Values{}
-	if doOptions.values != nil {
-		query = doOptions.values
-	}
-	if doOptions.force {
-		query.Add("force", "1")
-	}
-
 	// Obtain a reader lock to prevent the http client from being
 	// modified underneath us during a do().
 	c.configLock.RLock()
 	defer c.configLock.RUnlock() // This defer matches both the initial and the above lock
-
-	httpClient := c.httpClient
-	endpoint := c.getAPIPath(urlpath, query, doOptions.unversioned)
 
 	// The doOptions Context is shared for every attempted request in the do.
 	ctx := doOptions.context
@@ -314,56 +325,13 @@ func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response
 	c.addressLock.Unlock()
 
 	for _, address := range addresses {
-		target := address + endpoint
-
-		req, err := http.NewRequest(method, target, params)
+		resp, err := c.doAddress(ctx, method, address, doOptions)
 		if err != nil {
-			// Probably should not try and continue if we're unable
-			// to create the request.
+			if err == errTryNextEndpoint {
+				failedAddresses[address] = struct{}{}
+				continue
+			}
 			return nil, err
-		}
-		req.Header.Set("User-Agent", c.userAgent)
-		if doOptions.data != nil {
-			req.Header.Set("Content-Type", "application/json")
-		} else if method == "POST" {
-			req.Header.Set("Content-Type", "plain/text")
-		}
-		if c.username != "" && c.secret != "" {
-			req.SetBasicAuth(c.username, c.secret)
-		}
-
-		for k, v := range doOptions.headers {
-			req.Header.Set(k, v)
-		}
-
-		resp, err := httpClient.Do(req.WithContext(ctx))
-		if err != nil {
-			// If it is a custom error, return it. It probably knows more than us
-			if serror.IsStorageOSError(err) {
-				switch serror.ErrorKind(err) {
-				case serror.APIUncontactable:
-					// If API isn't contactable we should try the next address
-					failedAddresses[address] = struct{}{}
-					continue
-				case serror.InvalidHostConfig:
-					// If invalid host or unknown error, we should report back
-					fallthrough
-				case serror.UnknownError:
-					return nil, err
-				}
-			}
-
-			select {
-			case <-ctx.Done():
-				return nil, ctx.Err()
-			default:
-				if _, ok := err.(net.Error); ok {
-					// Be optimistic and try the next endpoint
-					failedAddresses[address] = struct{}{}
-					continue
-				}
-				return nil, err
-			}
 		}
 
 		// If we get to the point of response, we should move any failed
@@ -395,6 +363,62 @@ func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response
 	}
 
 	return nil, netutil.ErrAllFailed(addresses)
+}
+
+var errTryNextEndpoint = errors.New("try next endpoint")
+
+func (c *Client) doAddress(ctx context.Context, method, address string, doOptions doOptions) (*http.Response, error) {
+	httpClient := c.httpClient
+	body, err := doOptions.body()
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(method, c.target(address, &doOptions), body)
+	if err != nil {
+		// Probably should not try and continue if we're unable
+		// to create the request.
+		return nil, err
+	}
+	req.Header.Set("User-Agent", c.userAgent)
+	if doOptions.data != nil {
+		req.Header.Set("Content-Type", "application/json")
+	} else if method == "POST" {
+		req.Header.Set("Content-Type", "plain/text")
+	}
+	if c.username != "" && c.secret != "" {
+		req.SetBasicAuth(c.username, c.secret)
+	}
+
+	for k, v := range doOptions.headers {
+		req.Header.Set(k, v)
+	}
+
+	resp, err := httpClient.Do(req.WithContext(ctx))
+	if err != nil {
+		// If it is a custom error, return it. It probably knows more than us
+		if serror.IsStorageOSError(err) {
+			switch serror.ErrorKind(err) {
+			case serror.APIUncontactable:
+				// If API isn't contactable we should try the next address
+				return nil, errTryNextEndpoint
+			case serror.InvalidHostConfig, serror.UnknownError:
+				// If invalid host or unknown error, we should report back
+				return nil, err
+			}
+		}
+
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		default:
+			if _, ok := err.(net.Error); ok {
+				// Be optimistic and try the next endpoint
+				return nil, errTryNextEndpoint
+			}
+			return nil, err
+		}
+	}
+	return resp, nil
 }
 
 func (c *Client) getAPIPath(path string, query url.Values, unversioned bool) string {

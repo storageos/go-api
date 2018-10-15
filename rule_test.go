@@ -145,7 +145,10 @@ func TestRuleDelete(t *testing.T) {
 	if req.Method != expectedMethod {
 		t.Errorf("RuleDelete(%q): Wrong HTTP method. Want %s. Got %s.", name, expectedMethod, req.Method)
 	}
-	path, _ := namespacedRefPath(namespace, RuleAPIPrefix, name)
+	path, err := namespacedRefPath(namespace, RuleAPIPrefix, name)
+	if err != nil {
+		t.Fatal(err)
+	}
 	u, _ := url.Parse(client.getAPIPath(path, url.Values{}, false))
 	if req.URL.Path != u.Path {
 		t.Errorf("RuleDelete(%q): Wrong request path. Want %q. Got %q.", name, u.Path, req.URL.Path)

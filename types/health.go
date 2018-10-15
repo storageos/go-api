@@ -53,11 +53,11 @@ func (c *CPHealthStatus) UnmarshalJSON(data []byte) error {
 }
 
 type DPHealthStatus struct {
-	DirectFSClient SubModuleStatus
-	DirectFSServer SubModuleStatus
-	Director       SubModuleStatus
-	FSDriver       SubModuleStatus
-	FS             SubModuleStatus
+	DirectFSClient SubModuleStatus `json:"directfs_initiator,omitempty"`
+	DirectFSServer SubModuleStatus `json:"directfs_responder,omitempty"`
+	Director       SubModuleStatus `json:"director,omitempty"`
+	FSDriver       SubModuleStatus `json:"rdb,omitempty"`
+	FS             SubModuleStatus `json:"presentation,omitempty"`
 }
 
 func (d *DPHealthStatus) ToNamedSubmodules() []NamedSubModuleStatus {
