@@ -44,6 +44,9 @@ var (
 	// ErrProxyNotSupported is returned when a client is unable to set a proxy for http requests.
 	ErrProxyNotSupported = errors.New("client does not support http proxy")
 
+	// errTryNextEndpoint is returned to indicate a next endpoint should be tried
+	errTryNextEndpoint = errors.New("try next endpoint")
+
 	// DefaultPort is the default API port.
 	DefaultPort = "5705"
 
@@ -364,8 +367,6 @@ func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response
 
 	return nil, netutil.ErrAllFailed(addresses)
 }
-
-var errTryNextEndpoint = errors.New("try next endpoint")
 
 func (c *Client) doAddress(ctx context.Context, method, address string, doOptions doOptions) (*http.Response, error) {
 	httpClient := c.httpClient
