@@ -44,6 +44,9 @@ var (
 	// ErrProxyNotSupported is returned when a client is unable to set a proxy for http requests.
 	ErrProxyNotSupported = errors.New("client does not support http proxy")
 
+	// errTryNextEndpoint is returned to indicate a next endpoint should be tried
+	errTryNextEndpoint = errors.New("try next endpoint")
+
 	// DefaultPort is the default API port.
 	DefaultPort = "5705"
 
@@ -261,7 +264,8 @@ type doOptions struct {
 	unversioned bool
 }
 
-func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response, error) {
+// params returns the HTTP request body from doOptions
+func (doOptions *doOptions) body() (io.Reader, error) {
 	var params io.Reader
 	if doOptions.data != nil || doOptions.forceJSON {
 		buf, err := json.Marshal(doOptions.data)
@@ -270,26 +274,59 @@ func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response
 		}
 		params = bytes.NewBuffer(buf)
 	}
+	return params, nil
+}
 
+// namespacePath returns the path with namespace if namespace is specified, otherwise returns urlpath without any change
+func (doOptions *doOptions) namespacePath(urlpath string) string {
 	// Prefix the path with the namespace if given.  The caller should only set
 	// the namespace if this is desired.
 	if doOptions.namespace != "" {
 		urlpath = "/" + NamespaceAPIPrefix + "/" + doOptions.namespace + "/" + urlpath
 	}
+	return urlpath
+}
 
+// checkVersion checks the version compatibility if required
+func (c *Client) checkVersion(doOptions *doOptions) error {
 	if !c.SkipServerVersionCheck && !doOptions.unversioned {
 		err := c.checkAPIVersion()
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
+	return nil
+}
 
+// query returns the URL query (arguments) specified by doOptions
+func (doOptions *doOptions) query() url.Values {
 	query := url.Values{}
 	if doOptions.values != nil {
 		query = doOptions.values
 	}
 	if doOptions.force {
 		query.Add("force", "1")
+	}
+	return query
+}
+
+// endpoint calculates the endpoint specified by doOptions
+func (c *Client) endpoint(urlpath string, doOptions *doOptions) string {
+	urlpath = doOptions.namespacePath(urlpath)
+	query := doOptions.query()
+	endpoint := c.getAPIPath(urlpath, query, doOptions.unversioned)
+	return endpoint
+}
+
+// do does the HTTP request to a cluster of nodes one by one until succeeded or failed
+func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response, error) {
+	params, err := doOptions.body()
+	if err != nil {
+		return nil, err
+	}
+
+	if err := c.checkVersion(&doOptions); err != nil {
+		return nil, err
 	}
 
 	// Obtain a reader lock to prevent the http client from being
@@ -298,7 +335,7 @@ func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response
 	defer c.configLock.RUnlock() // This defer matches both the initial and the above lock
 
 	httpClient := c.httpClient
-	endpoint := c.getAPIPath(urlpath, query, doOptions.unversioned)
+	endpoint := c.endpoint(urlpath, &doOptions)
 
 	// The doOptions Context is shared for every attempted request in the do.
 	ctx := doOptions.context
@@ -314,58 +351,14 @@ func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response
 	c.addressLock.Unlock()
 
 	for _, address := range addresses {
-		target := address + endpoint
-
-		req, err := http.NewRequest(method, target, params)
+		resp, err := c.doAddress(ctx, httpClient, method, address, endpoint, &doOptions, params)
 		if err != nil {
-			// Probably should not try and continue if we're unable
-			// to create the request.
+			if err == errTryNextEndpoint {
+				failedAddresses[address] = struct{}{}
+				continue
+			}
 			return nil, err
 		}
-		req.Header.Set("User-Agent", c.userAgent)
-		if doOptions.data != nil {
-			req.Header.Set("Content-Type", "application/json")
-		} else if method == "POST" {
-			req.Header.Set("Content-Type", "plain/text")
-		}
-		if c.username != "" && c.secret != "" {
-			req.SetBasicAuth(c.username, c.secret)
-		}
-
-		for k, v := range doOptions.headers {
-			req.Header.Set(k, v)
-		}
-
-		resp, err := httpClient.Do(req.WithContext(ctx))
-		if err != nil {
-			// If it is a custom error, return it. It probably knows more than us
-			if serror.IsStorageOSError(err) {
-				switch serror.ErrorKind(err) {
-				case serror.APIUncontactable:
-					// If API isn't contactable we should try the next address
-					failedAddresses[address] = struct{}{}
-					continue
-				case serror.InvalidHostConfig:
-					// If invalid host or unknown error, we should report back
-					fallthrough
-				case serror.UnknownError:
-					return nil, err
-				}
-			}
-
-			select {
-			case <-ctx.Done():
-				return nil, ctx.Err()
-			default:
-				if _, ok := err.(net.Error); ok {
-					// Be optimistic and try the next endpoint
-					failedAddresses[address] = struct{}{}
-					continue
-				}
-				return nil, err
-			}
-		}
-
 		// If we get to the point of response, we should move any failed
 		// addresses to the back.
 		failed := len(failedAddresses)
@@ -395,6 +388,80 @@ func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response
 	}
 
 	return nil, netutil.ErrAllFailed(addresses)
+}
+
+// doAddress does an HTTP request to the address of a node, with expanded parameter list for both do and doNode to use
+func (c *Client) doAddress(ctx context.Context, httpClient *http.Client, method, address, endpoint string, doOptions *doOptions, params io.Reader) (*http.Response, error) {
+	target := address + endpoint
+
+	req, err := http.NewRequest(method, target, params)
+	if err != nil {
+		// Probably should not try and continue if we're unable
+		// to create the request.
+		return nil, err
+	}
+	req.Header.Set("User-Agent", c.userAgent)
+	if doOptions.data != nil {
+		req.Header.Set("Content-Type", "application/json")
+	} else if method == "POST" {
+		req.Header.Set("Content-Type", "plain/text")
+	}
+	if c.username != "" && c.secret != "" {
+		req.SetBasicAuth(c.username, c.secret)
+	}
+
+	for k, v := range doOptions.headers {
+		req.Header.Set(k, v)
+	}
+
+	resp, err := httpClient.Do(req.WithContext(ctx))
+	if err != nil {
+		// If it is a custom error, return it. It probably knows more than us
+		if serror.IsStorageOSError(err) {
+			switch serror.ErrorKind(err) {
+			case serror.APIUncontactable:
+				// If API isn't contactable we should try the next address
+				return nil, errTryNextEndpoint
+			case serror.InvalidHostConfig:
+				// If invalid host or unknown error, we should report back
+				fallthrough
+			case serror.UnknownError:
+				return nil, err
+			}
+		}
+
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		default:
+			if _, ok := err.(net.Error); ok {
+				// Be optimistic and try the next endpoint
+				return nil, errTryNextEndpoint
+			}
+			return nil, err
+		}
+	}
+
+	return resp, nil
+}
+
+// doNode does an HTTP request to the address of a node
+func (c *Client) doNode(ctx context.Context, method, address, urlpath string, doOptions *doOptions) (*http.Response, error) {
+	params, err := doOptions.body()
+	if err != nil {
+		return nil, err
+	}
+	if err := c.checkVersion(doOptions); err != nil {
+		return nil, err
+	}
+	resp, err := c.doAddress(ctx, c.httpClient, method, address, c.endpoint(urlpath, doOptions), doOptions, params)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode < 200 || resp.StatusCode >= 400 {
+		return nil, newError(resp) // These status codes are likely to be fatal
+	}
+	return resp, nil
 }
 
 func (c *Client) getAPIPath(path string, query url.Values, unversioned bool) string {

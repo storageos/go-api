@@ -469,6 +469,28 @@ func TestClientDoNewOrderParallel(t *testing.T) {
 
 }
 
+func TestClientDoNode(t *testing.T) {
+	// Create a good server
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer srv.Close()
+
+	client, err := NewClient(srv.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp, err := client.doNode(context.Background(), "POST", srv.URL, VolumeAPIPrefix, &doOptions{
+		namespace: "testns",
+	})
+	if err != nil {
+		t.Fatalf("expected: nil error, got: %s", err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("expected: status %d, got: %d", http.StatusOK, resp.StatusCode)
+	}
+}
+
 type FakeRoundTripper struct {
 	message  string
 	status   int
