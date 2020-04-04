@@ -9,6 +9,7 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -240,6 +241,28 @@ func TestSetAuth(t *testing.T) {
 	_, err = client.do("POST", "/xxx", doOptions{})
 	if err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestSetDialContext(t *testing.T) {
+	client, err := NewClient("http://localhost:8080")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dialerCalled := false
+	dialContext := func(ctx context.Context, network, address string) (net.Conn, error) {
+		dialerCalled = true
+		return nil, fmt.Errorf("not implemented")
+	}
+	if err := client.SetDialContext(dialContext); err != nil {
+		t.Fatalf("Failed to set DialContext: %v", err)
+	}
+
+	if err := client.Ping(); err == nil {
+		t.Error("Expected Ping() to return an error")
+	}
+	if !dialerCalled {
+		t.Error("Expected custom DialContext to be called")
 	}
 }
 
