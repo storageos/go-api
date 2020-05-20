@@ -49,7 +49,6 @@ components:
         Version:
             type: string
             maxLength: 30
-            minLength: 1
             description: >
                 An opaque representation of an entity version at the time it was
                 obtained from the API.
@@ -71,7 +70,7 @@ components:
                 ignore entity version constraints, thereby "forcing" the
                 operation.
             example: true
-            
+
         ExpiresAt:
             type: string
             format: date-time
@@ -129,7 +128,7 @@ components:
                 The file system type of a volume. "block" is a raw block device (no filesystem).
             example: "ext4"
 
-        Health:
+        NodeHealth:
             type: string
             readOnly: true
             enum:
@@ -137,15 +136,93 @@ components:
                 - "offline"
                 - "unknown"
             description: >
-                The operational health of an entity
+                The operational health of a node entity
             example: "online"
+
+        MasterHealth:
+            type: string
+            readOnly: true
+            enum:
+                - "online"
+                - "offline"
+                - "unknown"
+            description: >
+                The operational health of a volume master deployment
+            example:
+                "online"
+
+        ReplicaHealth:
+            type: string
+            readOnly: true
+            enum:
+                - "recovering"
+                - "provisioning"
+                - "provisioned"
+                - "syncing"
+                - "ready"
+                - "deleted"
+                - "failed"
+                - "unknown"
+            description: >
+                The operational health of a volume replica deployment
+            example: "ready"
+
+        SyncProgress:
+            type: object
+            readOnly: true
+            properties:
+                bytesRemaining:
+                    type: uint64
+                    description: >
+                        Number of bytes left remaining to complete the sync.
+                    example: 500000
+                throughputBytes:
+                    type: uint64
+                    description: >
+                        The average throughput of the sync given as bytes per 
+                        second.
+                    example: 100000
+                estimatedSecondsRemaining:
+                    type: uint64
+                    description: >
+                        The estimated time left for the sync to complete, given
+                        in seconds. When this field has a value of 0 either the 
+                        sync is complete or no duration estimate could be made.
+                        The values reported for bytesRemaining and 
+                        throughputBytes provide the client with the information
+                        needed to choose what to display.
+                    example: 5
+            description: >
+                The progress report for an ongoing sync. 
+
+        CapacityStats:
+            type: object
+            properties:
+                total:
+                    type: uint64
+                    default: 0
+                    description: >
+                        Total bytes in the filesystem
+                    example: 42
+                free:
+                    type: uint64
+                    default: 0
+                    description: >
+                        Free bytes in the filesystem available to root user
+                    example: 42
+                available:
+                    type: uint64
+                    default: 0
+                    description: >
+                       Byte value available to an unprivileged user
+                    example: 42
 
         Labels:
             type: object
             description: >
                 A set of arbitrary key value labels to apply to the entity.
             externalDocs:
-                url: https://docs.storageos.com/docs/reference/labels
+                url: https://docs.storageos.com/v2/openapi-help/labels
             additionalProperties:
                 type: string
             example:
@@ -261,8 +338,6 @@ components:
             properties:
                 id:
                     $ref: "#/components/schemas/ClusterID"
-                licence:
-                    $ref: "#/components/schemas/Licence"
                 disableTelemetry:
                     type: boolean
                     default: false
@@ -292,7 +367,6 @@ components:
                     $ref: "#/components/schemas/UpdatedAt"
                 version:
                     $ref: "#/components/schemas/Version"
-
         User:
             type: object
             properties:
@@ -333,6 +407,26 @@ components:
                     $ref: "#/components/schemas/UpdatedAt"
                 version:
                     $ref: "#/components/schemas/Version"
+        
+        UserSession:
+            allOf:
+                - $ref: "#/components/schemas/User"
+                - type: object
+                  properties:
+                      session:
+                          type: object
+                          properties:
+                              expiresInSeconds:
+                                  type: uint64
+                                  description: >
+                                      The maximum duration which the auth session 
+                                      will remain valid for in seconds.
+                                  minimum: 0
+                                  example: 60
+                              token:
+                                  type: string
+                                  description: >
+                                      The JWT token for the auth session.
 
         Volume:
             type: object
@@ -357,21 +451,17 @@ components:
                     $ref: "#/components/schemas/Labels"
                 fsType:
                     $ref: "#/components/schemas/FsType"
-                inode:
-                    readOnly: true
-                    type: uint32
-                    example: 42
                 master:
                     readOnly: true
                     allOf:
-                        - $ref: "#/components/schemas/DeploymentInfo"
+                        - $ref: "#/components/schemas/MasterDeploymentInfo"
                 replicas:
                     type: array
                     nullable: true
                     readOnly: true
                     default: []
                     items:
-                        $ref: "#/components/schemas/DeploymentInfo"
+                        $ref: "#/components/schemas/ReplicaDeploymentInfo"
                 sizeBytes:
                     type: uint64
                     description: >
@@ -392,16 +482,28 @@ components:
                     $ref: "#/components/schemas/DeploymentID"
                 nodeID:
                     $ref: "#/components/schemas/NodeID"
-                inode:
-                    type: uint32
-                    readOnly: true
-                    example: 1223
-                health:
-                    $ref: "#/components/schemas/Health"
-                syncing:
+                promotable:
                     type: boolean
                     description: >
-                        indicates if a volume is undergoing data synchronization operations
+                        Indicates if the volume deployment is eligible for promotion
+
+        MasterDeploymentInfo:
+            allOf:
+                - $ref: '#/components/schemas/DeploymentInfo'
+                - type: object
+                  properties:
+                      health:
+                          $ref: "#/components/schemas/MasterHealth"
+
+        ReplicaDeploymentInfo:
+            allOf:
+                - $ref: '#/components/schemas/DeploymentInfo'
+                - type: object
+                  properties:
+                      health:
+                          $ref: "#/components/schemas/ReplicaHealth"
+                      syncProgress:
+                          $ref: "#/components/schemas/SyncProgress"
 
         Node:
             type: object
@@ -418,7 +520,9 @@ components:
                         StorageOS cluster.
                     example: db1.lcy.storageos.network
                 health:
-                    $ref: "#/components/schemas/Health"
+                    $ref: "#/components/schemas/NodeHealth"
+                capacity:
+                    $ref: "#/components/schemas/CapacityStats"
                 ioEndpoint:
                     type: string
                     readOnly: true
@@ -566,22 +670,30 @@ components:
                     type: uint64
                     description: >
                         The allowed provisioning capacity in bytes
-                        
+
                         This value if for the cluster, if provisioning a volume
                         brings the cluster's total provisioned capacity above
                         it the request will fail
                     minimum: 0
                     example: 1000000
+                usedBytes:
+                    type: uint64
+                    default: 0
+                    description: >
+                        Sum of the size of all volumes in the cluster
+                    example: 42
                 kind:
                     type: string
                     description: >
                         Denotes which category the licence belongs to
-                    example: "basic"
+                    example: "unregistered"
                 customerName:
                     type: string
                     description: >
                         A user friendly reference to the customer
                     example: "Desmond"
+                version:
+                    $ref: "#/components/schemas/Version"
             description: >
                 A representation of a cluster's licence properties
 
@@ -738,7 +850,7 @@ components:
                         $ref: "#/components/schemas/Error"
                     example:
                         error: authentication required
-                        
+
         Forbidden:
             description: >
                 The authenticated user does not have permission to perform the
@@ -759,6 +871,16 @@ components:
                         $ref: "#/components/schemas/Error"
                     example:
                         error: not found
+
+        InsufficientStorage:
+            description: >
+                Available storage is not enough to handle the request.
+            content:
+                application/json:
+                    schema:
+                        $ref: "#/components/schemas/Error"
+                    example:
+                        error: insufficient storage capacity available
 
         StaleWrite:
             description: >
@@ -853,10 +975,18 @@ paths:
                                 the server to perform an authenticated request.
                             schema:
                                 type: string
+                        Authorization-Expires-Seconds:
+                            description: >
+                                A formatted string representing the number of 
+                                seconds after which the login session will 
+                                expire.
+                            schema:
+                                type: uint64
+                                example: 60
                     content:
                         application/json:
                             schema:
-                                $ref: "#/components/schemas/User"
+                                $ref: "#/components/schemas/UserSession"
 
                 "400":
                     $ref: "#/components/responses/BadRequest"
@@ -886,6 +1016,17 @@ paths:
                             description: The new JWT token.
                             schema:
                                 type: string
+                        Authorization-Expires-In:
+                            description: >
+                                A formatted string representing the duration 
+                                after which the refreshed token will expire.
+                            schema:
+                                type: uint64
+                                example: 60
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UserSession"
                 "401":
                     # The user has been removed from the system since acquiring
                     # the token
@@ -1763,8 +1904,12 @@ paths:
                                                 type: string
                                                 enum:
                                                     - "*"
-                                                    - "volume"
+                                                    - "cluster"
+                                                    - "namespace"
+                                                    - "node"
                                                     - "policy"
+                                                    - "user"
+                                                    - "volume"
                                                 description: >
                                                     The resource type this policy grants access to.
                                                 example: "volume"
@@ -2078,6 +2223,9 @@ paths:
                 "503":
                     $ref: "#/components/responses/StoreError"
 
+                "507":
+                    $ref: "#/components/responses/InsufficientStorage"
+
         get:
             summary: Fetch the list of volumes in the given namespace
             operationId: listVolumes
@@ -2142,64 +2290,6 @@ paths:
 
                 "404":
                     $ref: "#/components/responses/NotFound"
-
-                "500":
-                    $ref: "#/components/responses/ServerError"
-
-                "503":
-                    $ref: "#/components/responses/StoreError"
-
-        put:
-            summary: Update a volume
-            operationId: updateVolume
-            description: Update the volume identified by id.
-            security:
-                - jwt: []
-            requestBody:
-                description: update a volume to a desired state.
-                required: true
-                content:
-                    application/json:
-                        schema:
-                            type: object
-                            title: UpdateVolumeData
-                            properties:
-                                name:
-                                    type: string
-                                    description: >
-                                        desired new volume name
-                                    example: "new-volume-name"
-                                labels:
-                                    $ref: "#/components/schemas/Labels"
-                                description:
-                                    type: string
-                                    example: "This volume contains the data for my app"
-                                version:
-                                    $ref: "#/components/schemas/Version"
-            responses:
-                "200":
-                    description: The volume was successfully updated
-                    content:
-                        application/json:
-                            schema:
-                                $ref: "#/components/schemas/Volume"
-                "400":
-                    $ref: "#/components/responses/BadRequest"
-
-                "401":
-                    $ref: "#/components/responses/Unauthorised"
-
-                "403":
-                    $ref: "#/components/responses/Forbidden"
-
-                "404":
-                    $ref: "#/components/responses/NotFound"
-
-                "412":
-                    $ref: "#/components/responses/StaleWrite"
-
-                "451":
-                    $ref: "#/components/responses/LicenceRestricted"
 
                 "500":
                     $ref: "#/components/responses/ServerError"
@@ -2390,17 +2480,6 @@ paths:
                             type: object
                             title: UpdateClusterData
                             properties:
-                                licenceKey:
-                                    type: string
-                                    description: >
-                                        A StorageOS product licence key, used to
-                                        register a cluster. The format of this
-                                        type is opaque and may change.
-
-                                        If this field is empty we assume that
-                                        the called does not want to update the
-                                        cluster's licence, and do not perform
-                                        any operation.
                                 disableTelemetry:
                                     type: boolean
                                     default: false
@@ -2454,6 +2533,87 @@ paths:
 
                 "503":
                     $ref: "#/components/responses/StoreError"
+    
+    /cluster/licence:
+        get:
+            summary: Retrieves the cluster's licence information
+            operationId: getLicence
+            description: >
+                Retrieves the cluster's current licence information
+            security:
+                - jwt: []
+            responses:
+                "200":
+                    description: The cluster's licence information.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Licence"
+
+                "401":
+                    $ref: "#/components/responses/Unauthorised"
+
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+
+                "500":
+                    $ref: "#/components/responses/ServerError"
+
+                "503":
+                    $ref: "#/components/responses/StoreError"
+
+        put:
+            summary: Update the licence global configuration settings
+            operationId: updateLicence
+            description: Update the cluster's licence.
+            security:
+                - jwt: []
+            requestBody:
+                description: >
+                    A StorageOS product licence key, used to
+                    register a cluster. The format of this
+                    type is opaque and may change.
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            title: UpdateLicence
+                            properties:
+                                key:
+                                    type: string
+                                    description: >
+                                        A StorageOS product licence key, used to
+                                        register a cluster. The format of this
+                                        type is opaque and may change.
+                                version:
+                                    $ref: "#/components/schemas/Version"
+            responses:
+                "200":
+                    description: The provided licence was successfully applied.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Licence"
+
+                "400":
+                    $ref: "#/components/responses/BadRequest"
+
+                "401":
+                    $ref: "#/components/responses/Unauthorised"
+
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+
+                "412":
+                    $ref: "#/components/responses/StaleWrite"
+
+                "500":
+                    $ref: "#/components/responses/ServerError"
+
+                "503":
+                    $ref: "#/components/responses/StoreError"
+                
 
     /diagnostics:
         get:

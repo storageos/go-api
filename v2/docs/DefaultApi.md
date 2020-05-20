@@ -22,6 +22,7 @@ Method | HTTP request | Description
 [**GetAuthenticatedUser**](DefaultApi.md#GetAuthenticatedUser) | **Get** /users/self | Get the currently authenticated user&#39;s information
 [**GetCluster**](DefaultApi.md#GetCluster) | **Get** /cluster | Retrieves the cluster&#39;s global configuration settings
 [**GetDiagnostics**](DefaultApi.md#GetDiagnostics) | **Get** /diagnostics | Retrieves a diagnostics bundle from the target node
+[**GetLicence**](DefaultApi.md#GetLicence) | **Get** /cluster/licence | Retrieves the cluster&#39;s licence information
 [**GetNamespace**](DefaultApi.md#GetNamespace) | **Get** /namespaces/{id} | Fetch a namespace
 [**GetNode**](DefaultApi.md#GetNode) | **Get** /nodes/{id} | Fetch a node
 [**GetPolicyGroup**](DefaultApi.md#GetPolicyGroup) | **Get** /policies/{id} | Fetch a policy group
@@ -36,11 +37,11 @@ Method | HTTP request | Description
 [**Spec**](DefaultApi.md#Spec) | **Get** /openapi | Serves this openapi spec file
 [**UpdateAuthenticatedUser**](DefaultApi.md#UpdateAuthenticatedUser) | **Put** /users/self | Update the authenticated user&#39;s information
 [**UpdateCluster**](DefaultApi.md#UpdateCluster) | **Put** /cluster | Update the cluster&#39;s global configuration settings
+[**UpdateLicence**](DefaultApi.md#UpdateLicence) | **Put** /cluster/licence | Update the licence global configuration settings
 [**UpdateNamespace**](DefaultApi.md#UpdateNamespace) | **Put** /namespaces/{id} | Update a namespace
 [**UpdateNode**](DefaultApi.md#UpdateNode) | **Put** /nodes/{id} | Update a node
 [**UpdatePolicyGroup**](DefaultApi.md#UpdatePolicyGroup) | **Put** /policies/{id} | Update a policy group
 [**UpdateUser**](DefaultApi.md#UpdateUser) | **Put** /users/{id} | Update a user
-[**UpdateVolume**](DefaultApi.md#UpdateVolume) | **Put** /namespaces/{namespaceID}/volumes/{id} | Update a volume
 
 
 
@@ -82,7 +83,7 @@ Name | Type | Description  | Notes
 
 ## AuthenticateUser
 
-> User AuthenticateUser(ctx, authUserData)
+> UserSession AuthenticateUser(ctx, authUserData)
 
 Authenticate a user
 
@@ -98,7 +99,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**User**](User.md)
+[**UserSession**](UserSession.md)
 
 ### Authorization
 
@@ -750,6 +751,36 @@ This endpoint does not need any parameter.
 [[Back to README]](../README.md)
 
 
+## GetLicence
+
+> Licence GetLicence(ctx, )
+
+Retrieves the cluster's licence information
+
+Retrieves the cluster's current licence information 
+
+### Required Parameters
+
+This endpoint does not need any parameter.
+
+### Return type
+
+[**Licence**](Licence.md)
+
+### Authorization
+
+[jwt](../README.md#jwt)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
 ## GetNamespace
 
 > Namespace GetNamespace(ctx, id)
@@ -1077,7 +1108,7 @@ Name | Type | Description  | Notes
 
 ## RefreshJwt
 
-> RefreshJwt(ctx, )
+> UserSession RefreshJwt(ctx, )
 
 Refresh the JWT
 
@@ -1089,7 +1120,7 @@ This endpoint does not need any parameter.
 
 ### Return type
 
- (empty response body)
+[**UserSession**](UserSession.md)
 
 ### Authorization
 
@@ -1188,6 +1219,40 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**Cluster**](Cluster.md)
+
+### Authorization
+
+[jwt](../README.md#jwt)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## UpdateLicence
+
+> Licence UpdateLicence(ctx, updateLicence)
+
+Update the licence global configuration settings
+
+Update the cluster's licence.
+
+### Required Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**updateLicence** | [**UpdateLicence**](UpdateLicence.md)|  | 
+
+### Return type
+
+[**Licence**](Licence.md)
 
 ### Authorization
 
@@ -1328,42 +1393,6 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**User**](User.md)
-
-### Authorization
-
-[jwt](../README.md#jwt)
-
-### HTTP request headers
-
-- **Content-Type**: application/json
-- **Accept**: application/json
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
-[[Back to Model list]](../README.md#documentation-for-models)
-[[Back to README]](../README.md)
-
-
-## UpdateVolume
-
-> Volume UpdateVolume(ctx, namespaceID, id, updateVolumeData)
-
-Update a volume
-
-Update the volume identified by id.
-
-### Required Parameters
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**namespaceID** | **string**| ID of a Namespace | 
-**id** | **string**| ID of a Volume | 
-**updateVolumeData** | [**UpdateVolumeData**](UpdateVolumeData.md)|  | 
-
-### Return type
-
-[**Volume**](Volume.md)
 
 ### Authorization
 
