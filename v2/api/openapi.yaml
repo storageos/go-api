@@ -42,7 +42,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/UserSession'
           description: Successfully authenticated the returned user.
           headers:
             Authorization:
@@ -51,6 +51,14 @@ paths:
               explode: false
               schema:
                 type: string
+              style: simple
+            Authorization-Expires-Seconds:
+              description: |
+                A formatted string representing the number of  seconds after which the login session will  expire.
+              explode: false
+              schema:
+                example: 60
+                type: uint64
               style: simple
         "400":
           content:
@@ -93,6 +101,10 @@ paths:
       operationId: refreshJwt
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSession'
           description: Refresh was successful
           headers:
             Authorization:
@@ -100,6 +112,14 @@ paths:
               explode: false
               schema:
                 type: string
+              style: simple
+            Authorization-Expires-In:
+              description: |
+                A formatted string representing the duration  after which the refreshed token will expire.
+              explode: false
+              schema:
+                example: 60
+                type: uint64
               style: simple
         "401":
           content:
@@ -522,7 +542,6 @@ paths:
                     The format of this type is undefined and may change but the defined properties will not change.
                   example: NDI0MjQyNDI0MjQyNDI0MjQy
                   maxLength: 30
-                  minLength: 1
                   type: string
               title: UpdateUserData
               type: object
@@ -858,7 +877,6 @@ paths:
                     The format of this type is undefined and may change but the defined properties will not change.
                   example: NDI0MjQyNDI0MjQyNDI0MjQy
                   maxLength: 30
-                  minLength: 1
                   type: string
               title: UpdateAuthenticatedUserData
               type: object
@@ -1087,7 +1105,7 @@ paths:
                     env: prod
                     rack: db-1
                   externalDocs:
-                    url: https://docs.storageos.com/docs/reference/labels
+                    url: https://docs.storageos.com/v2/openapi-help/labels
                   type: object
               title: CreateNamespaceData
               type: object
@@ -1370,7 +1388,7 @@ paths:
                     env: prod
                     rack: db-1
                   externalDocs:
-                    url: https://docs.storageos.com/docs/reference/labels
+                    url: https://docs.storageos.com/v2/openapi-help/labels
                   type: object
                 version:
                   description: |
@@ -1379,7 +1397,6 @@ paths:
                     The format of this type is undefined and may change but the defined properties will not change.
                   example: NDI0MjQyNDI0MjQyNDI0MjQy
                   maxLength: 30
-                  minLength: 1
                   type: string
               title: UpdateNamespaceData
               type: object
@@ -1735,7 +1752,7 @@ paths:
                     env: prod
                     rack: db-1
                   externalDocs:
-                    url: https://docs.storageos.com/docs/reference/labels
+                    url: https://docs.storageos.com/v2/openapi-help/labels
                   type: object
                 version:
                   description: |
@@ -1744,7 +1761,6 @@ paths:
                     The format of this type is undefined and may change but the defined properties will not change.
                   example: NDI0MjQyNDI0MjQyNDI0MjQy
                   maxLength: 30
-                  minLength: 1
                   type: string
               title: UpdateNodeData
               type: object
@@ -2196,7 +2212,7 @@ paths:
                     resourceType: volume
                     readOnly: true
                   items:
-                    $ref: '#/components/schemas/_policies_specs'
+                    $ref: '#/components/schemas/_policies__id__specs'
                   nullable: true
                   type: array
                 version:
@@ -2206,7 +2222,6 @@ paths:
                     The format of this type is undefined and may change but the defined properties will not change.
                   example: NDI0MjQyNDI0MjQyNDI0MjQy
                   maxLength: 30
-                  minLength: 1
                   type: string
               title: UpdatePolicyGroupData
               type: object
@@ -2396,7 +2411,7 @@ paths:
                     env: prod
                     rack: db-1
                   externalDocs:
-                    url: https://docs.storageos.com/docs/reference/labels
+                    url: https://docs.storageos.com/v2/openapi-help/labels
                   type: object
                 name:
                   description: |
@@ -2500,6 +2515,15 @@ paths:
           description: |
             The server is currently unable to handle the request due to a temporary store failure.
             Check the health of the node/cluster and if the error persists, contact support.
+        "507":
+          content:
+            application/json:
+              example:
+                error: insufficient storage capacity available
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            Available storage is not enough to handle the request.
       security:
       - jwt: []
       summary: Create a new Volume in the specified namespace
@@ -2732,153 +2756,6 @@ paths:
       security:
       - jwt: []
       summary: Fetch a volume
-    put:
-      description: Update the volume identified by id.
-      operationId: updateVolume
-      parameters:
-      - description: ID of a Namespace
-        explode: false
-        in: path
-        name: namespaceID
-        required: true
-        schema:
-          $ref: '#/components/schemas/NamespaceID'
-        style: simple
-      - description: ID of a Volume
-        explode: false
-        in: path
-        name: id
-        required: true
-        schema:
-          $ref: '#/components/schemas/VolumeID'
-        style: simple
-      requestBody:
-        $ref: '#/components/requestBodies/UpdateVolumeData'
-        content:
-          application/json:
-            schema:
-              example:
-                name: new-volume-name
-                description: This volume contains the data for my app
-                version: NDI0MjQyNDI0MjQyNDI0MjQy
-                labels:
-                  env: prod
-                  rack: db-1
-              properties:
-                name:
-                  description: |
-                    desired new volume name
-                  example: new-volume-name
-                  type: string
-                labels:
-                  additionalProperties:
-                    type: string
-                  description: |
-                    A set of arbitrary key value labels to apply to the entity.
-                  example:
-                    env: prod
-                    rack: db-1
-                  externalDocs:
-                    url: https://docs.storageos.com/docs/reference/labels
-                  type: object
-                description:
-                  example: This volume contains the data for my app
-                  type: string
-                version:
-                  description: |
-                    An opaque representation of an entity version at the time it was obtained from the API.
-                    All operations that mutate the entity must include this version field in the request unchanged.
-                    The format of this type is undefined and may change but the defined properties will not change.
-                  example: NDI0MjQyNDI0MjQyNDI0MjQy
-                  maxLength: 30
-                  minLength: 1
-                  type: string
-              title: UpdateVolumeData
-              type: object
-        description: update a volume to a desired state.
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Volume'
-          description: The volume was successfully updated
-        "400":
-          content:
-            application/json:
-              example:
-                error: a short description of the validation failure
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: The request does not conform to the API specification.
-        "401":
-          content:
-            application/json:
-              example:
-                error: authentication required
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            The requested endpoint requires authentication - you must log in first.
-            If attempting to log in, your credentials were not recognised.
-        "403":
-          content:
-            application/json:
-              example:
-                error: unauthorised
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            The authenticated user does not have permission to perform the requested action.
-        "404":
-          content:
-            application/json:
-              example:
-                error: not found
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            A referenced resource does not exist.
-        "412":
-          content:
-            application/json:
-              example:
-                error: attempting to write stale object
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
-            The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
-        "451":
-          content:
-            application/json:
-              example:
-                error: insufficient allowed capacity (bytes) (used 53687091200, allowed
-                  53687091200, requested 5000000)
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            The requested operation failed because your storageOS licence does not allow it, either create an account for a free licence or buy a professional licence.
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            The request caused an internal server error and should be retried.
-            Check the health of the node/cluster and if the error persists, contact support.
-        "503":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            The server is currently unable to handle the request due to a temporary store failure.
-            Check the health of the node/cluster and if the error persists, contact support.
-      security:
-      - jwt: []
-      summary: Update a volume
   /namespaces/{namespaceID}/volumes/{id}/attach:
     delete:
       description: Detach the volume identified by id.
@@ -3173,7 +3050,6 @@ paths:
           application/json:
             schema:
               example:
-                licenceKey: licenceKey
                 disableVersionCheck: false
                 disableCrashReporting: false
                 logFormat: json
@@ -3181,11 +3057,6 @@ paths:
                 disableTelemetry: false
                 version: NDI0MjQyNDI0MjQyNDI0MjQy
               properties:
-                licenceKey:
-                  description: |
-                    A StorageOS product licence key, used to register a cluster. The format of this type is opaque and may change.
-                    If this field is empty we assume that the called does not want to update the cluster's licence, and do not perform any operation.
-                  type: string
                 disableTelemetry:
                   default: false
                   description: |
@@ -3215,7 +3086,6 @@ paths:
                     The format of this type is undefined and may change but the defined properties will not change.
                   example: NDI0MjQyNDI0MjQyNDI0MjQy
                   maxLength: 30
-                  minLength: 1
                   type: string
               title: UpdateClusterData
               type: object
@@ -3284,6 +3154,148 @@ paths:
       security:
       - jwt: []
       summary: Update the cluster's global configuration settings
+  /cluster/licence:
+    get:
+      description: |
+        Retrieves the cluster's current licence information
+      operationId: getLicence
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Licence'
+          description: The cluster's licence information.
+        "401":
+          content:
+            application/json:
+              example:
+                error: authentication required
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The requested endpoint requires authentication - you must log in first.
+            If attempting to log in, your credentials were not recognised.
+        "403":
+          content:
+            application/json:
+              example:
+                error: unauthorised
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The authenticated user does not have permission to perform the requested action.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The request caused an internal server error and should be retried.
+            Check the health of the node/cluster and if the error persists, contact support.
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The server is currently unable to handle the request due to a temporary store failure.
+            Check the health of the node/cluster and if the error persists, contact support.
+      security:
+      - jwt: []
+      summary: Retrieves the cluster's licence information
+    put:
+      description: Update the cluster's licence.
+      operationId: updateLicence
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateLicence'
+        content:
+          application/json:
+            schema:
+              example:
+                version: NDI0MjQyNDI0MjQyNDI0MjQy
+                key: key
+              properties:
+                key:
+                  description: |
+                    A StorageOS product licence key, used to register a cluster. The format of this type is opaque and may change.
+                  type: string
+                version:
+                  description: |
+                    An opaque representation of an entity version at the time it was obtained from the API.
+                    All operations that mutate the entity must include this version field in the request unchanged.
+                    The format of this type is undefined and may change but the defined properties will not change.
+                  example: NDI0MjQyNDI0MjQyNDI0MjQy
+                  maxLength: 30
+                  type: string
+              title: UpdateLicence
+              type: object
+        description: |
+          A StorageOS product licence key, used to register a cluster. The format of this type is opaque and may change.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Licence'
+          description: The provided licence was successfully applied.
+        "400":
+          content:
+            application/json:
+              example:
+                error: a short description of the validation failure
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request does not conform to the API specification.
+        "401":
+          content:
+            application/json:
+              example:
+                error: authentication required
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The requested endpoint requires authentication - you must log in first.
+            If attempting to log in, your credentials were not recognised.
+        "403":
+          content:
+            application/json:
+              example:
+                error: unauthorised
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The authenticated user does not have permission to perform the requested action.
+        "412":
+          content:
+            application/json:
+              example:
+                error: attempting to write stale object
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
+            The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The request caused an internal server error and should be retried.
+            Check the health of the node/cluster and if the error persists, contact support.
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The server is currently unable to handle the request due to a temporary store failure.
+            Check the health of the node/cluster and if the error persists, contact support.
+      security:
+      - jwt: []
+      summary: Update the licence global configuration settings
   /diagnostics:
     get:
       description: |
@@ -3408,12 +3420,6 @@ components:
           schema:
             $ref: '#/components/schemas/CreateVolumeData'
       required: true
-    UpdateVolumeData:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/UpdateVolumeData'
-      required: true
     UpdateUserData:
       content:
         application/json:
@@ -3425,6 +3431,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/CreateUserData'
+      required: true
+    UpdateLicence:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateLicence'
       required: true
     CreatePolicyGroupData:
       content:
@@ -3543,6 +3555,15 @@ components:
             $ref: '#/components/schemas/Error'
       description: |
         A referenced resource does not exist.
+    InsufficientStorage:
+      content:
+        application/json:
+          example:
+            error: insufficient storage capacity available
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: |
+        Available storage is not enough to handle the request.
     StaleWrite:
       content:
         application/json:
@@ -3610,7 +3631,6 @@ components:
         The format of this type is undefined and may change but the defined properties will not change.
       example: NDI0MjQyNDI0MjQyNDI0MjQy
       maxLength: 30
-      minLength: 1
       type: string
     IgnoreVersion:
       default: false
@@ -3660,9 +3680,9 @@ components:
       - block
       example: ext4
       type: string
-    Health:
+    NodeHealth:
       description: |
-        The operational health of an entity
+        The operational health of a node entity
       enum:
       - online
       - offline
@@ -3670,6 +3690,73 @@ components:
       example: online
       readOnly: true
       type: string
+    MasterHealth:
+      description: |
+        The operational health of a volume master deployment
+      enum:
+      - online
+      - offline
+      - unknown
+      example: online
+      readOnly: true
+      type: string
+    ReplicaHealth:
+      description: |
+        The operational health of a volume replica deployment
+      enum:
+      - recovering
+      - provisioning
+      - provisioned
+      - syncing
+      - ready
+      - deleted
+      - failed
+      - unknown
+      example: ready
+      readOnly: true
+      type: string
+    SyncProgress:
+      description: "The progress report for an ongoing sync. \n"
+      properties:
+        bytesRemaining:
+          description: |
+            Number of bytes left remaining to complete the sync.
+          example: 500000
+          type: uint64
+        throughputBytes:
+          description: |
+            The average throughput of the sync given as bytes per  second.
+          example: 100000
+          type: uint64
+        estimatedSecondsRemaining:
+          description: |
+            The estimated time left for the sync to complete, given in seconds. When this field has a value of 0 either the  sync is complete or no duration estimate could be made. The values reported for bytesRemaining and  throughputBytes provide the client with the information needed to choose what to display.
+          example: 5
+          type: uint64
+      readOnly: true
+      type: object
+    CapacityStats:
+      example:
+        total: 42
+        available: 42
+        free: 42
+      properties:
+        total:
+          description: |
+            Total bytes in the filesystem
+          example: 42
+          type: uint64
+        free:
+          description: |
+            Free bytes in the filesystem available to root user
+          example: 42
+          type: uint64
+        available:
+          description: |
+            Byte value available to an unprivileged user
+          example: 42
+          type: uint64
+      type: object
     Labels:
       additionalProperties:
         type: string
@@ -3679,7 +3766,7 @@ components:
         env: prod
         rack: db-1
       externalDocs:
-        url: https://docs.storageos.com/docs/reference/labels
+        url: https://docs.storageos.com/v2/openapi-help/labels
       type: object
     LogLevel:
       default: info
@@ -3743,12 +3830,6 @@ components:
     Cluster:
       example:
         disableVersionCheck: false
-        licence:
-          clusterCapacityBytes: 1000000
-          kind: basic
-          clusterID: c5666b58-b805-4215-ab4a-cb094948ccc6
-          expiresAt: 2019-03-10T13:42:42Z
-          customerName: Desmond
         createdAt: 2019-03-10T13:42:42Z
         disableCrashReporting: false
         logFormat: json
@@ -3764,8 +3845,6 @@ components:
           example: c5666b58-b805-4215-ab4a-cb094948ccc6
           readOnly: true
           type: string
-        licence:
-          $ref: '#/components/schemas/Licence'
         disableTelemetry:
           default: false
           description: Disables collection of telemetry data across the cluster.
@@ -3814,7 +3893,6 @@ components:
             The format of this type is undefined and may change but the defined properties will not change.
           example: NDI0MjQyNDI0MjQyNDI0MjQy
           maxLength: 30
-          minLength: 1
           type: string
       type: object
     User:
@@ -3883,22 +3961,17 @@ components:
             The format of this type is undefined and may change but the defined properties will not change.
           example: NDI0MjQyNDI0MjQyNDI0MjQy
           maxLength: 30
-          minLength: 1
           type: string
       type: object
+    UserSession:
+      allOf:
+      - $ref: '#/components/schemas/User'
+      - $ref: '#/components/schemas/UserSession_allOf'
     Volume:
       example:
         replicas:
-        - inode: 1223
-          syncing: true
-          health: online
-          id: c5666b58-b805-4215-ab4a-cb094948ccc6
-          nodeID: c5666b58-b805-4215-ab4a-cb094948ccc6
-        - inode: 1223
-          syncing: true
-          health: online
-          id: c5666b58-b805-4215-ab4a-cb094948ccc6
-          nodeID: c5666b58-b805-4215-ab4a-cb094948ccc6
+        - null
+        - null
         description: This volume contains the data for my app
         fsType: ext4
         version: NDI0MjQyNDI0MjQyNDI0MjQy
@@ -3908,7 +3981,6 @@ components:
         master: ""
         sizeBytes: 5000
         attachedOn: ""
-        inode: 42
         createdAt: 2019-03-10T13:42:42Z
         namespaceID: ""
         name: app-data
@@ -3943,22 +4015,18 @@ components:
             env: prod
             rack: db-1
           externalDocs:
-            url: https://docs.storageos.com/docs/reference/labels
+            url: https://docs.storageos.com/v2/openapi-help/labels
           type: object
         fsType:
           $ref: '#/components/schemas/FsType'
-        inode:
-          example: 42
-          readOnly: true
-          type: uint32
         master:
           allOf:
-          - $ref: '#/components/schemas/DeploymentInfo'
+          - $ref: '#/components/schemas/MasterDeploymentInfo'
           readOnly: true
         replicas:
           default: []
           items:
-            $ref: '#/components/schemas/DeploymentInfo'
+            $ref: '#/components/schemas/ReplicaDeploymentInfo'
           nullable: true
           readOnly: true
           type: array
@@ -3995,16 +4063,9 @@ components:
             The format of this type is undefined and may change but the defined properties will not change.
           example: NDI0MjQyNDI0MjQyNDI0MjQy
           maxLength: 30
-          minLength: 1
           type: string
       type: object
     DeploymentInfo:
-      example:
-        inode: 1223
-        syncing: true
-        health: online
-        id: c5666b58-b805-4215-ab4a-cb094948ccc6
-        nodeID: c5666b58-b805-4215-ab4a-cb094948ccc6
       properties:
         id:
           description: |
@@ -4017,17 +4078,19 @@ components:
           example: c5666b58-b805-4215-ab4a-cb094948ccc6
           readOnly: true
           type: string
-        inode:
-          example: 1223
-          readOnly: true
-          type: uint32
-        health:
-          $ref: '#/components/schemas/Health'
-        syncing:
+        promotable:
           description: |
-            indicates if a volume is undergoing data synchronization operations
+            Indicates if the volume deployment is eligible for promotion
           type: boolean
       type: object
+    MasterDeploymentInfo:
+      allOf:
+      - $ref: '#/components/schemas/DeploymentInfo'
+      - $ref: '#/components/schemas/MasterDeploymentInfo_allOf'
+    ReplicaDeploymentInfo:
+      allOf:
+      - $ref: '#/components/schemas/DeploymentInfo'
+      - $ref: '#/components/schemas/ReplicaDeploymentInfo_allOf'
     Node:
       example:
         createdAt: 2019-03-10T13:42:42Z
@@ -4039,6 +4102,10 @@ components:
         supervisorEndpoint: '["192.0.2.1:5704"]'
         clusteringEndpoint: '["192.0.2.1:5710"]'
         version: NDI0MjQyNDI0MjQyNDI0MjQy
+        capacity:
+          total: 42
+          available: 42
+          free: 42
         labels:
           env: prod
           rack: db-1
@@ -4058,7 +4125,9 @@ components:
           readOnly: true
           type: string
         health:
-          $ref: '#/components/schemas/Health'
+          $ref: '#/components/schemas/NodeHealth'
+        capacity:
+          $ref: '#/components/schemas/CapacityStats'
         ioEndpoint:
           description: |
             Endpoint at which we operate our dataplane's dfs service. (used for IO operations)
@@ -4096,7 +4165,7 @@ components:
             env: prod
             rack: db-1
           externalDocs:
-            url: https://docs.storageos.com/docs/reference/labels
+            url: https://docs.storageos.com/v2/openapi-help/labels
           type: object
         createdAt:
           description: |
@@ -4125,7 +4194,6 @@ components:
             The format of this type is undefined and may change but the defined properties will not change.
           example: NDI0MjQyNDI0MjQyNDI0MjQy
           maxLength: 30
-          minLength: 1
           type: string
       type: object
     Namespace:
@@ -4157,7 +4225,7 @@ components:
             env: prod
             rack: db-1
           externalDocs:
-            url: https://docs.storageos.com/docs/reference/labels
+            url: https://docs.storageos.com/v2/openapi-help/labels
           type: object
         createdAt:
           description: |
@@ -4186,7 +4254,6 @@ components:
             The format of this type is undefined and may change but the defined properties will not change.
           example: NDI0MjQyNDI0MjQyNDI0MjQy
           maxLength: 30
-          minLength: 1
           type: string
       type: object
     PolicyGroup:
@@ -4243,7 +4310,7 @@ components:
             resourceType: volume
             readOnly: true
           items:
-            $ref: '#/components/schemas/_policies_specs'
+            $ref: '#/components/schemas/_policies__id__specs'
           nullable: true
           type: array
         createdAt:
@@ -4273,7 +4340,6 @@ components:
             The format of this type is undefined and may change but the defined properties will not change.
           example: NDI0MjQyNDI0MjQyNDI0MjQy
           maxLength: 30
-          minLength: 1
           type: string
       type: object
     Licence:
@@ -4281,8 +4347,10 @@ components:
         A representation of a cluster's licence properties
       example:
         clusterCapacityBytes: 1000000
-        kind: basic
+        kind: unregistered
         clusterID: c5666b58-b805-4215-ab4a-cb094948ccc6
+        usedBytes: 42
+        version: NDI0MjQyNDI0MjQyNDI0MjQy
         expiresAt: 2019-03-10T13:42:42Z
         customerName: Desmond
       properties:
@@ -4308,15 +4376,28 @@ components:
           example: 1000000
           minimum: 0
           type: uint64
+        usedBytes:
+          description: |
+            Sum of the size of all volumes in the cluster
+          example: 42
+          type: uint64
         kind:
           description: |
             Denotes which category the licence belongs to
-          example: basic
+          example: unregistered
           type: string
         customerName:
           description: |
             A user friendly reference to the customer
           example: Desmond
+          type: string
+        version:
+          description: |
+            An opaque representation of an entity version at the time it was obtained from the API.
+            All operations that mutate the entity must include this version field in the request unchanged.
+            The format of this type is undefined and may change but the defined properties will not change.
+          example: NDI0MjQyNDI0MjQyNDI0MjQy
+          maxLength: 30
           type: string
       type: object
     AcceptedMessage:
@@ -4446,7 +4527,6 @@ components:
             The format of this type is undefined and may change but the defined properties will not change.
           example: NDI0MjQyNDI0MjQyNDI0MjQy
           maxLength: 30
-          minLength: 1
           type: string
       title: UpdateUserData
       type: object
@@ -4469,7 +4549,6 @@ components:
             The format of this type is undefined and may change but the defined properties will not change.
           example: NDI0MjQyNDI0MjQyNDI0MjQy
           maxLength: 30
-          minLength: 1
           type: string
       title: UpdateAuthenticatedUserData
       type: object
@@ -4495,7 +4574,7 @@ components:
             env: prod
             rack: db-1
           externalDocs:
-            url: https://docs.storageos.com/docs/reference/labels
+            url: https://docs.storageos.com/v2/openapi-help/labels
           type: object
       title: CreateNamespaceData
       type: object
@@ -4515,7 +4594,7 @@ components:
             env: prod
             rack: db-1
           externalDocs:
-            url: https://docs.storageos.com/docs/reference/labels
+            url: https://docs.storageos.com/v2/openapi-help/labels
           type: object
         version:
           description: |
@@ -4524,7 +4603,6 @@ components:
             The format of this type is undefined and may change but the defined properties will not change.
           example: NDI0MjQyNDI0MjQyNDI0MjQy
           maxLength: 30
-          minLength: 1
           type: string
       title: UpdateNamespaceData
       type: object
@@ -4544,7 +4622,7 @@ components:
             env: prod
             rack: db-1
           externalDocs:
-            url: https://docs.storageos.com/docs/reference/labels
+            url: https://docs.storageos.com/v2/openapi-help/labels
           type: object
         version:
           description: |
@@ -4553,7 +4631,6 @@ components:
             The format of this type is undefined and may change but the defined properties will not change.
           example: NDI0MjQyNDI0MjQyNDI0MjQy
           maxLength: 30
-          minLength: 1
           type: string
       title: UpdateNodeData
       type: object
@@ -4569,8 +4646,12 @@ components:
             The resource type this policy grants access to.
           enum:
           - '*'
-          - volume
+          - cluster
+          - namespace
+          - node
           - policy
+          - user
+          - volume
           example: volume
           type: string
         readOnly:
@@ -4609,6 +4690,28 @@ components:
           type: array
       title: CreatePolicyGroupData
       type: object
+    _policies__id__specs:
+      properties:
+        namespaceID:
+          description: |
+            A unique identifier for a namespace. The format of this type is undefined and may change but the defined properties will not change..
+          example: c5666b58-b805-4215-ab4a-cb094948ccc6
+          type: string
+        resourceType:
+          description: |
+            The resource type this policy grants access to.
+          enum:
+          - '*'
+          - volume
+          - policy
+          example: volume
+          type: string
+        readOnly:
+          default: false
+          description: |
+            If true, disallows requests that attempt to mutate the resource.
+          example: false
+          type: boolean
     UpdatePolicyGroupData:
       example:
         specs:
@@ -4631,7 +4734,7 @@ components:
             resourceType: volume
             readOnly: true
           items:
-            $ref: '#/components/schemas/_policies_specs'
+            $ref: '#/components/schemas/_policies__id__specs'
           nullable: true
           type: array
         version:
@@ -4641,7 +4744,6 @@ components:
             The format of this type is undefined and may change but the defined properties will not change.
           example: NDI0MjQyNDI0MjQyNDI0MjQy
           maxLength: 30
-          minLength: 1
           type: string
       title: UpdatePolicyGroupData
       type: object
@@ -4670,7 +4772,7 @@ components:
             env: prod
             rack: db-1
           externalDocs:
-            url: https://docs.storageos.com/docs/reference/labels
+            url: https://docs.storageos.com/v2/openapi-help/labels
           type: object
         name:
           description: |
@@ -4696,45 +4798,6 @@ components:
       - sizeBytes
       title: CreateVolumeData
       type: object
-    UpdateVolumeData:
-      example:
-        name: new-volume-name
-        description: This volume contains the data for my app
-        version: NDI0MjQyNDI0MjQyNDI0MjQy
-        labels:
-          env: prod
-          rack: db-1
-      properties:
-        name:
-          description: |
-            desired new volume name
-          example: new-volume-name
-          type: string
-        labels:
-          additionalProperties:
-            type: string
-          description: |
-            A set of arbitrary key value labels to apply to the entity.
-          example:
-            env: prod
-            rack: db-1
-          externalDocs:
-            url: https://docs.storageos.com/docs/reference/labels
-          type: object
-        description:
-          example: This volume contains the data for my app
-          type: string
-        version:
-          description: |
-            An opaque representation of an entity version at the time it was obtained from the API.
-            All operations that mutate the entity must include this version field in the request unchanged.
-            The format of this type is undefined and may change but the defined properties will not change.
-          example: NDI0MjQyNDI0MjQyNDI0MjQy
-          maxLength: 30
-          minLength: 1
-          type: string
-      title: UpdateVolumeData
-      type: object
     AttachVolumeData:
       example:
         nodeID: c5666b58-b805-4215-ab4a-cb094948ccc6
@@ -4749,7 +4812,6 @@ components:
       type: object
     UpdateClusterData:
       example:
-        licenceKey: licenceKey
         disableVersionCheck: false
         disableCrashReporting: false
         logFormat: json
@@ -4757,11 +4819,6 @@ components:
         disableTelemetry: false
         version: NDI0MjQyNDI0MjQyNDI0MjQy
       properties:
-        licenceKey:
-          description: |
-            A StorageOS product licence key, used to register a cluster. The format of this type is opaque and may change.
-            If this field is empty we assume that the called does not want to update the cluster's licence, and do not perform any operation.
-          type: string
         disableTelemetry:
           default: false
           description: |
@@ -4791,10 +4848,54 @@ components:
             The format of this type is undefined and may change but the defined properties will not change.
           example: NDI0MjQyNDI0MjQyNDI0MjQy
           maxLength: 30
-          minLength: 1
           type: string
       title: UpdateClusterData
       type: object
+    UpdateLicence:
+      example:
+        version: NDI0MjQyNDI0MjQyNDI0MjQy
+        key: key
+      properties:
+        key:
+          description: |
+            A StorageOS product licence key, used to register a cluster. The format of this type is opaque and may change.
+          type: string
+        version:
+          description: |
+            An opaque representation of an entity version at the time it was obtained from the API.
+            All operations that mutate the entity must include this version field in the request unchanged.
+            The format of this type is undefined and may change but the defined properties will not change.
+          example: NDI0MjQyNDI0MjQyNDI0MjQy
+          maxLength: 30
+          type: string
+      title: UpdateLicence
+      type: object
+    UserSession_allOf_session:
+      properties:
+        expiresInSeconds:
+          description: |
+            The maximum duration which the auth session  will remain valid for in seconds.
+          example: 60
+          minimum: 0
+          type: uint64
+        token:
+          description: |
+            The JWT token for the auth session.
+          type: string
+    UserSession_allOf:
+      properties:
+        session:
+          $ref: '#/components/schemas/UserSession_allOf_session'
+    MasterDeploymentInfo_allOf:
+      properties:
+        health:
+          $ref: '#/components/schemas/MasterHealth'
+    ReplicaDeploymentInfo_allOf:
+      properties:
+        health:
+          $ref: '#/components/schemas/ReplicaHealth'
+        syncProgress:
+          $ref: '#/components/schemas/SyncProgress'
     PolicyGroup_users:
       properties:
         id:
