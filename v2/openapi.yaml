@@ -1,7 +1,7 @@
 openapi: "3.0.2"
 info:
     title: "StorageOS API"
-    version: "2.1.0"
+    version: "2.2.0"
     contact:
         name: StorageOS
         url: https://storageos.com
@@ -2921,6 +2921,21 @@ paths:
 
                 "500":
                     $ref: "#/components/responses/ServerError"
+
+                "502":
+                    description: >
+                        The server is returning an incomplete diagnostic bundle.
+
+                        A bundle may contain partial information if one or more
+                        nodes failed to respond, or some other error occured
+                        during the collection process.
+
+                        The returned bundle is still valid and should be sent to
+                        StorageOS.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
 
                 "503":
                     $ref: "#/components/responses/StoreError"
