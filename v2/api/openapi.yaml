@@ -5,7 +5,7 @@ info:
     name: StorageOS
     url: https://storageos.com
   title: StorageOS API
-  version: 2.1.0
+  version: 2.2.0
 externalDocs:
   description: The latest StorageOS user documentation
   url: https://docs.storageos.com/
@@ -3915,6 +3915,15 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
+        "502":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The server is returning an incomplete diagnostic bundle.
+            A bundle may contain partial information if one or more nodes failed to respond, or some other error occured during the collection process.
+            The returned bundle is still valid and should be sent to StorageOS.
         "503":
           content:
             application/json:
@@ -5263,6 +5272,7 @@ components:
             If true, disallows requests that attempt to mutate the resource.
           example: false
           type: boolean
+      type: object
     CreatePolicyGroupData:
       example:
         specs:
@@ -5315,6 +5325,7 @@ components:
             If true, disallows requests that attempt to mutate the resource.
           example: false
           type: boolean
+      type: object
     UpdatePolicyGroupData:
       example:
         specs:
@@ -5560,20 +5571,24 @@ components:
           description: |
             The JWT token for the auth session.
           type: string
+      type: object
     UserSession_allOf:
       properties:
         session:
           $ref: '#/components/schemas/UserSession_allOf_session'
+      type: object
     MasterDeploymentInfo_allOf:
       properties:
         health:
           $ref: '#/components/schemas/MasterHealth'
+      type: object
     ReplicaDeploymentInfo_allOf:
       properties:
         health:
           $ref: '#/components/schemas/ReplicaHealth'
         syncProgress:
           $ref: '#/components/schemas/SyncProgress'
+      type: object
     PolicyGroup_users:
       properties:
         id:
@@ -5584,6 +5599,7 @@ components:
         username:
           example: admin
           type: string
+      type: object
   securitySchemes:
     jwt:
       bearerFormat: JWT
