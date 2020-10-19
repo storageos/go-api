@@ -1,7 +1,7 @@
 openapi: "3.0.2"
 info:
     title: "StorageOS API"
-    version: "2.2.0"
+    version: "2.3.0"
     contact:
         name: StorageOS
         url: https://storageos.com
@@ -127,6 +127,19 @@ components:
             description: >
                 The file system type of a volume. "block" is a raw block device (no filesystem).
             example: "ext4"
+            
+        AttachType:
+            type: string
+            readOnly: true
+            enum:
+                - "unknown"
+                - "detached"
+                - "nfs"
+                - "host"
+            description: >
+                The attachment type of a volume. "host" indicates that the
+                volume is consumed by the node it is attached to.
+            example: "host"
 
         NodeHealth:
             type: string
@@ -166,7 +179,7 @@ components:
             description: >
                 The operational health of a volume replica deployment
             example: "ready"
-
+            
         SyncProgress:
             type: object
             readOnly: true
@@ -194,7 +207,7 @@ components:
                     example: 5
             description: >
                 The progress report for an ongoing sync. 
-
+      
         CapacityStats:
             type: object
             properties:
@@ -216,7 +229,124 @@ components:
                     description: >
                        Byte value available to an unprivileged user
                     example: 42
+        NfsAcl:
+            type: object
+            properties:
+              identity:
+                type: object
+                properties:
+                    identityType:
+                        type: string
+                        enum:
+                            - "cidr"
+                            - "hostname"
+                            - "netgroup"
+                        description: >
+                            The identity type used to identify the nfs client.
+                        example: "hostname"
+                    matcher:
+                        type: string
+                        description: >
+                            NFS identity matcher.
 
+                            For "cidr", this should be a valid CIDR block string
+                            such as "10.0.0.0/8".
+
+                            For "hostname", this must be the hostname sent by the
+                            client, with ? and * wildcard characters.
+
+                            For netgroup, this must be in the form of
+                            "@netgroup" with ? and * wildcard characters.
+                        example: "*.prod.storageos.com"
+              squashConfig:
+                type: object
+                properties:
+                    uid:
+                        type: int64
+                    gid:
+                        type: int64
+                    squash:
+                        type: string
+                        enum:
+                            - "none"
+                            - "root"
+                            - "rootuid"
+                            - "all"
+                        description: >
+                            SquashConfig defines the root squashing behaviour. 
+                            
+                            When a client creates a file, it sends the user UID
+                            from the client. If the client is running as root,
+                            this sends uid=0. Root squashing allows the NFS
+                            administrator to prevent the client from writing as
+                            "root" to the NFS share, instead mapping the client
+                            to a new UID/GID (usually nfsnobody, -2).
+
+                            "none" performs no UID/GID alterations, using the
+                            values sent by the client.
+
+                            "root" mapps UID & GID 0 to the values specified.
+
+                            "rootuid" maps UID 0 and a GID of any value to the
+                            value specified.
+
+                            "all" maps changes all UID and GID values to those
+                            specified.
+
+                        example: "root"
+              accessLevel:
+                type: string
+                enum:
+                    - "ro"
+                    - "rw"
+                description: >
+                    The access level this ACL grants - read-only, or read-write.
+                example: "rw"
+                    
+        NfsExportConfig:
+            type: object
+            properties:
+                exportID:
+                    type: uint64
+                    default: 0
+                    description: >
+                        ID for this export
+                    example: 42
+                path:
+                    type: string
+                    default: ""
+                    description: >
+                        The path relative to the volume root to serve as the export root
+                    example: "/very/important/files/"
+                pseudoPath:
+                    type: string
+                    default: ""
+                    description: >
+                        The configured pseudo path in the NFS virtual filesystem.
+                        This is the path clients will see when traversing to this
+                        export on the NFS share.
+                    example: "/very/important/files/somewhere/else"
+                acls:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/NfsAcl"
+        NFSConfig:
+            type: object
+            properties:
+                exports:
+                    nullable: true
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/NfsExportConfig"
+                serviceEndpoint:
+                    type: string
+                    readOnly: true
+                    nullable: true
+                    default: ""
+                    description: >
+                        The address to which the NFS server is bound.
+                
+                        
         Labels:
             type: object
             description: >
@@ -443,6 +573,10 @@ components:
                     readOnly: true
                     allOf:
                         - $ref: "#/components/schemas/NodeID"
+                nfs:
+                    readOnly: true
+                    nullable: true
+                    $ref: "#/components/schemas/NFSConfig"
                 namespaceID:
                     readOnly: true
                     allOf:
@@ -451,6 +585,9 @@ components:
                     $ref: "#/components/schemas/Labels"
                 fsType:
                     $ref: "#/components/schemas/FsType"
+                attachmentType:
+                    readOnly: true
+                    $ref: "#/components/schemas/AttachType"
                 master:
                     readOnly: true
                     allOf:
@@ -692,6 +829,14 @@ components:
                     description: >
                         A user friendly reference to the customer
                     example: "Desmond"
+                features:
+                    type: array
+                    items:
+                        type: string
+                    nullable: true
+                    description: >
+                        A list of product features which are enabled by the 
+                        licence, subject to the installed version.
                 version:
                     $ref: "#/components/schemas/Version"
             description: >
@@ -874,7 +1019,8 @@ components:
 
         InsufficientStorage:
             description: >
-                Available storage is not enough to handle the request.
+                Available storage is not enough to handle the request or
+                target node has reached maximum number of attached volumes.
             content:
                 application/json:
                     schema:
@@ -2503,6 +2649,10 @@ paths:
 
                 "500":
                     $ref: "#/components/responses/ServerError"
+
+                "507":
+                    $ref: "#/components/responses/InsufficientStorage"
+
         delete:
             summary: Detach the given volume
             operationId: detachVolume
@@ -2544,6 +2694,215 @@ paths:
 
                 "503":
                     $ref: "#/components/responses/StoreError"
+    /namespaces/{namespaceID}/volumes/{id}/nfs/attach:
+        parameters:
+            - name: namespaceID
+              in: path
+              description: ID of a Namespace
+              required: true
+              schema:
+                  $ref: "#/components/schemas/NamespaceID"
+            - name: id
+              in: path
+              description: ID of a Volume
+              required: true
+              schema:
+                  $ref: "#/components/schemas/VolumeID"
+
+        post:
+            summary: attach and share the volume using NFS
+            operationId: attachNFSVolume
+            description: >
+                Attach the given volume as an NFS volume.
+                
+                If no export configuration has been set via the
+                /nfs/export-config endpoint, the nfs service will start with
+                defaults settings (sharing the volume at its root).
+            security:
+                - jwt: []
+            parameters:
+                - $ref: "#/components/parameters/IgnoreVersion"
+                - $ref: "#/components/parameters/AsyncHeader"
+                - $ref: "#/components/parameters/AsyncParam"
+            requestBody:
+                description: NFS volume configuration. The version is the corresponding volume's version.
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            title: AttachNFSVolumeData
+                            properties:
+                                version:
+                                    $ref: "#/components/schemas/Version"
+
+            responses:
+                "200":
+                    description: The volume was successfully attached.
+
+                "400":
+                    $ref: "#/components/responses/BadRequest"
+
+                "401":
+                    $ref: "#/components/responses/Unauthorised"
+
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+
+                "404":
+                    $ref: "#/components/responses/NotFound"
+
+                "409":
+                    $ref: "#/components/responses/InUse"
+
+                "412":
+                    $ref: "#/components/responses/StaleWrite"
+
+                "422":
+                    $ref: "#/components/responses/InvalidStateTransition"
+
+                "500":
+                    $ref: "#/components/responses/ServerError"
+                    
+    /namespaces/{namespaceID}/volumes/{id}/nfs/mount-endpoint:
+        parameters:
+            - name: namespaceID
+              in: path
+              description: ID of a Namespace
+              required: true
+              schema:
+                  $ref: "#/components/schemas/NamespaceID"
+            - name: id
+              in: path
+              description: ID of a Volume
+              required: true
+              schema:
+                  $ref: "#/components/schemas/VolumeID"
+
+        put:
+            summary: Update an nfs volume's mount endpoint
+            operationId: updateNFSVolumeMountEndpoint
+            description: >
+                Update the NFS volume's mount endpoint
+            security:
+                - jwt: []
+            parameters:
+                - $ref: "#/components/parameters/IgnoreVersion"
+                - $ref: "#/components/parameters/AsyncHeader"
+                - $ref: "#/components/parameters/AsyncParam"
+            requestBody:
+                description: >
+                  Update an existing NFS volume's mount endpoint
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            title: NFSVolumeMountEndpoint
+                            properties:
+                                mountEndpoint:
+                                    type: string
+                                    default: ""
+                                    description: >
+                                        The address to which the NFS server is bound.
+                                version:
+                                    $ref: "#/components/schemas/Version"
+
+            responses:
+                "200":
+                    description: The volume's mount endpoint was successfully updated.
+
+                "400":
+                    $ref: "#/components/responses/BadRequest"
+
+                "401":
+                    $ref: "#/components/responses/Unauthorised"
+
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+
+                "404":
+                    $ref: "#/components/responses/NotFound"
+
+                "409":
+                    $ref: "#/components/responses/InUse"
+
+                "412":
+                    $ref: "#/components/responses/StaleWrite"
+
+                "500":
+                    $ref: "#/components/responses/ServerError"
+
+    /namespaces/{namespaceID}/volumes/{id}/nfs/export-config:
+        parameters:
+            - name: namespaceID
+              in: path
+              description: ID of a Namespace
+              required: true
+              schema:
+                  $ref: "#/components/schemas/NamespaceID"
+            - name: id
+              in: path
+              description: ID of a Volume
+              required: true
+              schema:
+                  $ref: "#/components/schemas/VolumeID"
+
+        put:
+            summary: Update an nfs volume's export configuration
+            operationId: updateNFSVolumeExports
+            description: >
+                Update the NFS volume's export configuration
+            security:
+                - jwt: []
+            parameters:
+                - $ref: "#/components/parameters/IgnoreVersion"
+                - $ref: "#/components/parameters/AsyncHeader"
+                - $ref: "#/components/parameters/AsyncParam"
+            requestBody:
+                description: >
+                    Updates an existing volume's NFS export configuration.
+
+                    The volume will use the given export configuration once
+                    attached.
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            title: NFSVolumeExports
+                            properties:
+                                exports:
+                                    type: array
+                                    items:
+                                        $ref: "#/components/schemas/NfsExportConfig"
+                                version:
+                                    $ref: "#/components/schemas/Version"
+
+            responses:
+                "200":
+                    description: The volume's NFS export configuration was successfully updated.
+
+                "400":
+                    $ref: "#/components/responses/BadRequest"
+
+                "401":
+                    $ref: "#/components/responses/Unauthorised"
+
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+
+                "404":
+                    $ref: "#/components/responses/NotFound"
+
+                "409":
+                    $ref: "#/components/responses/InUse"
+
+                "412":
+                    $ref: "#/components/responses/StaleWrite"
+
+                "500":
+                    $ref: "#/components/responses/ServerError"
 
     /namespaces/{namespaceID}/volumes/{id}/replicas:
         parameters:
