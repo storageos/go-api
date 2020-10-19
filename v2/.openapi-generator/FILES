@@ -6,6 +6,8 @@ api_default.go
 client.go
 configuration.go
 docs/AcceptedMessage.md
+docs/AttachNfsVolumeData.md
+docs/AttachType.md
 docs/AttachVolumeData.md
 docs/AuthUserData.md
 docs/CapacityStats.md
@@ -25,6 +27,13 @@ docs/MasterDeploymentInfo.md
 docs/MasterDeploymentInfoAllOf.md
 docs/MasterHealth.md
 docs/Namespace.md
+docs/NfsAcl.md
+docs/NfsAclIdentity.md
+docs/NfsAclSquashConfig.md
+docs/NfsConfig.md
+docs/NfsExportConfig.md
+docs/NfsVolumeExports.md
+docs/NfsVolumeMountEndpoint.md
 docs/Node.md
 docs/NodeHealth.md
 docs/PoliciesIdSpecs.md
@@ -56,6 +65,8 @@ go.sum
 model__policies__id__specs.go
 model__policies_specs.go
 model_accepted_message.go
+model_attach_nfs_volume_data.go
+model_attach_type.go
 model_attach_volume_data.go
 model_auth_user_data.go
 model_capacity_stats.go
@@ -74,6 +85,13 @@ model_master_deployment_info.go
 model_master_deployment_info_all_of.go
 model_master_health.go
 model_namespace.go
+model_nfs_acl.go
+model_nfs_acl_identity.go
+model_nfs_acl_squash_config.go
+model_nfs_config.go
+model_nfs_export_config.go
+model_nfs_volume_exports.go
+model_nfs_volume_mount_endpoint.go
 model_node.go
 model_node_health.go
 model_policy_group.go
