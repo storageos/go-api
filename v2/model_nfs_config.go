@@ -9,7 +9,9 @@
  */
 
 package api
-// Error struct for Error
-type Error struct {
-	Error string `json:"error"`
+// NfsConfig struct for NfsConfig
+type NfsConfig struct {
+	Exports *[]NfsExportConfig `json:"exports,omitempty"`
+	// The address to which the NFS server is bound. 
+	ServiceEndpoint *string `json:"serviceEndpoint,omitempty"`
 }
