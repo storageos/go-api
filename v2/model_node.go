@@ -37,3 +37,18 @@ type Node struct {
 	// An opaque representation of an entity version at the time it was obtained from the API. All operations that mutate the entity must include this version field in the request unchanged. The format of this type is undefined and may change but the defined properties will not change. 
 	Version string `json:"version,omitempty"`
 }
+
+// GetID returns the object ID.
+func (t *Node) GetID() string {
+	return t.Id
+}
+
+// GetName returns the object name.
+func (t *Node) GetName() string {
+	return t.Name
+}
+
+// GetLabels returns the object's labels.
+func (t *Node) GetLabels() map[string]string {
+	return t.Labels
+}

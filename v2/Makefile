@@ -11,13 +11,24 @@ help: ## Display this help.
 
 build: generate customise ## Re-generates the API from openapi.yaml.
 
-generate: ## Runs the openapi-generator on openapi.yaml.
+generate: generate-base generate-custom ## Runs the openapi-generator on openapi.yaml.
+generate-base:
 	docker run --rm -v `pwd`:/local -u `id -u ${USER}`:`id -g ${USER}` \
 		openapitools/openapi-generator-cli:latest generate \
 		--strict-spec=true \
 		--additional-properties enumClassPrefix=true \
 		--additional-properties packageName=api \
 		--additional-properties packageVersion=$(VERSION) \
+		-i /local/openapi.yaml -g go -o /local
+generate-custom:
+	docker run --rm -v `pwd`:/local -u `id -u ${USER}`:`id -g ${USER}` \
+		openapitools/openapi-generator-cli:latest generate \
+		--strict-spec=true \
+		--additional-properties enumClassPrefix=true \
+		--additional-properties packageName=api \
+		--additional-properties packageVersion=$(VERSION) \
+		--global-property models="Node" \
+		-t /local/templates \
 		-i /local/openapi.yaml -g go -o /local
 
 customise:  ## Applies customisations to the generated API.
@@ -27,5 +38,3 @@ customise:  ## Applies customisations to the generated API.
 clean: ## Removes generated files.
 	rm -f .openapi-generator-ignore .gitignore git_push.sh .travis.yml *.go go.mod go.sum
 	rm -rf .openapi-generator/ api/ docs/
-
-
