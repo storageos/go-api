@@ -11,7 +11,7 @@ help: ## Display this help.
 
 build: generate customise ## Re-generates the API from openapi.yaml.
 
-generate: generate-base generate-custom ## Runs the openapi-generator on openapi.yaml.
+generate: generate-base generate-node generate-namespace generate-volume ## Runs the openapi-generator on openapi.yaml.
 generate-base:
 	docker run --rm -v `pwd`:/local -u `id -u ${USER}`:`id -g ${USER}` \
 		openapitools/openapi-generator-cli:latest generate \
@@ -20,7 +20,7 @@ generate-base:
 		--additional-properties packageName=api \
 		--additional-properties packageVersion=$(VERSION) \
 		-i /local/openapi.yaml -g go -o /local
-generate-custom:
+generate-node:
 	docker run --rm -v `pwd`:/local -u `id -u ${USER}`:`id -g ${USER}` \
 		openapitools/openapi-generator-cli:latest generate \
 		--strict-spec=true \
@@ -28,7 +28,27 @@ generate-custom:
 		--additional-properties packageName=api \
 		--additional-properties packageVersion=$(VERSION) \
 		--global-property models="Node" \
-		-t /local/templates \
+		-t /local/templates/node \
+		-i /local/openapi.yaml -g go -o /local
+generate-namespace:
+	docker run --rm -v `pwd`:/local -u `id -u ${USER}`:`id -g ${USER}` \
+		openapitools/openapi-generator-cli:latest generate \
+		--strict-spec=true \
+		--additional-properties enumClassPrefix=true \
+		--additional-properties packageName=api \
+		--additional-properties packageVersion=$(VERSION) \
+		--global-property models="Namespace" \
+		-t /local/templates/namespace \
+		-i /local/openapi.yaml -g go -o /local
+generate-volume:
+	docker run --rm -v `pwd`:/local -u `id -u ${USER}`:`id -g ${USER}` \
+		openapitools/openapi-generator-cli:latest generate \
+		--strict-spec=true \
+		--additional-properties enumClassPrefix=true \
+		--additional-properties packageName=api \
+		--additional-properties packageVersion=$(VERSION) \
+		--global-property models="Volume" \
+		-t /local/templates/volume \
 		-i /local/openapi.yaml -g go -o /local
 
 customise:  ## Applies customisations to the generated API.
