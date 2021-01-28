@@ -51,7 +51,7 @@ func (t {{classname}}) GetName() string {
 
 // GetNamespace returns the volume namespace. 
 func (t {{classname}}) GetNamespace() string {
-	return ""
+	return t.NamespaceID
 }
 
 // GetLabels returns the volume labels.
