@@ -56,5 +56,6 @@ customise:  ## Applies customisations to the generated API.
 	sed -i "s#module github.com/GIT_USER_ID/GIT_REPO_ID#module github.com/${GIT_USER_ID}/${GIT_REPO_ID}/v2#g" go.mod
 
 clean: ## Removes generated files.
-	rm -f .openapi-generator-ignore .gitignore git_push.sh .travis.yml *.go go.mod go.sum
-	rm -rf .openapi-generator/ api/ docs/
+	rm -f .openapi-generator-ignore .gitignore git_push.sh .travis.yml go.mod go.sum
+	rm -f  api_default.go client.go configuration.go model_*.go response.go
+	rm -rf .openapi-generator/ api/openapi.yaml docs/
