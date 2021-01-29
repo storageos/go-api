@@ -38,17 +38,22 @@ type Node struct {
 	Version string `json:"version,omitempty"`
 }
 
-// GetID returns the object ID.
-func (t *Node) GetID() string {
+// GetID returns the node ID.
+func (t Node) GetID() string {
 	return t.Id
 }
 
-// GetName returns the object name.
-func (t *Node) GetName() string {
+// GetName returns the node name.
+func (t Node) GetName() string {
 	return t.Name
 }
 
-// GetLabels returns the object's labels.
-func (t *Node) GetLabels() map[string]string {
+// GetNamespace returns an empty string as nodes are not namespaced. 
+func (t Node) GetNamespace() string {
+	return ""
+}
+
+// GetLabels returns the node labels.
+func (t Node) GetLabels() map[string]string {
 	return t.Labels
 }

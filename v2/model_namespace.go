@@ -26,3 +26,23 @@ type Namespace struct {
 	// An opaque representation of an entity version at the time it was obtained from the API. All operations that mutate the entity must include this version field in the request unchanged. The format of this type is undefined and may change but the defined properties will not change. 
 	Version string `json:"version,omitempty"`
 }
+
+// GetID returns the namespace ID.
+func (t Namespace) GetID() string {
+	return t.Id
+}
+
+// GetName returns the namespace name.
+func (t Namespace) GetName() string {
+	return t.Name
+}
+
+// GetNamespace returns an empty string as namespaces are not namespaced. 
+func (t Namespace) GetNamespace() string {
+	return ""
+}
+
+// GetLabels returns the namespace labels.
+func (t Namespace) GetLabels() map[string]string {
+	return t.Labels
+}

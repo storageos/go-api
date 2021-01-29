@@ -36,3 +36,23 @@ type Volume struct {
 	// An opaque representation of an entity version at the time it was obtained from the API. All operations that mutate the entity must include this version field in the request unchanged. The format of this type is undefined and may change but the defined properties will not change. 
 	Version string `json:"version,omitempty"`
 }
+
+// GetID returns the volume ID.
+func (t Volume) GetID() string {
+	return t.Id
+}
+
+// GetName returns the volume name.
+func (t Volume) GetName() string {
+	return t.Name
+}
+
+// GetNamespace returns the volume namespace. 
+func (t Volume) GetNamespace() string {
+	return t.NamespaceID
+}
+
+// GetLabels returns the volume labels.
+func (t Volume) GetLabels() map[string]string {
+	return t.Labels
+}

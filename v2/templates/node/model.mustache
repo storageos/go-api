@@ -39,18 +39,23 @@ type {{classname}} struct {
 {{/allVars}}
 }
 
-// GetID returns the object ID.
-func (t *{{classname}}) GetID() string {
+// GetID returns the node ID.
+func (t {{classname}}) GetID() string {
 	return t.Id
 }
 
-// GetName returns the object name.
-func (t *{{classname}}) GetName() string {
+// GetName returns the node name.
+func (t {{classname}}) GetName() string {
 	return t.Name
 }
 
-// GetLabels returns the object's labels.
-func (t *{{classname}}) GetLabels() map[string]string {
+// GetNamespace returns an empty string as nodes are not namespaced. 
+func (t {{classname}}) GetNamespace() string {
+	return ""
+}
+
+// GetLabels returns the node labels.
+func (t {{classname}}) GetLabels() map[string]string {
 	return t.Labels
 }
 {{/isEnum}}
