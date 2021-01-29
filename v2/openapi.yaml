@@ -1,7 +1,7 @@
 openapi: "3.0.2"
 info:
     title: "StorageOS API"
-    version: "2.3.0"
+    version: "2.4.0-alpha"
     contact:
         name: StorageOS
         url: https://storageos.com
@@ -330,7 +330,7 @@ components:
                     type: array
                     items:
                         $ref: "#/components/schemas/NfsAcl"
-        NFSConfig:
+        NfsConfig:
             type: object
             properties:
                 exports:
@@ -576,7 +576,7 @@ components:
                 nfs:
                     readOnly: true
                     nullable: true
-                    $ref: "#/components/schemas/NFSConfig"
+                    $ref: "#/components/schemas/NfsConfig"
                 namespaceID:
                     readOnly: true
                     allOf:
@@ -1940,13 +1940,15 @@ paths:
         put:
             summary: Update a node
             operationId: updateNode
-            description: Update the node identified by id.
+            description: >
+                Update the non-storageos labels configured for the node 
+                identified by id.
             security:
                 - jwt: []
-            parameters:
-                - $ref: "#/components/parameters/IgnoreVersion"
             requestBody:
-                description: The new node data to store.
+                description: >
+                    Update the label configuration of the node to the desired
+                    state. Alterations of StorageOS labels are rejected. 
                 required: true
                 content:
                     application/json:
@@ -2036,6 +2038,68 @@ paths:
 
                 "503":
                     $ref: "#/components/responses/StoreError"
+
+    /nodes/{id}/compute-only:
+        parameters:
+            - name: id
+              in: path
+              description: ID of a Node
+              required: true
+              schema:
+                  $ref: "#/components/schemas/NodeID"
+
+        put:
+            summary: Modify the computeonly behaviour state for a node
+            operationId: setComputeOnly
+            description: >
+                Set the compute-only configuration state for the node corresponding 
+                to id given by the request.
+            security:
+                - jwt: []
+            parameters:
+                - $ref: "#/components/parameters/IgnoreVersion"
+            requestBody: 
+                description: Desired compute-only configuration state for the node.
+                required: true
+                content: 
+                    application/json:
+                        schema:
+                            type: object
+                            title: SetComputeOnlyNodeData
+                            properties:
+                                computeOnly:
+                                    type: boolean
+                                    description: >
+                                        Marks the node's desired configuration 
+                                        state as compute-only. This will result
+                                        in the node being avoided for volume
+                                        placement
+                                    example: true
+                                version:
+                                    $ref: "#/components/schemas/Version"
+            responses:
+                "200":
+                    description: The node was successfullly updated
+                    content:
+                        application/json: 
+                            schema: 
+                                $ref: "#/components/schemas/Node"
+
+                "400":
+                    $ref: "#/components/responses/BadRequest"
+                "401":
+                    $ref: "#/components/responses/Unauthorised"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "412":
+                    $ref: "#/components/responses/StaleWrite"
+                "500":
+                    $ref: "#/components/responses/ServerError"
+                "503":
+                    $ref: "#/components/responses/StoreError"
+
 
     /policies:
         post:

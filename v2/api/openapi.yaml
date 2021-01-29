@@ -5,7 +5,7 @@ info:
     name: StorageOS
     url: https://storageos.com
   title: StorageOS API
-  version: 2.3.0
+  version: 2.4.0-alpha
 externalDocs:
   description: The latest StorageOS user documentation
   url: https://docs.storageos.com/
@@ -1758,7 +1758,8 @@ paths:
       - jwt: []
       summary: Fetch a node
     put:
-      description: Update the node identified by id.
+      description: |
+        Update the non-storageos labels configured for the node  identified by id.
       operationId: updateNode
       parameters:
       - description: ID of a node
@@ -1769,15 +1770,6 @@ paths:
         schema:
           $ref: '#/components/schemas/NodeID'
         style: simple
-      - description: |
-          If set to true this value indicates that the user wants to ignore entity version constraints, thereby "forcing" the operation.
-        explode: true
-        in: query
-        name: ignore-version
-        required: false
-        schema:
-          $ref: '#/components/schemas/IgnoreVersion'
-        style: form
       requestBody:
         $ref: '#/components/requestBodies/UpdateNodeData'
         content:
@@ -1810,7 +1802,8 @@ paths:
                   type: string
               title: UpdateNodeData
               type: object
-        description: The new node data to store.
+        description: "Update the label configuration of the node to the desired state.\
+          \ Alterations of StorageOS labels are rejected. \n"
         required: true
       responses:
         "200":
@@ -1884,6 +1877,127 @@ paths:
       security:
       - jwt: []
       summary: Update a node
+  /nodes/{id}/compute-only:
+    put:
+      description: |
+        Set the compute-only configuration state for the node corresponding  to id given by the request.
+      operationId: setComputeOnly
+      parameters:
+      - description: ID of a Node
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          $ref: '#/components/schemas/NodeID'
+        style: simple
+      - description: |
+          If set to true this value indicates that the user wants to ignore entity version constraints, thereby "forcing" the operation.
+        explode: true
+        in: query
+        name: ignore-version
+        required: false
+        schema:
+          $ref: '#/components/schemas/IgnoreVersion'
+        style: form
+      requestBody:
+        $ref: '#/components/requestBodies/SetComputeOnlyNodeData'
+        content:
+          application/json:
+            schema:
+              example:
+                computeOnly: true
+                version: NDI0MjQyNDI0MjQyNDI0MjQy
+              properties:
+                computeOnly:
+                  description: |
+                    Marks the node's desired configuration  state as compute-only. This will result in the node being avoided for volume placement
+                  example: true
+                  type: boolean
+                version:
+                  description: |
+                    An opaque representation of an entity version at the time it was obtained from the API.
+                    All operations that mutate the entity must include this version field in the request unchanged.
+                    The format of this type is undefined and may change but the defined properties will not change.
+                  example: NDI0MjQyNDI0MjQyNDI0MjQy
+                  maxLength: 30
+                  type: string
+              title: SetComputeOnlyNodeData
+              type: object
+        description: Desired compute-only configuration state for the node.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Node'
+          description: The node was successfullly updated
+        "400":
+          content:
+            application/json:
+              example:
+                error: a short description of the validation failure
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request does not conform to the API specification.
+        "401":
+          content:
+            application/json:
+              example:
+                error: authentication required
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The requested endpoint requires authentication - you must log in first.
+            If attempting to log in, your credentials were not recognised.
+        "403":
+          content:
+            application/json:
+              example:
+                error: unauthorised
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The authenticated user does not have permission to perform the requested action.
+        "404":
+          content:
+            application/json:
+              example:
+                error: not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            A referenced resource does not exist.
+        "412":
+          content:
+            application/json:
+              example:
+                error: attempting to write stale object
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
+            The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The request caused an internal server error and should be retried.
+            Check the health of the node/cluster and if the error persists, contact support.
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The server is currently unable to handle the request due to a temporary store failure.
+            Check the health of the node/cluster and if the error persists, contact support.
+      security:
+      - jwt: []
+      summary: Modify the computeonly behaviour state for a node
   /policies:
     get:
       description: Fetch the list of policy groups in the cluster.
@@ -4425,6 +4539,12 @@ components:
         type: string
       style: form
   requestBodies:
+    SetComputeOnlyNodeData:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SetComputeOnlyNodeData'
+      required: true
     CreateVolumeData:
       content:
         application/json:
@@ -4893,7 +5013,7 @@ components:
             $ref: '#/components/schemas/NfsAcl'
           type: array
       type: object
-    NFSConfig:
+    NfsConfig:
       example:
         exports:
         - path: /very/important/files/
@@ -5241,7 +5361,7 @@ components:
           - $ref: '#/components/schemas/NodeID'
           readOnly: true
         nfs:
-          $ref: '#/components/schemas/NFSConfig'
+          $ref: '#/components/schemas/NfsConfig'
         namespaceID:
           allOf:
           - $ref: '#/components/schemas/NamespaceID'
@@ -5885,6 +6005,26 @@ components:
           maxLength: 30
           type: string
       title: UpdateNodeData
+      type: object
+    SetComputeOnlyNodeData:
+      example:
+        computeOnly: true
+        version: NDI0MjQyNDI0MjQyNDI0MjQy
+      properties:
+        computeOnly:
+          description: |
+            Marks the node's desired configuration  state as compute-only. This will result in the node being avoided for volume placement
+          example: true
+          type: boolean
+        version:
+          description: |
+            An opaque representation of an entity version at the time it was obtained from the API.
+            All operations that mutate the entity must include this version field in the request unchanged.
+            The format of this type is undefined and may change but the defined properties will not change.
+          example: NDI0MjQyNDI0MjQyNDI0MjQy
+          maxLength: 30
+          type: string
+      title: SetComputeOnlyNodeData
       type: object
     _policies_specs:
       properties:

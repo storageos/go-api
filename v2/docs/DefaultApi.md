@@ -36,6 +36,7 @@ Method | HTTP request | Description
 [**ListVolumes**](DefaultApi.md#ListVolumes) | **Get** /namespaces/{namespaceID}/volumes | Fetch the list of volumes in the given namespace
 [**RefreshJwt**](DefaultApi.md#RefreshJwt) | **Post** /auth/refresh | Refresh the JWT
 [**ResizeVolume**](DefaultApi.md#ResizeVolume) | **Put** /namespaces/{namespaceID}/volumes/{id}/size | Increase the size of a volume.
+[**SetComputeOnly**](DefaultApi.md#SetComputeOnly) | **Put** /nodes/{id}/compute-only | Modify the computeonly behaviour state for a node
 [**SetReplicas**](DefaultApi.md#SetReplicas) | **Put** /namespaces/{namespaceID}/volumes/{id}/replicas | Set the number of replicas to maintain for the volume.
 [**Spec**](DefaultApi.md#Spec) | **Get** /openapi | Serves this openapi spec file
 [**UpdateAuthenticatedUser**](DefaultApi.md#UpdateAuthenticatedUser) | **Put** /users/self | Update the authenticated user&#39;s information
@@ -1244,6 +1245,53 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
+## SetComputeOnly
+
+> Node SetComputeOnly(ctx, id, setComputeOnlyNodeData, optional)
+
+Modify the computeonly behaviour state for a node
+
+Set the compute-only configuration state for the node corresponding  to id given by the request. 
+
+### Required Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string**| ID of a Node | 
+**setComputeOnlyNodeData** | [**SetComputeOnlyNodeData**](SetComputeOnlyNodeData.md)|  | 
+ **optional** | ***SetComputeOnlyOpts** | optional parameters | nil if no parameters
+
+### Optional Parameters
+
+Optional parameters are passed through a pointer to a SetComputeOnlyOpts struct
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+ **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+
+### Return type
+
+[**Node**](Node.md)
+
+### Authorization
+
+[jwt](../README.md#jwt)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
 ## SetReplicas
 
 > AcceptedMessage SetReplicas(ctx, namespaceID, id, setReplicasRequest, optional)
@@ -1607,11 +1655,11 @@ Name | Type | Description  | Notes
 
 ## UpdateNode
 
-> Node UpdateNode(ctx, id, updateNodeData, optional)
+> Node UpdateNode(ctx, id, updateNodeData)
 
 Update a node
 
-Update the node identified by id.
+Update the non-storageos labels configured for the node  identified by id. 
 
 ### Required Parameters
 
@@ -1621,18 +1669,6 @@ Name | Type | Description  | Notes
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
 **id** | **string**| ID of a node | 
 **updateNodeData** | [**UpdateNodeData**](UpdateNodeData.md)|  | 
- **optional** | ***UpdateNodeOpts** | optional parameters | nil if no parameters
-
-### Optional Parameters
-
-Optional parameters are passed through a pointer to a UpdateNodeOpts struct
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-
-
- **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
 
 ### Return type
 

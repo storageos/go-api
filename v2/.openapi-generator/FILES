@@ -1,4 +1,5 @@
 .gitignore
+.openapi-generator-ignore
 .travis.yml
 README.md
 api/openapi.yaml
@@ -44,6 +45,7 @@ docs/ReplicaDeploymentInfo.md
 docs/ReplicaDeploymentInfoAllOf.md
 docs/ReplicaHealth.md
 docs/ResizeVolumeRequest.md
+docs/SetComputeOnlyNodeData.md
 docs/SetReplicasRequest.md
 docs/SyncProgress.md
 docs/UpdateAuthenticatedUserData.md
@@ -100,6 +102,7 @@ model_replica_deployment_info.go
 model_replica_deployment_info_all_of.go
 model_replica_health.go
 model_resize_volume_request.go
+model_set_compute_only_node_data.go
 model_set_replicas_request.go
 model_sync_progress.go
 model_update_authenticated_user_data.go
