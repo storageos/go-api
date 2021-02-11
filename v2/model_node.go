@@ -57,3 +57,11 @@ func (t Node) GetNamespace() string {
 func (t Node) GetLabels() map[string]string {
 	return t.Labels
 }
+
+// IsHealthy returns true if the node is healthy.
+func (t Node) IsHealthy() bool {
+	if t.Health == NODEHEALTH_ONLINE {
+		return true
+	}
+	return false
+}

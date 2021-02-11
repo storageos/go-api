@@ -56,3 +56,11 @@ func (t Volume) GetNamespace() string {
 func (t Volume) GetLabels() map[string]string {
 	return t.Labels
 }
+
+// IsHealthy returns true if the volume is healthy.
+func (t Volume) IsHealthy() bool {
+	if t.Master.Health == MASTERHEALTH_ONLINE {
+		return true
+	}
+	return false
+}

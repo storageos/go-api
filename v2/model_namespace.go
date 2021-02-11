@@ -46,3 +46,8 @@ func (t Namespace) GetNamespace() string {
 func (t Namespace) GetLabels() map[string]string {
 	return t.Labels
 }
+
+// IsHealthy always returns true for namespaces.
+func (t Namespace) IsHealthy() bool {
+	return true
+}
