@@ -1,5 +1,4 @@
 .gitignore
-.openapi-generator-ignore
 .travis.yml
 README.md
 api/openapi.yaml
@@ -20,6 +19,7 @@ docs/CreateVolumeData.md
 docs/DefaultApi.md
 docs/DeploymentInfo.md
 docs/Error.md
+docs/FailureModeIntent.md
 docs/FsType.md
 docs/Licence.md
 docs/LogFormat.md
@@ -46,6 +46,9 @@ docs/ReplicaDeploymentInfoAllOf.md
 docs/ReplicaHealth.md
 docs/ResizeVolumeRequest.md
 docs/SetComputeOnlyNodeData.md
+docs/SetFailureModeIntentRequestData.md
+docs/SetFailureModeRequest.md
+docs/SetFailureThresholdRequestData.md
 docs/SetReplicasRequest.md
 docs/SyncProgress.md
 docs/UpdateAuthenticatedUserData.md
@@ -79,6 +82,7 @@ model_create_user_data.go
 model_create_volume_data.go
 model_deployment_info.go
 model_error.go
+model_failure_mode_intent.go
 model_fs_type.go
 model_licence.go
 model_log_format.go
@@ -103,6 +107,9 @@ model_replica_deployment_info_all_of.go
 model_replica_health.go
 model_resize_volume_request.go
 model_set_compute_only_node_data.go
+model_set_failure_mode_intent_request_data.go
+model_set_failure_mode_request.go
+model_set_failure_threshold_request_data.go
 model_set_replicas_request.go
 model_sync_progress.go
 model_update_authenticated_user_data.go

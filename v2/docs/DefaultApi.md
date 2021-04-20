@@ -27,6 +27,7 @@ Method | HTTP request | Description
 [**GetNamespace**](DefaultApi.md#GetNamespace) | **Get** /namespaces/{id} | Fetch a namespace
 [**GetNode**](DefaultApi.md#GetNode) | **Get** /nodes/{id} | Fetch a node
 [**GetPolicyGroup**](DefaultApi.md#GetPolicyGroup) | **Get** /policies/{id} | Fetch a policy group
+[**GetSingleNodeDiagnostics**](DefaultApi.md#GetSingleNodeDiagnostics) | **Get** /diagnostics/{id} | Retrieves a single node diagnostics bundle from the target node
 [**GetUser**](DefaultApi.md#GetUser) | **Get** /users/{id} | Fetch a user
 [**GetVolume**](DefaultApi.md#GetVolume) | **Get** /namespaces/{namespaceID}/volumes/{id} | Fetch a volume
 [**ListNamespaces**](DefaultApi.md#ListNamespaces) | **Get** /namespaces | Fetch the list of namespaces
@@ -37,6 +38,7 @@ Method | HTTP request | Description
 [**RefreshJwt**](DefaultApi.md#RefreshJwt) | **Post** /auth/refresh | Refresh the JWT
 [**ResizeVolume**](DefaultApi.md#ResizeVolume) | **Put** /namespaces/{namespaceID}/volumes/{id}/size | Increase the size of a volume.
 [**SetComputeOnly**](DefaultApi.md#SetComputeOnly) | **Put** /nodes/{id}/compute-only | Modify the computeonly behaviour state for a node
+[**SetFailureMode**](DefaultApi.md#SetFailureMode) | **Put** /namespaces/{namespaceID}/volumes/{id}/failure-mode | Set the failure mode of the volume.
 [**SetReplicas**](DefaultApi.md#SetReplicas) | **Put** /namespaces/{namespaceID}/volumes/{id}/replicas | Set the number of replicas to maintain for the volume.
 [**Spec**](DefaultApi.md#Spec) | **Get** /openapi | Serves this openapi spec file
 [**UpdateAuthenticatedUser**](DefaultApi.md#UpdateAuthenticatedUser) | **Put** /users/self | Update the authenticated user&#39;s information
@@ -786,7 +788,7 @@ This endpoint does not need any parameter.
 
 Retrieves a diagnostics bundle from the target node
 
-Requests that the target node gathers detailed information about the state of the cluster, using it to then build and return a bundle which can be used for troubleshooting. The request will only be served when the authenticated user is an administrator. The node will attempt to gather information about its local state, cluster-wide state and local state of other nodes in the cluster. If the cluster is unhealthy this may cause a slower response. 
+Requests that the recipient node gathers information about the global state of the cluster and detailed information about the local state of each node in the cluster, using it to then build and return a bundle which can be used for  troubleshooting. For clusters in an unhealthy state this may result in a slower, incomplete response.  If the cluster has many nodes, it is recommended to use the  single node diagnostic collection endpoint to target the desired nodes in turn. The request will only be served when the authenticated user is an administrator. 
 
 ### Required Parameters
 
@@ -803,7 +805,7 @@ This endpoint does not need any parameter.
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/gzip, application/json
+- **Accept**: application/octet-stream, application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -936,6 +938,40 @@ Name | Type | Description  | Notes
 
 - **Content-Type**: Not defined
 - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetSingleNodeDiagnostics
+
+> *os.File GetSingleNodeDiagnostics(ctx, id)
+
+Retrieves a single node diagnostics bundle from the target node
+
+Requests that the recipient node gathers information about the global state of the cluster and detailed information about the target node, using it to then build and return a bundle which can be used for troubleshooting. If the target node is in an unhealthy state then the response may be slower and  incomplete. The request will only be served when the authenticated user is an administrator. 
+
+### Required Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string**| ID of a node | 
+
+### Return type
+
+[***os.File**](*os.File.md)
+
+### Authorization
+
+[jwt](../README.md#jwt)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/octet-stream, application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -1277,6 +1313,55 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**Node**](Node.md)
+
+### Authorization
+
+[jwt](../README.md#jwt)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## SetFailureMode
+
+> Volume SetFailureMode(ctx, namespaceID, id, setFailureModeRequest, optional)
+
+Set the failure mode of the volume.
+
+Set the behaviour of the volume identified by id when responding to observed replica failure. This modifies the protected  StorageOS system label \"storageos.com/failure-mode\". This request may either specify a precise failure threshold or a more flexible intent-based failure mode operating with respect  to the volume's current replication target. A request will be denied if the current state of the volume does not satisfy the requested failure behaviour. 
+
+### Required Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**namespaceID** | **string**| ID of a Namespace | 
+**id** | **string**| ID of a Volume | 
+**setFailureModeRequest** | [**SetFailureModeRequest**](SetFailureModeRequest.md)| Failure mode to use | 
+ **optional** | ***SetFailureModeOpts** | optional parameters | nil if no parameters
+
+### Optional Parameters
+
+Optional parameters are passed through a pointer to a SetFailureModeOpts struct
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+
+ **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+
+### Return type
+
+[**Volume**](Volume.md)
 
 ### Authorization
 
