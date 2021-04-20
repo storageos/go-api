@@ -58,6 +58,14 @@ func (t {{classname}}) GetNamespace() string {
 func (t {{classname}}) GetLabels() map[string]string {
 	return t.Labels
 }
+
+// IsHealthy returns true if the node is healthy.
+func (t {{classname}}) IsHealthy() bool {
+	if t.Health == NODEHEALTH_ONLINE {
+		return true
+	}
+	return false
+}
 {{/isEnum}}
 {{/model}}
 {{/models}}

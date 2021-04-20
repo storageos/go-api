@@ -5,7 +5,7 @@ info:
     name: StorageOS
     url: https://storageos.com
   title: StorageOS API
-  version: 2.4.0-alpha
+  version: 2.4.0
 externalDocs:
   description: The latest StorageOS user documentation
   url: https://docs.storageos.com/
@@ -1124,7 +1124,7 @@ paths:
                     env: prod
                     rack: db-1
                   externalDocs:
-                    url: https://docs.storageos.com/v2/openapi-help/labels
+                    url: https://docs.storageos.com/docs/reference/labels
                   type: object
               title: CreateNamespaceData
               type: object
@@ -1416,7 +1416,7 @@ paths:
                     env: prod
                     rack: db-1
                   externalDocs:
-                    url: https://docs.storageos.com/v2/openapi-help/labels
+                    url: https://docs.storageos.com/docs/reference/labels
                   type: object
                 version:
                   description: |
@@ -1790,7 +1790,7 @@ paths:
                     env: prod
                     rack: db-1
                   externalDocs:
-                    url: https://docs.storageos.com/v2/openapi-help/labels
+                    url: https://docs.storageos.com/docs/reference/labels
                   type: object
                 version:
                   description: |
@@ -2580,7 +2580,7 @@ paths:
                     env: prod
                     rack: db-1
                   externalDocs:
-                    url: https://docs.storageos.com/v2/openapi-help/labels
+                    url: https://docs.storageos.com/docs/reference/labels
                   type: object
                 name:
                   description: |
@@ -3010,7 +3010,7 @@ paths:
                     env: prod
                     rack: db-1
                   externalDocs:
-                    url: https://docs.storageos.com/v2/openapi-help/labels
+                    url: https://docs.storageos.com/docs/reference/labels
                   type: object
                 description:
                   example: This volume contains the data for my app
@@ -3927,6 +3927,138 @@ paths:
       security:
       - jwt: []
       summary: Set the number of replicas to maintain for the volume.
+  /namespaces/{namespaceID}/volumes/{id}/failure-mode:
+    put:
+      description: |
+        Set the behaviour of the volume identified by id when responding to observed replica failure. This modifies the protected  StorageOS system label "storageos.com/failure-mode".
+        This request may either specify a precise failure threshold or a more flexible intent-based failure mode operating with respect  to the volume's current replication target.
+        A request will be denied if the current state of the volume does not satisfy the requested failure behaviour.
+      operationId: setFailureMode
+      parameters:
+      - description: ID of a Namespace
+        explode: false
+        in: path
+        name: namespaceID
+        required: true
+        schema:
+          $ref: '#/components/schemas/NamespaceID'
+        style: simple
+      - description: ID of a Volume
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          $ref: '#/components/schemas/VolumeID'
+        style: simple
+      - description: |
+          If set to true this value indicates that the user wants to ignore entity version constraints, thereby "forcing" the operation.
+        explode: true
+        in: query
+        name: ignore-version
+        required: false
+        schema:
+          $ref: '#/components/schemas/IgnoreVersion'
+        style: form
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetFailureModeRequest'
+        description: Failure mode to use
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Volume'
+          description: The updated volume information.
+        "400":
+          content:
+            application/json:
+              example:
+                error: a short description of the validation failure
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request does not conform to the API specification.
+        "401":
+          content:
+            application/json:
+              example:
+                error: authentication required
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The requested endpoint requires authentication - you must log in first.
+            If attempting to log in, your credentials were not recognised.
+        "403":
+          content:
+            application/json:
+              example:
+                error: unauthorised
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The authenticated user does not have permission to perform the requested action.
+        "404":
+          content:
+            application/json:
+              example:
+                error: not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            A referenced resource does not exist.
+        "409":
+          content:
+            application/json:
+              example:
+                error: label \"a\" with value \"b\" conflicts with label \"c\" with
+                  value \"d\"
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The requested configuration change for the referenced entity cannot be made as it would result in a conflict which invalidates the resultant config.
+        "412":
+          content:
+            application/json:
+              example:
+                error: attempting to write stale object
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
+            The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
+        "422":
+          content:
+            application/json:
+              example:
+                error: invalid state for operation (currently "deleted")
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            An action was requested that cannot be performed on the entity in it's current state.
+            As an example, this error might be returned when trying to delete a currently mounted volume.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The request caused an internal server error and should be retried.
+            Check the health of the node/cluster and if the error persists, contact support.
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The server is currently unable to handle the request due to a temporary store failure.
+            Check the health of the node/cluster and if the error persists, contact support.
+      security:
+      - jwt: []
+      summary: Set the failure mode of the volume.
   /namespaces/{namespaceID}/volumes/{id}/size:
     put:
       description: |
@@ -4414,15 +4546,19 @@ paths:
       summary: Update the licence global configuration settings
   /diagnostics:
     get:
-      description: |
-        Requests that the target node gathers detailed information about the state of the cluster, using it to then build and return a bundle which can be used for troubleshooting.
-        The request will only be served when the authenticated user is an administrator.
-        The node will attempt to gather information about its local state, cluster-wide state and local state of other nodes in the cluster. If the cluster is unhealthy this may cause a slower response.
+      description: "Requests that the recipient node gathers information about the\
+        \ global state of the cluster and detailed information about the local state\
+        \ of each node in the cluster, using it to then build and return a bundle\
+        \ which can be used for  troubleshooting. For clusters in an unhealthy state\
+        \ this may result in a slower, incomplete response. \nIf the cluster has many\
+        \ nodes, it is recommended to use the  single node diagnostic collection endpoint\
+        \ to target the desired nodes in turn.\nThe request will only be served when\
+        \ the authenticated user is an administrator.\n"
       operationId: getDiagnostics
       responses:
         "200":
           content:
-            application/gzip:
+            application/octet-stream:
               schema:
                 format: binary
                 type: string
@@ -4457,9 +4593,10 @@ paths:
             Check the health of the node/cluster and if the error persists, contact support.
         "502":
           content:
-            application/json:
+            application/octet-stream:
               schema:
-                $ref: '#/components/schemas/Error'
+                format: binary
+                type: string
           description: |
             The server is returning an incomplete diagnostic bundle.
             A bundle may contain partial information if one or more nodes failed to respond, or some other error occured during the collection process.
@@ -4475,6 +4612,78 @@ paths:
       security:
       - jwt: []
       summary: Retrieves a diagnostics bundle from the target node
+  /diagnostics/{id}:
+    get:
+      description: |
+        Requests that the recipient node gathers information about the global state of the cluster and detailed information about the target node, using it to then build and return a bundle which can be used for troubleshooting. If the target node is in an unhealthy state then the response may be slower and  incomplete.
+        The request will only be served when the authenticated user is an administrator.
+      operationId: getSingleNodeDiagnostics
+      parameters:
+      - description: ID of a node
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          $ref: '#/components/schemas/NodeID'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/octet-stream:
+              schema:
+                format: binary
+                type: string
+          description: |
+            A diagnostics bundle was successfully built and returned for just the target node.
+        "401":
+          content:
+            application/json:
+              example:
+                error: authentication required
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The requested endpoint requires authentication - you must log in first.
+            If attempting to log in, your credentials were not recognised.
+        "403":
+          content:
+            application/json:
+              example:
+                error: unauthorised
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The authenticated user does not have permission to perform the requested action.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The request caused an internal server error and should be retried.
+            Check the health of the node/cluster and if the error persists, contact support.
+        "502":
+          content:
+            application/octet-stream:
+              schema:
+                format: binary
+                type: string
+          description: |
+            The server is returning an incomplete diagnostic bundle.
+            A single-node bundle may contain partial information if the target node failed to respond, or did not gather all available diagnostics during the collection process.
+            The returned bundle may still contain useful data and  should be sent to StorageOS.
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The server is currently unable to handle the request due to a temporary store failure.
+            Check the health of the node/cluster and if the error persists, contact support.
+      security:
+      - jwt: []
+      summary: Retrieves a single node diagnostics bundle from the target node
   /openapi:
     get:
       description: Serves this openapi spec file
@@ -4769,6 +4978,16 @@ components:
             $ref: '#/components/schemas/Error'
       description: |
         A referenced entity is currently in use.
+    InvalidResult:
+      content:
+        application/json:
+          example:
+            error: label \"a\" with value \"b\" conflicts with label \"c\" with value
+              \"d\"
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: |
+        The requested configuration change for the referenced entity cannot be made as it would result in a conflict which invalidates the resultant config.
     Locked:
       content:
         application/json:
@@ -4866,6 +5085,16 @@ components:
       - host
       example: host
       readOnly: true
+      type: string
+    FailureModeIntent:
+      description: "The intent-based failure mode behaviour of a volume. The default\
+        \ behaviour for a volume is \"hard\", in the absence of a directly  configured\
+        \ intent or numerical failure threshold. \n"
+      enum:
+      - hard
+      - soft
+      - alwayson
+      example: hard
       type: string
     NodeHealth:
       description: |
@@ -5080,7 +5309,7 @@ components:
         env: prod
         rack: db-1
       externalDocs:
-        url: https://docs.storageos.com/v2/openapi-help/labels
+        url: https://docs.storageos.com/docs/reference/labels
       type: object
     LogLevel:
       default: info
@@ -5375,7 +5604,7 @@ components:
             env: prod
             rack: db-1
           externalDocs:
-            url: https://docs.storageos.com/v2/openapi-help/labels
+            url: https://docs.storageos.com/docs/reference/labels
           type: object
         fsType:
           $ref: '#/components/schemas/FsType'
@@ -5527,7 +5756,7 @@ components:
             env: prod
             rack: db-1
           externalDocs:
-            url: https://docs.storageos.com/v2/openapi-help/labels
+            url: https://docs.storageos.com/docs/reference/labels
           type: object
         createdAt:
           description: |
@@ -5587,7 +5816,7 @@ components:
             env: prod
             rack: db-1
           externalDocs:
-            url: https://docs.storageos.com/v2/openapi-help/labels
+            url: https://docs.storageos.com/docs/reference/labels
           type: object
         createdAt:
           description: |
@@ -5799,6 +6028,41 @@ components:
       items:
         $ref: '#/components/schemas/Volume'
       type: array
+    SetFailureThresholdRequestData:
+      properties:
+        failureThreshold:
+          description: |
+            The minimum number of replicas required to be online and receiving writes in order for the volume to remain read-writable. This value replaces any previously set failure threshold or intent-based failure mode.
+          example: 2
+          maximum: 5
+          minimum: 0
+          type: uint64
+        version:
+          description: |
+            An opaque representation of an entity version at the time it was obtained from the API.
+            All operations that mutate the entity must include this version field in the request unchanged.
+            The format of this type is undefined and may change but the defined properties will not change.
+          example: NDI0MjQyNDI0MjQyNDI0MjQy
+          maxLength: 30
+          type: string
+      type: object
+    SetFailureModeIntentRequestData:
+      properties:
+        mode:
+          $ref: '#/components/schemas/FailureModeIntent'
+        version:
+          description: |
+            An opaque representation of an entity version at the time it was obtained from the API.
+            All operations that mutate the entity must include this version field in the request unchanged.
+            The format of this type is undefined and may change but the defined properties will not change.
+          example: NDI0MjQyNDI0MjQyNDI0MjQy
+          maxLength: 30
+          type: string
+      type: object
+    SetFailureModeRequest:
+      oneOf:
+      - $ref: '#/components/schemas/SetFailureThresholdRequestData'
+      - $ref: '#/components/schemas/SetFailureModeIntentRequestData'
     AuthUserData:
       example:
         username: admin
@@ -5946,7 +6210,7 @@ components:
             env: prod
             rack: db-1
           externalDocs:
-            url: https://docs.storageos.com/v2/openapi-help/labels
+            url: https://docs.storageos.com/docs/reference/labels
           type: object
       title: CreateNamespaceData
       type: object
@@ -5966,7 +6230,7 @@ components:
             env: prod
             rack: db-1
           externalDocs:
-            url: https://docs.storageos.com/v2/openapi-help/labels
+            url: https://docs.storageos.com/docs/reference/labels
           type: object
         version:
           description: |
@@ -5994,7 +6258,7 @@ components:
             env: prod
             rack: db-1
           externalDocs:
-            url: https://docs.storageos.com/v2/openapi-help/labels
+            url: https://docs.storageos.com/docs/reference/labels
           type: object
         version:
           description: |
@@ -6164,7 +6428,7 @@ components:
             env: prod
             rack: db-1
           externalDocs:
-            url: https://docs.storageos.com/v2/openapi-help/labels
+            url: https://docs.storageos.com/docs/reference/labels
           type: object
         name:
           description: |
@@ -6207,7 +6471,7 @@ components:
             env: prod
             rack: db-1
           externalDocs:
-            url: https://docs.storageos.com/v2/openapi-help/labels
+            url: https://docs.storageos.com/docs/reference/labels
           type: object
         description:
           example: This volume contains the data for my app

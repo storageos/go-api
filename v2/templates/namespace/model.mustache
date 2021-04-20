@@ -58,6 +58,11 @@ func (t {{classname}}) GetNamespace() string {
 func (t {{classname}}) GetLabels() map[string]string {
 	return t.Labels
 }
+
+// IsHealthy always returns true for namespaces.
+func (t {{classname}}) IsHealthy() bool {
+	return true
+}
 {{/isEnum}}
 {{/model}}
 {{/models}}
