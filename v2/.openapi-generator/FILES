@@ -49,6 +49,7 @@ docs/SetComputeOnlyNodeData.md
 docs/SetFailureModeIntentRequestData.md
 docs/SetFailureModeRequest.md
 docs/SetFailureThresholdRequestData.md
+docs/SetLogLevelData.md
 docs/SetReplicasRequest.md
 docs/SyncProgress.md
 docs/UpdateAuthenticatedUserData.md
@@ -110,6 +111,7 @@ model_set_compute_only_node_data.go
 model_set_failure_mode_intent_request_data.go
 model_set_failure_mode_request.go
 model_set_failure_threshold_request_data.go
+model_set_log_level_data.go
 model_set_replicas_request.go
 model_sync_progress.go
 model_update_authenticated_user_data.go

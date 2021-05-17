@@ -9,9 +9,10 @@
  */
 
 package api
-// SetFailureModeIntentRequestData struct for SetFailureModeIntentRequestData
-type SetFailureModeIntentRequestData struct {
-	Mode FailureModeIntent `json:"mode,omitempty"`
+// SetLogLevelData struct for SetLogLevelData
+type SetLogLevelData struct {
+	// The desired log level of the cluster 
+	LogLevel string `json:"logLevel,omitempty"`
 	// An opaque representation of an entity version at the time it was obtained from the API. All operations that mutate the entity must include this version field in the request unchanged. The format of this type is undefined and may change but the defined properties will not change. 
 	Version string `json:"version,omitempty"`
 }

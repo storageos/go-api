@@ -1,7 +1,7 @@
 openapi: "3.0.2"
 info:
     title: "StorageOS API"
-    version: "2.4.0"
+    version: "2.4.1-alpha"
     contact:
         name: StorageOS
         url: https://storageos.com
@@ -3358,7 +3358,6 @@ paths:
 
                 "503":
                     $ref: "#/components/responses/StoreError"
-    
     /cluster/licence:
         get:
             summary: Retrieves the cluster's licence information
@@ -3422,6 +3421,51 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/Licence"
+
+                "400":
+                    $ref: "#/components/responses/BadRequest"
+
+                "401":
+                    $ref: "#/components/responses/Unauthorised"
+
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+
+                "412":
+                    $ref: "#/components/responses/StaleWrite"
+
+                "500":
+                    $ref: "#/components/responses/ServerError"
+
+                "503":
+                    $ref: "#/components/responses/StoreError"
+    /cluster/log-level:
+        put:
+            summary: Update the cluster's log level
+            operationId: setLogLevel
+            description: Updates the cluster's log level at runtime (affecting all nodes) and persists the new log level across cluster restarts
+            security:
+                - jwt: []
+            parameters:
+                - $ref: "#/components/parameters/IgnoreVersion"
+            requestBody:
+                description: Desired log level for the cluster
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            title: SetLogLevelData
+                            properties:
+                                logLevel:
+                                    type: string
+                                    description: >
+                                        The desired log level of the cluster
+                                version:
+                                    $ref: "#/components/schemas/Version"
+            responses:
+                "200":
+                    description: The provided log level was successfully applied.
 
                 "400":
                     $ref: "#/components/responses/BadRequest"
