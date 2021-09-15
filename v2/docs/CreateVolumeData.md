@@ -10,6 +10,7 @@ Name | Type | Description | Notes
 **FsType** | [**FsType**](FsType.md) |  | 
 **Description** | **string** |  | [optional] 
 **SizeBytes** | **uint64** | A volume&#39;s size in bytes  | 
+**PlacementStrategy** | [**Strategy**](Strategy.md) |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

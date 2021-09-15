@@ -1,7 +1,7 @@
 openapi: "3.0.2"
 info:
     title: "StorageOS API"
-    version: "2.4.0"
+    version: "v2.5.0-beta1"
     contact:
         name: StorageOS
         url: https://storageos.com
@@ -297,7 +297,7 @@ components:
                             "none" performs no UID/GID alterations, using the
                             values sent by the client.
 
-                            "root" mapps UID & GID 0 to the values specified.
+                            "root" maps UID & GID 0 to the values specified.
 
                             "rootuid" maps UID 0 and a GID of any value to the
                             value specified.
@@ -406,6 +406,42 @@ components:
                 nodes that are already operational.
             example: "json"
 
+        Strategy:
+            type: object
+            properties:
+                strategy:
+                    type: string
+                    enum:
+                        - recommended
+                        - topology-aware
+                    default: recommended
+                options:
+                    type: object
+                    properties:
+                        topologyKey:
+                            type: string
+                            default: topology.kubernetes.io/zone
+                            example: my.custom.zone.label
+                            description: >
+                                Indicates the node label used to decribe the topology
+                                used for data placement decisions. If two nodes are 
+                                labelled with this key and have identical values 
+                                for that label, the scheduler treats both nodes 
+                                as being in the same topology domain. 
+                                When topology-aware provisioning is enabled, 
+                                the scheduler tries to spread a volume's master 
+                                and replica copies across different topology domains.
+                    nullable: true
+                    description: >
+                        Used together with topology-aware strategy to further
+                        specify how the placement should be done.
+            description: >
+                The logic to use when placing the volume replicas across the
+                available nodes. Possible options for this field include an
+                availability zone aware rule and recommended rule in which
+                multiple factors like available disk space, recent number of
+                errors on the nodes, etc, are taken into consideration.
+                Defaults to using a recommended placement strategy.
         # ------------------------------------------------------------------------------
         # UUIDs
         # ------------------------------------------------------------------------------
@@ -708,12 +744,29 @@ components:
                     type: string
                     readOnly: true
                     description: >
-                        Endpoint at which we operate our clustering GRPC API.
+                        Endpoint at which we operate our clustering gRPC API.
 
                         This value is set on startup by the corresponding
                         environment variable (INTERNAL_API_ADVERTISE_ADDRESS)
                     example:
                         - "192.0.2.1:5710"
+                cordoned:
+                    type: boolean
+                    readOnly: true
+                    default: false
+                    description: >
+                        Cordoned describes the cordoned state of the node.
+
+                        A cordoned node will not have new volume deployments scheduled on it
+                cordonedAt: 
+                    type: string
+                    format: date-time
+                    readOnly: true
+                    description: |
+                        The time the node has been cordoned. This field's purpose is informative only.
+
+                        String format is RFC3339.
+                    example: "2019-03-29T23:13:13Z"
                 labels:
                     $ref: "#/components/schemas/Labels"
                 createdAt:
@@ -1151,7 +1204,7 @@ components:
 
         Accepted:
             description: >
-                An aynchronous request has been accepted
+                An asynchronous request has been accepted
             content:
                 application/json:
                     schema:
@@ -2140,7 +2193,66 @@ paths:
                                     $ref: "#/components/schemas/Version"
             responses:
                 "200":
-                    description: The node was successfullly updated
+                    description: The node was successfully updated
+                    content:
+                        application/json: 
+                            schema: 
+                                $ref: "#/components/schemas/Node"
+
+                "400":
+                    $ref: "#/components/responses/BadRequest"
+                "401":
+                    $ref: "#/components/responses/Unauthorised"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "412":
+                    $ref: "#/components/responses/StaleWrite"
+                "500":
+                    $ref: "#/components/responses/ServerError"
+                "503":
+                    $ref: "#/components/responses/StoreError"
+
+    /nodes/{id}/cordon:
+        parameters:
+            - name: id
+              in: path
+              description: ID of a Node
+              required: true
+              schema:
+                  $ref: "#/components/schemas/NodeID"
+
+        put:
+            summary: Modify the cordoned state for a node
+            operationId: setCordoned
+            description: >
+                Set the cordoned state for the node corresponding 
+                to id given by the request.
+            security:
+                - jwt: []
+            parameters:
+                - $ref: "#/components/parameters/IgnoreVersion"
+            requestBody: 
+                description: Desired cordoned state for the node.
+                required: true
+                content: 
+                    application/json:
+                        schema:
+                            type: object
+                            title: SetCordonedNodeData
+                            properties:
+                                cordoned:
+                                    type: boolean
+                                    description: >
+                                        Marks the node's desired cordoned state state. 
+                                        A cordoned node will not have new volume deployments scheduled on it.
+                                    example: true
+                                version:
+                                    $ref: "#/components/schemas/Version"
+            responses:
+                "200":
+                    description: The node was successfully updated
                     content:
                         application/json: 
                             schema: 
@@ -2484,6 +2596,8 @@ paths:
                                         A volume's size in bytes
                                     minimum: 0
                                     example: 5000
+                                placementStrategy:
+                                    $ref: "#/components/schemas/Strategy"
             responses:
                 "201":
                     description: The volume was successfully created
@@ -3259,6 +3373,79 @@ paths:
                 "503":
                     $ref: "#/components/responses/StoreError"
 
+    /namespaces/{namespaceID}/volumes/{id}/placement-strategy:
+        parameters:
+            - name: namespaceID
+              in: path
+              description: ID of a Namespace
+              required: true
+              schema:
+                  $ref: "#/components/schemas/NamespaceID"
+            - name: id
+              in: path
+              description: ID of a Volume
+              required: true
+              schema:
+                  $ref: "#/components/schemas/VolumeID"
+        put:
+            summary: Sets the placement strategy of the volume.
+            operationId: setPlacementStrategy
+            description: >
+                Sets the desired behaviour of the volume identified by id when
+                provisioning new replicas.
+
+                The already placed replicas will not be moved, instead, during
+                future failovers, node restarts (containing the volume replicas)
+                and any other operation that requires a replica to be
+                provisioned will now follow this rule thus having an "eventually
+                consistent" response.
+            security:
+                - jwt: []
+            parameters:
+                - $ref: "#/components/parameters/IgnoreVersion"
+            requestBody:
+                description: Placement strategy to use
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            title: SetPlacementStrategyData
+                            properties:
+                                placementStrategy:
+                                    $ref: "#/components/schemas/Strategy"
+                                version:
+                                    $ref: "#/components/schemas/Version"
+            responses:
+                "200":
+                    $ref: "#/components/responses/Accepted"
+                "400":
+                    $ref: "#/components/responses/BadRequest"
+                
+                "401":
+                    $ref: "#/components/responses/Unauthorised"
+
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+
+                "404":
+                    $ref: "#/components/responses/NotFound"
+
+                "409":
+                    $ref: "#/components/responses/InvalidResult"
+
+                "412":
+                    $ref: "#/components/responses/StaleWrite"
+
+                "422":
+                    $ref: "#/components/responses/InvalidStateTransition"
+
+                "500":
+                    $ref: "#/components/responses/ServerError"
+
+                "503":
+                    $ref: "#/components/responses/StoreError"
+
     /cluster:
         get:
             summary: Retrieves the cluster's global configuration settings
@@ -3291,7 +3478,9 @@ paths:
         put:
             summary: Update the cluster's global configuration settings
             operationId: updateCluster
-            description: Update the global configuration settings to use for the cluster.
+            description: >
+                Update the global configuration settings to use for the cluster.
+                Updating the cluster log level does not require a restart
             security:
                 - jwt: []
             parameters:
@@ -3487,7 +3676,7 @@ paths:
                         The server is returning an incomplete diagnostic bundle.
 
                         A bundle may contain partial information if one or more
-                        nodes failed to respond, or some other error occured
+                        nodes failed to respond, or some other error occurred
                         during the collection process.
 
                         The returned bundle is still valid and should be sent to
