@@ -9,9 +9,10 @@
  */
 
 package api
-// NfsVolumeExports struct for NfsVolumeExports
-type NfsVolumeExports struct {
-	Exports []NfsExportConfig `json:"exports,omitempty"`
+// SetCordonedNodeData struct for SetCordonedNodeData
+type SetCordonedNodeData struct {
+	// Marks the node's desired cordoned state state.  A cordoned node will not have new volume deployments scheduled on it. 
+	Cordoned bool `json:"cordoned,omitempty"`
 	// An opaque representation of an entity version at the time it was obtained from the API. All operations that mutate the entity must include this version field in the request unchanged. The format of this type is undefined and may change but the defined properties will not change. 
 	Version string `json:"version,omitempty"`
 }

@@ -38,7 +38,9 @@ Method | HTTP request | Description
 [**RefreshJwt**](DefaultApi.md#RefreshJwt) | **Post** /auth/refresh | Refresh the JWT
 [**ResizeVolume**](DefaultApi.md#ResizeVolume) | **Put** /namespaces/{namespaceID}/volumes/{id}/size | Increase the size of a volume.
 [**SetComputeOnly**](DefaultApi.md#SetComputeOnly) | **Put** /nodes/{id}/compute-only | Modify the computeonly behaviour state for a node
+[**SetCordoned**](DefaultApi.md#SetCordoned) | **Put** /nodes/{id}/cordon | Modify the cordoned state for a node
 [**SetFailureMode**](DefaultApi.md#SetFailureMode) | **Put** /namespaces/{namespaceID}/volumes/{id}/failure-mode | Set the failure mode of the volume.
+[**SetPlacementStrategy**](DefaultApi.md#SetPlacementStrategy) | **Put** /namespaces/{namespaceID}/volumes/{id}/placement-strategy | Sets the placement strategy of the volume.
 [**SetReplicas**](DefaultApi.md#SetReplicas) | **Put** /namespaces/{namespaceID}/volumes/{id}/replicas | Set the number of replicas to maintain for the volume.
 [**Spec**](DefaultApi.md#Spec) | **Get** /openapi | Serves this openapi spec file
 [**UpdateAuthenticatedUser**](DefaultApi.md#UpdateAuthenticatedUser) | **Put** /users/self | Update the authenticated user&#39;s information
@@ -1328,6 +1330,53 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
+## SetCordoned
+
+> Node SetCordoned(ctx, id, setCordonedNodeData, optional)
+
+Modify the cordoned state for a node
+
+Set the cordoned state for the node corresponding  to id given by the request. 
+
+### Required Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string**| ID of a Node | 
+**setCordonedNodeData** | [**SetCordonedNodeData**](SetCordonedNodeData.md)|  | 
+ **optional** | ***SetCordonedOpts** | optional parameters | nil if no parameters
+
+### Optional Parameters
+
+Optional parameters are passed through a pointer to a SetCordonedOpts struct
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+ **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+
+### Return type
+
+[**Node**](Node.md)
+
+### Authorization
+
+[jwt](../README.md#jwt)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
 ## SetFailureMode
 
 > Volume SetFailureMode(ctx, namespaceID, id, setFailureModeRequest, optional)
@@ -1362,6 +1411,55 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**Volume**](Volume.md)
+
+### Authorization
+
+[jwt](../README.md#jwt)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## SetPlacementStrategy
+
+> AcceptedMessage SetPlacementStrategy(ctx, namespaceID, id, setPlacementStrategyData, optional)
+
+Sets the placement strategy of the volume.
+
+Sets the desired behaviour of the volume identified by id when provisioning new replicas. The already placed replicas will not be moved, instead, during future failovers, node restarts (containing the volume replicas) and any other operation that requires a replica to be provisioned will now follow this rule thus having an \"eventually consistent\" response. 
+
+### Required Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**namespaceID** | **string**| ID of a Namespace | 
+**id** | **string**| ID of a Volume | 
+**setPlacementStrategyData** | [**SetPlacementStrategyData**](SetPlacementStrategyData.md)|  | 
+ **optional** | ***SetPlacementStrategyOpts** | optional parameters | nil if no parameters
+
+### Optional Parameters
+
+Optional parameters are passed through a pointer to a SetPlacementStrategyOpts struct
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+
+ **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+
+### Return type
+
+[**AcceptedMessage**](AcceptedMessage.md)
 
 ### Authorization
 
@@ -1507,7 +1605,7 @@ Name | Type | Description  | Notes
 
 Update the cluster's global configuration settings
 
-Update the global configuration settings to use for the cluster.
+Update the global configuration settings to use for the cluster. Updating the cluster log level does not require a restart 
 
 ### Required Parameters
 

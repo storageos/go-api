@@ -5,7 +5,7 @@ info:
     name: StorageOS
     url: https://storageos.com
   title: StorageOS API
-  version: 2.4.0
+  version: v2.5.0-beta1
 externalDocs:
   description: The latest StorageOS user documentation
   url: https://docs.storageos.com/
@@ -1607,7 +1607,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AcceptedMessage'
           description: |
-            An aynchronous request has been accepted
+            An asynchronous request has been accepted
         "400":
           content:
             application/json:
@@ -1932,7 +1932,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Node'
-          description: The node was successfullly updated
+          description: The node was successfully updated
         "400":
           content:
             application/json:
@@ -1998,6 +1998,127 @@ paths:
       security:
       - jwt: []
       summary: Modify the computeonly behaviour state for a node
+  /nodes/{id}/cordon:
+    put:
+      description: |
+        Set the cordoned state for the node corresponding  to id given by the request.
+      operationId: setCordoned
+      parameters:
+      - description: ID of a Node
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          $ref: '#/components/schemas/NodeID'
+        style: simple
+      - description: |
+          If set to true this value indicates that the user wants to ignore entity version constraints, thereby "forcing" the operation.
+        explode: true
+        in: query
+        name: ignore-version
+        required: false
+        schema:
+          $ref: '#/components/schemas/IgnoreVersion'
+        style: form
+      requestBody:
+        $ref: '#/components/requestBodies/SetCordonedNodeData'
+        content:
+          application/json:
+            schema:
+              example:
+                cordoned: true
+                version: NDI0MjQyNDI0MjQyNDI0MjQy
+              properties:
+                cordoned:
+                  description: |
+                    Marks the node's desired cordoned state state.  A cordoned node will not have new volume deployments scheduled on it.
+                  example: true
+                  type: boolean
+                version:
+                  description: |
+                    An opaque representation of an entity version at the time it was obtained from the API.
+                    All operations that mutate the entity must include this version field in the request unchanged.
+                    The format of this type is undefined and may change but the defined properties will not change.
+                  example: NDI0MjQyNDI0MjQyNDI0MjQy
+                  maxLength: 30
+                  type: string
+              title: SetCordonedNodeData
+              type: object
+        description: Desired cordoned state for the node.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Node'
+          description: The node was successfully updated
+        "400":
+          content:
+            application/json:
+              example:
+                error: a short description of the validation failure
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request does not conform to the API specification.
+        "401":
+          content:
+            application/json:
+              example:
+                error: authentication required
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The requested endpoint requires authentication - you must log in first.
+            If attempting to log in, your credentials were not recognised.
+        "403":
+          content:
+            application/json:
+              example:
+                error: unauthorised
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The authenticated user does not have permission to perform the requested action.
+        "404":
+          content:
+            application/json:
+              example:
+                error: not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            A referenced resource does not exist.
+        "412":
+          content:
+            application/json:
+              example:
+                error: attempting to write stale object
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
+            The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The request caused an internal server error and should be retried.
+            Check the health of the node/cluster and if the error persists, contact support.
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The server is currently unable to handle the request due to a temporary store failure.
+            Check the health of the node/cluster and if the error persists, contact support.
+      security:
+      - jwt: []
+      summary: Modify the cordoned state for a node
   /policies:
     get:
       description: Fetch the list of policy groups in the cluster.
@@ -2558,6 +2679,10 @@ paths:
             schema:
               example:
                 namespaceID: c5666b58-b805-4215-ab4a-cb094948ccc6
+                placementStrategy:
+                  options:
+                    topologyKey: my.custom.zone.label
+                  strategy: recommended
                 name: data
                 description: This volume contains the data for my app
                 fsType: ext4
@@ -2599,6 +2724,8 @@ paths:
                   example: 5000
                   minimum: 0
                   type: uint64
+                placementStrategy:
+                  $ref: '#/components/schemas/Strategy'
               required:
               - fsType
               - name
@@ -2621,7 +2748,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AcceptedMessage'
           description: |
-            An aynchronous request has been accepted
+            An asynchronous request has been accepted
         "400":
           content:
             application/json:
@@ -2770,7 +2897,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AcceptedMessage'
           description: |
-            An aynchronous request has been accepted
+            An asynchronous request has been accepted
         "400":
           content:
             application/json:
@@ -3851,7 +3978,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AcceptedMessage'
           description: |
-            An aynchronous request has been accepted
+            An asynchronous request has been accepted
         "400":
           content:
             application/json:
@@ -4143,7 +4270,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AcceptedMessage'
           description: |
-            An aynchronous request has been accepted
+            An asynchronous request has been accepted
         "400":
           content:
             application/json:
@@ -4219,6 +4346,157 @@ paths:
       security:
       - jwt: []
       summary: Increase the size of a volume.
+  /namespaces/{namespaceID}/volumes/{id}/placement-strategy:
+    put:
+      description: |
+        Sets the desired behaviour of the volume identified by id when provisioning new replicas.
+        The already placed replicas will not be moved, instead, during future failovers, node restarts (containing the volume replicas) and any other operation that requires a replica to be provisioned will now follow this rule thus having an "eventually consistent" response.
+      operationId: setPlacementStrategy
+      parameters:
+      - description: ID of a Namespace
+        explode: false
+        in: path
+        name: namespaceID
+        required: true
+        schema:
+          $ref: '#/components/schemas/NamespaceID'
+        style: simple
+      - description: ID of a Volume
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          $ref: '#/components/schemas/VolumeID'
+        style: simple
+      - description: |
+          If set to true this value indicates that the user wants to ignore entity version constraints, thereby "forcing" the operation.
+        explode: true
+        in: query
+        name: ignore-version
+        required: false
+        schema:
+          $ref: '#/components/schemas/IgnoreVersion'
+        style: form
+      requestBody:
+        $ref: '#/components/requestBodies/SetPlacementStrategyData'
+        content:
+          application/json:
+            schema:
+              example:
+                placementStrategy:
+                  options:
+                    topologyKey: my.custom.zone.label
+                  strategy: recommended
+                version: NDI0MjQyNDI0MjQyNDI0MjQy
+              properties:
+                placementStrategy:
+                  $ref: '#/components/schemas/Strategy'
+                version:
+                  description: |
+                    An opaque representation of an entity version at the time it was obtained from the API.
+                    All operations that mutate the entity must include this version field in the request unchanged.
+                    The format of this type is undefined and may change but the defined properties will not change.
+                  example: NDI0MjQyNDI0MjQyNDI0MjQy
+                  maxLength: 30
+                  type: string
+              title: SetPlacementStrategyData
+              type: object
+        description: Placement strategy to use
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcceptedMessage'
+          description: |
+            An asynchronous request has been accepted
+        "400":
+          content:
+            application/json:
+              example:
+                error: a short description of the validation failure
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request does not conform to the API specification.
+        "401":
+          content:
+            application/json:
+              example:
+                error: authentication required
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The requested endpoint requires authentication - you must log in first.
+            If attempting to log in, your credentials were not recognised.
+        "403":
+          content:
+            application/json:
+              example:
+                error: unauthorised
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The authenticated user does not have permission to perform the requested action.
+        "404":
+          content:
+            application/json:
+              example:
+                error: not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            A referenced resource does not exist.
+        "409":
+          content:
+            application/json:
+              example:
+                error: label \"a\" with value \"b\" conflicts with label \"c\" with
+                  value \"d\"
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The requested configuration change for the referenced entity cannot be made as it would result in a conflict which invalidates the resultant config.
+        "412":
+          content:
+            application/json:
+              example:
+                error: attempting to write stale object
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
+            The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
+        "422":
+          content:
+            application/json:
+              example:
+                error: invalid state for operation (currently "deleted")
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            An action was requested that cannot be performed on the entity in it's current state.
+            As an example, this error might be returned when trying to delete a currently mounted volume.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The request caused an internal server error and should be retried.
+            Check the health of the node/cluster and if the error persists, contact support.
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The server is currently unable to handle the request due to a temporary store failure.
+            Check the health of the node/cluster and if the error persists, contact support.
+      security:
+      - jwt: []
+      summary: Sets the placement strategy of the volume.
   /cluster:
     get:
       description: |
@@ -4270,7 +4548,8 @@ paths:
       - jwt: []
       summary: Retrieves the cluster's global configuration settings
     put:
-      description: Update the global configuration settings to use for the cluster.
+      description: |
+        Update the global configuration settings to use for the cluster. Updating the cluster log level does not require a restart
       operationId: updateCluster
       parameters:
       - description: |
@@ -4599,7 +4878,7 @@ paths:
                 type: string
           description: |
             The server is returning an incomplete diagnostic bundle.
-            A bundle may contain partial information if one or more nodes failed to respond, or some other error occured during the collection process.
+            A bundle may contain partial information if one or more nodes failed to respond, or some other error occurred during the collection process.
             The returned bundle is still valid and should be sent to StorageOS.
         "503":
           content:
@@ -4754,6 +5033,12 @@ components:
           schema:
             $ref: '#/components/schemas/SetComputeOnlyNodeData'
       required: true
+    SetCordonedNodeData:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SetCordonedNodeData'
+      required: true
     CreateVolumeData:
       content:
         application/json:
@@ -4855,6 +5140,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/UpdateClusterData'
+      required: true
+    SetPlacementStrategyData:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SetPlacementStrategyData'
       required: true
     AttachVolumeData:
       content:
@@ -5003,7 +5294,7 @@ components:
           schema:
             $ref: '#/components/schemas/AcceptedMessage'
       description: |
-        An aynchronous request has been accepted
+        An asynchronous request has been accepted
   schemas:
     OpenAPISpec:
       description: |
@@ -5333,6 +5624,23 @@ components:
       - json
       example: json
       type: string
+    Strategy:
+      description: |
+        The logic to use when placing the volume replicas across the available nodes. Possible options for this field include an availability zone aware rule and recommended rule in which multiple factors like available disk space, recent number of errors on the nodes, etc, are taken into consideration. Defaults to using a recommended placement strategy.
+      example:
+        options:
+          topologyKey: my.custom.zone.label
+        strategy: recommended
+      properties:
+        strategy:
+          default: recommended
+          enum:
+          - recommended
+          - topology-aware
+          type: string
+        options:
+          $ref: '#/components/schemas/Strategy_options'
+      type: object
     ClusterID:
       description: |
         A unique identifier for a cluster. The format of this type is undefined and may change but the defined properties will not change.
@@ -5684,14 +5992,9 @@ components:
       - $ref: '#/components/schemas/ReplicaDeploymentInfo_allOf'
     Node:
       example:
-        createdAt: 2019-03-10T13:42:42Z
+        cordonedAt: 2019-03-29T23:13:13Z
         gossipEndpoint: '["192.0.2.1:5711"]'
-        ioEndpoint: '["192.0.2.1:5703"]'
-        name: db1.lcy.storageos.network
         health: online
-        id: c5666b58-b805-4215-ab4a-cb094948ccc6
-        supervisorEndpoint: '["192.0.2.1:5704"]'
-        clusteringEndpoint: '["192.0.2.1:5710"]'
         version: NDI0MjQyNDI0MjQyNDI0MjQy
         capacity:
           total: 42
@@ -5700,6 +6003,13 @@ components:
         labels:
           env: prod
           rack: db-1
+        createdAt: 2019-03-10T13:42:42Z
+        ioEndpoint: '["192.0.2.1:5703"]'
+        name: db1.lcy.storageos.network
+        cordoned: false
+        id: c5666b58-b805-4215-ab4a-cb094948ccc6
+        supervisorEndpoint: '["192.0.2.1:5704"]'
+        clusteringEndpoint: '["192.0.2.1:5710"]'
         updatedAt: 2019-03-29T23:13:13Z
       properties:
         id:
@@ -5742,9 +6052,25 @@ components:
           type: string
         clusteringEndpoint:
           description: |
-            Endpoint at which we operate our clustering GRPC API.
+            Endpoint at which we operate our clustering gRPC API.
             This value is set on startup by the corresponding environment variable (INTERNAL_API_ADVERTISE_ADDRESS)
           example: '["192.0.2.1:5710"]'
+          readOnly: true
+          type: string
+        cordoned:
+          default: false
+          description: |
+            Cordoned describes the cordoned state of the node.
+            A cordoned node will not have new volume deployments scheduled on it
+          readOnly: true
+          type: boolean
+        cordonedAt:
+          description: |
+            The time the node has been cordoned. This field's purpose is informative only.
+
+            String format is RFC3339.
+          example: 2019-03-29T23:13:13Z
+          format: date-time
           readOnly: true
           type: string
         labels:
@@ -6290,6 +6616,26 @@ components:
           type: string
       title: SetComputeOnlyNodeData
       type: object
+    SetCordonedNodeData:
+      example:
+        cordoned: true
+        version: NDI0MjQyNDI0MjQyNDI0MjQy
+      properties:
+        cordoned:
+          description: |
+            Marks the node's desired cordoned state state.  A cordoned node will not have new volume deployments scheduled on it.
+          example: true
+          type: boolean
+        version:
+          description: |
+            An opaque representation of an entity version at the time it was obtained from the API.
+            All operations that mutate the entity must include this version field in the request unchanged.
+            The format of this type is undefined and may change but the defined properties will not change.
+          example: NDI0MjQyNDI0MjQyNDI0MjQy
+          maxLength: 30
+          type: string
+      title: SetCordonedNodeData
+      type: object
     _policies_specs:
       properties:
         namespaceID:
@@ -6406,6 +6752,10 @@ components:
     CreateVolumeData:
       example:
         namespaceID: c5666b58-b805-4215-ab4a-cb094948ccc6
+        placementStrategy:
+          options:
+            topologyKey: my.custom.zone.label
+          strategy: recommended
         name: data
         description: This volume contains the data for my app
         fsType: ext4
@@ -6447,6 +6797,8 @@ components:
           example: 5000
           minimum: 0
           type: uint64
+        placementStrategy:
+          $ref: '#/components/schemas/Strategy'
       required:
       - fsType
       - name
@@ -6586,6 +6938,26 @@ components:
           type: string
       title: ResizeVolumeRequest
       type: object
+    SetPlacementStrategyData:
+      example:
+        placementStrategy:
+          options:
+            topologyKey: my.custom.zone.label
+          strategy: recommended
+        version: NDI0MjQyNDI0MjQyNDI0MjQy
+      properties:
+        placementStrategy:
+          $ref: '#/components/schemas/Strategy'
+        version:
+          description: |
+            An opaque representation of an entity version at the time it was obtained from the API.
+            All operations that mutate the entity must include this version field in the request unchanged.
+            The format of this type is undefined and may change but the defined properties will not change.
+          example: NDI0MjQyNDI0MjQyNDI0MjQy
+          maxLength: 30
+          type: string
+      title: SetPlacementStrategyData
+      type: object
     UpdateClusterData:
       example:
         disableVersionCheck: false
@@ -6685,7 +7057,7 @@ components:
             \ NFS administrator to prevent the client from writing as \"root\" to\
             \ the NFS share, instead mapping the client to a new UID/GID (usually\
             \ nfsnobody, -2).\n\"none\" performs no UID/GID alterations, using the\
-            \ values sent by the client.\n\"root\" mapps UID & GID 0 to the values\
+            \ values sent by the client.\n\"root\" maps UID & GID 0 to the values\
             \ specified.\n\"rootuid\" maps UID 0 and a GID of any value to the value\
             \ specified.\n\"all\" maps changes all UID and GID values to those specified.\n"
           enum:
@@ -6694,6 +7066,19 @@ components:
           - rootuid
           - all
           example: root
+          type: string
+    Strategy_options:
+      description: |
+        Used together with topology-aware strategy to further specify how the placement should be done.
+      example:
+        topologyKey: my.custom.zone.label
+      nullable: true
+      properties:
+        topologyKey:
+          default: topology.kubernetes.io/zone
+          description: |
+            Indicates the node label used to decribe the topology used for data placement decisions. If two nodes are  labelled with this key and have identical values  for that label, the scheduler treats both nodes  as being in the same topology domain.  When topology-aware provisioning is enabled,  the scheduler tries to spread a volume's master  and replica copies across different topology domains.
+          example: my.custom.zone.label
           type: string
     UserSession_allOf_session:
       properties:
