@@ -1,9 +1,14 @@
 # NodeHealth
 
-## Properties
+## Enum
 
-Name | Type | Description | Notes
------------- | ------------- | ------------- | -------------
+
+* `ONLINE` (value: `"online"`)
+
+* `OFFLINE` (value: `"offline"`)
+
+* `UNKNOWN` (value: `"unknown"`)
+
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

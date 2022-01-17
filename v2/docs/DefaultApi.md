@@ -1,6 +1,6 @@
 # \DefaultApi
 
-All URIs are relative to *http://localhost/v2*
+All URIs are relative to */v2*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -58,35 +58,62 @@ Method | HTTP request | Description
 
 ## AttachNFSVolume
 
-> AttachNFSVolume(ctx, namespaceID, id, attachNfsVolumeData, optional)
+> AttachNFSVolume(ctx, namespaceID, id).AttachNFSVolumeData(attachNFSVolumeData).IgnoreVersion(ignoreVersion).AsyncMax(asyncMax).Execute()
 
 attach and share the volume using NFS
 
-Attach the given volume as an NFS volume. If no export configuration has been set via the /nfs/export-config endpoint, the nfs service will start with defaults settings (sharing the volume at its root). 
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    namespaceID := "namespaceID_example" // string | ID of a Namespace
+    id := "id_example" // string | ID of a Volume
+    attachNFSVolumeData := *openapiclient.NewAttachNFSVolumeData() // AttachNFSVolumeData | 
+    ignoreVersion := true // bool | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.  (optional) (default to false)
+    asyncMax := "asyncMax_example" // string | Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \"async-max\" header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\", or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". We reject negative or nil duration values.  (optional)
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.AttachNFSVolume(context.Background(), namespaceID, id).AttachNFSVolumeData(attachNFSVolumeData).IgnoreVersion(ignoreVersion).AsyncMax(asyncMax).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.AttachNFSVolume``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+}
+```
+
+### Path Parameters
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**namespaceID** | **string**| ID of a Namespace | 
-**id** | **string**| ID of a Volume | 
-**attachNfsVolumeData** | [**AttachNfsVolumeData**](AttachNfsVolumeData.md)|  | 
- **optional** | ***AttachNFSVolumeOpts** | optional parameters | nil if no parameters
+**namespaceID** | **string** | ID of a Namespace | 
+**id** | **string** | ID of a Volume | 
 
-### Optional Parameters
+### Other Parameters
 
-Optional parameters are passed through a pointer to a AttachNFSVolumeOpts struct
+Other parameters are passed through a pointer to a apiAttachNFSVolumeRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
 
-
- **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
- **asyncMax** | **optional.String**| Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \&quot;async-max\&quot; header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \&quot;300ms\&quot;, or \&quot;2h45m\&quot;. Valid time units are \&quot;ns\&quot;, \&quot;us\&quot; (or \&quot;µs\&quot;), \&quot;ms\&quot;, \&quot;s\&quot;, \&quot;m\&quot;, \&quot;h\&quot;. We reject negative or nil duration values.  | 
+ **attachNFSVolumeData** | [**AttachNFSVolumeData**](AttachNFSVolumeData.md) |  | 
+ **ignoreVersion** | **bool** | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+ **asyncMax** | **string** | Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \&quot;async-max\&quot; header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \&quot;300ms\&quot;, or \&quot;2h45m\&quot;. Valid time units are \&quot;ns\&quot;, \&quot;us\&quot; (or \&quot;µs\&quot;), \&quot;ms\&quot;, \&quot;s\&quot;, \&quot;m\&quot;, \&quot;h\&quot;. We reject negative or nil duration values.  | 
 
 ### Return type
 
@@ -108,21 +135,58 @@ Name | Type | Description  | Notes
 
 ## AttachVolume
 
-> AttachVolume(ctx, namespaceID, id, attachVolumeData)
+> AttachVolume(ctx, namespaceID, id).AttachVolumeData(attachVolumeData).Execute()
 
 Attach a volume to the given node
 
-Attach the volume identified by id to the node identified in the request's body. 
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    namespaceID := "namespaceID_example" // string | ID of a Namespace
+    id := "id_example" // string | ID of a Volume
+    attachVolumeData := *openapiclient.NewAttachVolumeData() // AttachVolumeData | 
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.AttachVolume(context.Background(), namespaceID, id).AttachVolumeData(attachVolumeData).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.AttachVolume``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+}
+```
+
+### Path Parameters
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**namespaceID** | **string**| ID of a Namespace | 
-**id** | **string**| ID of a Volume | 
-**attachVolumeData** | [**AttachVolumeData**](AttachVolumeData.md)|  | 
+**namespaceID** | **string** | ID of a Namespace | 
+**id** | **string** | ID of a Volume | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiAttachVolumeRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+ **attachVolumeData** | [**AttachVolumeData**](AttachVolumeData.md) |  | 
 
 ### Return type
 
@@ -144,19 +208,51 @@ Name | Type | Description  | Notes
 
 ## AuthenticateUser
 
-> UserSession AuthenticateUser(ctx, authUserData)
+> UserSession AuthenticateUser(ctx).AuthUserData(authUserData).Execute()
 
 Authenticate a user
 
-Generate a new JWT token for a user.
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    authUserData := *openapiclient.NewAuthUserData("Username_example", "Password_example") // AuthUserData | 
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.AuthenticateUser(context.Background()).AuthUserData(authUserData).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.AuthenticateUser``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `AuthenticateUser`: UserSession
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.AuthenticateUser`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiAuthenticateUserRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
-**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**authUserData** | [**AuthUserData**](AuthUserData.md)|  | 
+ **authUserData** | [**AuthUserData**](AuthUserData.md) |  | 
 
 ### Return type
 
@@ -178,19 +274,51 @@ No authorization required
 
 ## CreateNamespace
 
-> Namespace CreateNamespace(ctx, createNamespaceData)
+> Namespace CreateNamespace(ctx).CreateNamespaceData(createNamespaceData).Execute()
 
 Create a new namespace
 
-Create a new namespace in the cluster - only administrators can create new namespaces. 
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    createNamespaceData := *openapiclient.NewCreateNamespaceData() // CreateNamespaceData | 
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.CreateNamespace(context.Background()).CreateNamespaceData(createNamespaceData).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.CreateNamespace``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `CreateNamespace`: Namespace
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.CreateNamespace`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiCreateNamespaceRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
-**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**createNamespaceData** | [**CreateNamespaceData**](CreateNamespaceData.md)|  | 
+ **createNamespaceData** | [**CreateNamespaceData**](CreateNamespaceData.md) |  | 
 
 ### Return type
 
@@ -212,19 +340,51 @@ Name | Type | Description  | Notes
 
 ## CreatePolicyGroup
 
-> PolicyGroup CreatePolicyGroup(ctx, createPolicyGroupData)
+> PolicyGroup CreatePolicyGroup(ctx).CreatePolicyGroupData(createPolicyGroupData).Execute()
 
 Create a new policy group
 
-Create a new policy group in the cluster - only administrators can create new policy groups. 
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    createPolicyGroupData := *openapiclient.NewCreatePolicyGroupData() // CreatePolicyGroupData | 
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.CreatePolicyGroup(context.Background()).CreatePolicyGroupData(createPolicyGroupData).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.CreatePolicyGroup``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `CreatePolicyGroup`: PolicyGroup
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.CreatePolicyGroup`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiCreatePolicyGroupRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
-**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**createPolicyGroupData** | [**CreatePolicyGroupData**](CreatePolicyGroupData.md)|  | 
+ **createPolicyGroupData** | [**CreatePolicyGroupData**](CreatePolicyGroupData.md) |  | 
 
 ### Return type
 
@@ -246,19 +406,51 @@ Name | Type | Description  | Notes
 
 ## CreateUser
 
-> User CreateUser(ctx, createUserData)
+> User CreateUser(ctx).CreateUserData(createUserData).Execute()
 
 Create a new user
 
-Create a new user in the cluster - only administrators can create new users. 
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    createUserData := *openapiclient.NewCreateUserData("admin", "turtlesaregreat") // CreateUserData | 
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.CreateUser(context.Background()).CreateUserData(createUserData).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.CreateUser``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `CreateUser`: User
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.CreateUser`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiCreateUserRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
-**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**createUserData** | [**CreateUserData**](CreateUserData.md)|  | 
+ **createUserData** | [**CreateUserData**](CreateUserData.md) |  | 
 
 ### Return type
 
@@ -280,32 +472,59 @@ Name | Type | Description  | Notes
 
 ## CreateVolume
 
-> Volume CreateVolume(ctx, namespaceID, createVolumeData, optional)
+> Volume CreateVolume(ctx, namespaceID).CreateVolumeData(createVolumeData).AsyncMax(asyncMax).Execute()
 
 Create a new Volume in the specified namespace
 
-Create a new volume in the given namespace
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    namespaceID := "namespaceID_example" // string | ID of a Namespace
+    createVolumeData := *openapiclient.NewCreateVolumeData("c5666b58-b805-4215-ab4a-cb094948ccc6", "data", openapiclient.FsType("ext2"), uint64(5000)) // CreateVolumeData | 
+    asyncMax := "asyncMax_example" // string | Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \"async-max\" header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\", or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". We reject negative or nil duration values.  (optional)
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.CreateVolume(context.Background(), namespaceID).CreateVolumeData(createVolumeData).AsyncMax(asyncMax).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.CreateVolume``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `CreateVolume`: Volume
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.CreateVolume`: %v\n", resp)
+}
+```
+
+### Path Parameters
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**namespaceID** | **string**| ID of a Namespace | 
-**createVolumeData** | [**CreateVolumeData**](CreateVolumeData.md)|  | 
- **optional** | ***CreateVolumeOpts** | optional parameters | nil if no parameters
+**namespaceID** | **string** | ID of a Namespace | 
 
-### Optional Parameters
+### Other Parameters
 
-Optional parameters are passed through a pointer to a CreateVolumeOpts struct
+Other parameters are passed through a pointer to a apiCreateVolumeRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
-
- **asyncMax** | **optional.String**| Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \&quot;async-max\&quot; header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \&quot;300ms\&quot;, or \&quot;2h45m\&quot;. Valid time units are \&quot;ns\&quot;, \&quot;us\&quot; (or \&quot;µs\&quot;), \&quot;ms\&quot;, \&quot;s\&quot;, \&quot;m\&quot;, \&quot;h\&quot;. We reject negative or nil duration values.  | 
+ **createVolumeData** | [**CreateVolumeData**](CreateVolumeData.md) |  | 
+ **asyncMax** | **string** | Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \&quot;async-max\&quot; header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \&quot;300ms\&quot;, or \&quot;2h45m\&quot;. Valid time units are \&quot;ns\&quot;, \&quot;us\&quot; (or \&quot;µs\&quot;), \&quot;ms\&quot;, \&quot;s\&quot;, \&quot;m\&quot;, \&quot;h\&quot;. We reject negative or nil duration values.  | 
 
 ### Return type
 
@@ -327,30 +546,51 @@ Name | Type | Description  | Notes
 
 ## DeleteAuthenticatedUser
 
-> DeleteAuthenticatedUser(ctx, version, optional)
+> DeleteAuthenticatedUser(ctx).Version(version).IgnoreVersion(ignoreVersion).Execute()
 
 Delete the authenticated user
 
-Remove the authenticated user from the cluster.
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    version := "version_example" // string | This value is used to perform a conditional delete or update of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
+    ignoreVersion := true // bool | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.  (optional) (default to false)
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.DeleteAuthenticatedUser(context.Background()).Version(version).IgnoreVersion(ignoreVersion).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.DeleteAuthenticatedUser``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiDeleteAuthenticatedUserRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
-**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**version** | **string**| This value is used to perform a conditional delete or update of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.  | 
- **optional** | ***DeleteAuthenticatedUserOpts** | optional parameters | nil if no parameters
-
-### Optional Parameters
-
-Optional parameters are passed through a pointer to a DeleteAuthenticatedUserOpts struct
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-
- **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+ **version** | **string** | This value is used to perform a conditional delete or update of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.  | 
+ **ignoreVersion** | **bool** | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
 
 ### Return type
 
@@ -372,15 +612,44 @@ Name | Type | Description  | Notes
 
 ## DeleteAuthenticatedUserSessions
 
-> DeleteAuthenticatedUserSessions(ctx, )
+> DeleteAuthenticatedUserSessions(ctx).Execute()
 
 Invalidate the logged in user's sessions
 
-Invalidates logged in user's active JWTs.
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.DeleteAuthenticatedUserSessions(context.Background()).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.DeleteAuthenticatedUserSessions``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+}
+```
+
+### Path Parameters
 
 This endpoint does not need any parameter.
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiDeleteAuthenticatedUserSessionsRequest struct via the builder pattern
+
 
 ### Return type
 
@@ -402,32 +671,57 @@ This endpoint does not need any parameter.
 
 ## DeleteNamespace
 
-> DeleteNamespace(ctx, id, version, optional)
+> DeleteNamespace(ctx, id).Version(version).IgnoreVersion(ignoreVersion).Execute()
 
 Delete a namespace
 
-Remove the namespace identified by id.
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    id := "id_example" // string | ID of a namespace
+    version := "version_example" // string | This value is used to perform a conditional delete or update of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
+    ignoreVersion := true // bool | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.  (optional) (default to false)
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.DeleteNamespace(context.Background(), id).Version(version).IgnoreVersion(ignoreVersion).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.DeleteNamespace``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+}
+```
+
+### Path Parameters
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**id** | **string**| ID of a namespace | 
-**version** | **string**| This value is used to perform a conditional delete or update of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.  | 
- **optional** | ***DeleteNamespaceOpts** | optional parameters | nil if no parameters
+**id** | **string** | ID of a namespace | 
 
-### Optional Parameters
+### Other Parameters
 
-Optional parameters are passed through a pointer to a DeleteNamespaceOpts struct
+Other parameters are passed through a pointer to a apiDeleteNamespaceRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
-
- **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+ **version** | **string** | This value is used to perform a conditional delete or update of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.  | 
+ **ignoreVersion** | **bool** | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
 
 ### Return type
 
@@ -449,33 +743,59 @@ Name | Type | Description  | Notes
 
 ## DeleteNode
 
-> DeleteNode(ctx, id, version, optional)
+> DeleteNode(ctx, id).Version(version).IgnoreVersion(ignoreVersion).AsyncMax(asyncMax).Execute()
 
 Delete a node
 
-Remove the node identified by id. A node can only be deleted if it is currently offline and does not host any master deployments. 
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    id := "id_example" // string | ID of a node
+    version := "version_example" // string | This value is used to perform a conditional delete or update of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
+    ignoreVersion := true // bool | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.  (optional) (default to false)
+    asyncMax := "asyncMax_example" // string | Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \"async-max\" header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\", or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". We reject negative or nil duration values.  (optional)
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.DeleteNode(context.Background(), id).Version(version).IgnoreVersion(ignoreVersion).AsyncMax(asyncMax).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.DeleteNode``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+}
+```
+
+### Path Parameters
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**id** | **string**| ID of a node | 
-**version** | **string**| This value is used to perform a conditional delete or update of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.  | 
- **optional** | ***DeleteNodeOpts** | optional parameters | nil if no parameters
+**id** | **string** | ID of a node | 
 
-### Optional Parameters
+### Other Parameters
 
-Optional parameters are passed through a pointer to a DeleteNodeOpts struct
+Other parameters are passed through a pointer to a apiDeleteNodeRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
-
- **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
- **asyncMax** | **optional.String**| Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \&quot;async-max\&quot; header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \&quot;300ms\&quot;, or \&quot;2h45m\&quot;. Valid time units are \&quot;ns\&quot;, \&quot;us\&quot; (or \&quot;µs\&quot;), \&quot;ms\&quot;, \&quot;s\&quot;, \&quot;m\&quot;, \&quot;h\&quot;. We reject negative or nil duration values.  | 
+ **version** | **string** | This value is used to perform a conditional delete or update of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.  | 
+ **ignoreVersion** | **bool** | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+ **asyncMax** | **string** | Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \&quot;async-max\&quot; header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \&quot;300ms\&quot;, or \&quot;2h45m\&quot;. Valid time units are \&quot;ns\&quot;, \&quot;us\&quot; (or \&quot;µs\&quot;), \&quot;ms\&quot;, \&quot;s\&quot;, \&quot;m\&quot;, \&quot;h\&quot;. We reject negative or nil duration values.  | 
 
 ### Return type
 
@@ -497,32 +817,57 @@ Name | Type | Description  | Notes
 
 ## DeletePolicyGroup
 
-> DeletePolicyGroup(ctx, id, version, optional)
+> DeletePolicyGroup(ctx, id).Version(version).IgnoreVersion(ignoreVersion).Execute()
 
 Delete a policy group
 
-Remove the policy group identified by id.
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    id := "id_example" // string | ID of a policy group
+    version := "version_example" // string | This value is used to perform a conditional delete or update of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
+    ignoreVersion := true // bool | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.  (optional) (default to false)
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.DeletePolicyGroup(context.Background(), id).Version(version).IgnoreVersion(ignoreVersion).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.DeletePolicyGroup``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+}
+```
+
+### Path Parameters
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**id** | **string**| ID of a policy group | 
-**version** | **string**| This value is used to perform a conditional delete or update of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.  | 
- **optional** | ***DeletePolicyGroupOpts** | optional parameters | nil if no parameters
+**id** | **string** | ID of a policy group | 
 
-### Optional Parameters
+### Other Parameters
 
-Optional parameters are passed through a pointer to a DeletePolicyGroupOpts struct
+Other parameters are passed through a pointer to a apiDeletePolicyGroupRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
-
- **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+ **version** | **string** | This value is used to perform a conditional delete or update of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.  | 
+ **ignoreVersion** | **bool** | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
 
 ### Return type
 
@@ -544,19 +889,53 @@ Name | Type | Description  | Notes
 
 ## DeleteSessions
 
-> DeleteSessions(ctx, id)
+> DeleteSessions(ctx, id).Execute()
 
 Invalidate login sessions
 
-Invalidates active JWTs on a per-user basis, specified by id. This request will not succeed if the target account is the currently authenticated account. Use the separate users/self endpoint for this purpose. 
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    id := "id_example" // string | ID of a user
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.DeleteSessions(context.Background(), id).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.DeleteSessions``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+}
+```
+
+### Path Parameters
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**id** | **string**| ID of a user | 
+**id** | **string** | ID of a user | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiDeleteSessionsRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
 
 ### Return type
 
@@ -578,32 +957,57 @@ Name | Type | Description  | Notes
 
 ## DeleteUser
 
-> DeleteUser(ctx, id, version, optional)
+> DeleteUser(ctx, id).Version(version).IgnoreVersion(ignoreVersion).Execute()
 
 Delete a user
 
-Remove the user identified by id. This request will not succeed if the target account is the currently authenticated account. Use the separate users/self endpoint for this purpose. 
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    id := "id_example" // string | ID of a user
+    version := "version_example" // string | This value is used to perform a conditional delete or update of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
+    ignoreVersion := true // bool | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.  (optional) (default to false)
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.DeleteUser(context.Background(), id).Version(version).IgnoreVersion(ignoreVersion).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.DeleteUser``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+}
+```
+
+### Path Parameters
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**id** | **string**| ID of a user | 
-**version** | **string**| This value is used to perform a conditional delete or update of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.  | 
- **optional** | ***DeleteUserOpts** | optional parameters | nil if no parameters
+**id** | **string** | ID of a user | 
 
-### Optional Parameters
+### Other Parameters
 
-Optional parameters are passed through a pointer to a DeleteUserOpts struct
+Other parameters are passed through a pointer to a apiDeleteUserRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
-
- **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+ **version** | **string** | This value is used to perform a conditional delete or update of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.  | 
+ **ignoreVersion** | **bool** | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
 
 ### Return type
 
@@ -625,36 +1029,64 @@ Name | Type | Description  | Notes
 
 ## DeleteVolume
 
-> DeleteVolume(ctx, namespaceID, id, version, optional)
+> DeleteVolume(ctx, namespaceID, id).Version(version).IgnoreVersion(ignoreVersion).AsyncMax(asyncMax).OfflineDelete(offlineDelete).Execute()
 
 Delete a volume
 
-Remove the volume identified by id.
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    namespaceID := "namespaceID_example" // string | ID of a Namespace
+    id := "id_example" // string | ID of a Volume
+    version := "version_example" // string | This value is used to perform a conditional delete or update of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
+    ignoreVersion := true // bool | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.  (optional) (default to false)
+    asyncMax := "asyncMax_example" // string | Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \"async-max\" header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\", or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". We reject negative or nil duration values.  (optional)
+    offlineDelete := true // bool | If set to true, enables deletion of a volume when all  deployments are offline, bypassing the host nodes which cannot be reached. An offline delete request will be rejected when either a) there are online deployments for the target volume or b) there is evidence that an unreachable node still has the volume master  (optional) (default to false)
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.DeleteVolume(context.Background(), namespaceID, id).Version(version).IgnoreVersion(ignoreVersion).AsyncMax(asyncMax).OfflineDelete(offlineDelete).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.DeleteVolume``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+}
+```
+
+### Path Parameters
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**namespaceID** | **string**| ID of a Namespace | 
-**id** | **string**| ID of a Volume | 
-**version** | **string**| This value is used to perform a conditional delete or update of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.  | 
- **optional** | ***DeleteVolumeOpts** | optional parameters | nil if no parameters
+**namespaceID** | **string** | ID of a Namespace | 
+**id** | **string** | ID of a Volume | 
 
-### Optional Parameters
+### Other Parameters
 
-Optional parameters are passed through a pointer to a DeleteVolumeOpts struct
+Other parameters are passed through a pointer to a apiDeleteVolumeRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
 
-
- **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
- **asyncMax** | **optional.String**| Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \&quot;async-max\&quot; header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \&quot;300ms\&quot;, or \&quot;2h45m\&quot;. Valid time units are \&quot;ns\&quot;, \&quot;us\&quot; (or \&quot;µs\&quot;), \&quot;ms\&quot;, \&quot;s\&quot;, \&quot;m\&quot;, \&quot;h\&quot;. We reject negative or nil duration values.  | 
- **offlineDelete** | **optional.Bool**| If set to true, enables deletion of a volume when all  deployments are offline, bypassing the host nodes which cannot be reached. An offline delete request will be rejected when either a) there are online deployments for the target volume or b) there is evidence that an unreachable node still has the volume master  | [default to false]
+ **version** | **string** | This value is used to perform a conditional delete or update of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.  | 
+ **ignoreVersion** | **bool** | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+ **asyncMax** | **string** | Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \&quot;async-max\&quot; header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \&quot;300ms\&quot;, or \&quot;2h45m\&quot;. Valid time units are \&quot;ns\&quot;, \&quot;us\&quot; (or \&quot;µs\&quot;), \&quot;ms\&quot;, \&quot;s\&quot;, \&quot;m\&quot;, \&quot;h\&quot;. We reject negative or nil duration values.  | 
+ **offlineDelete** | **bool** | If set to true, enables deletion of a volume when all  deployments are offline, bypassing the host nodes which cannot be reached. An offline delete request will be rejected when either a) there are online deployments for the target volume or b) there is evidence that an unreachable node still has the volume master  | [default to false]
 
 ### Return type
 
@@ -676,35 +1108,62 @@ Name | Type | Description  | Notes
 
 ## DetachVolume
 
-> DetachVolume(ctx, namespaceID, id, version, optional)
+> DetachVolume(ctx, namespaceID, id).Version(version).IgnoreVersion(ignoreVersion).AsyncMax(asyncMax).Execute()
 
 Detach the given volume
 
-Detach the volume identified by id.
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    namespaceID := "namespaceID_example" // string | ID of a Namespace
+    id := "id_example" // string | ID of a Volume
+    version := "version_example" // string | This value is used to perform a conditional delete or update of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
+    ignoreVersion := true // bool | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.  (optional) (default to false)
+    asyncMax := "asyncMax_example" // string | Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \"async-max\" header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\", or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". We reject negative or nil duration values.  (optional)
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.DetachVolume(context.Background(), namespaceID, id).Version(version).IgnoreVersion(ignoreVersion).AsyncMax(asyncMax).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.DetachVolume``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+}
+```
+
+### Path Parameters
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**namespaceID** | **string**| ID of a Namespace | 
-**id** | **string**| ID of a Volume | 
-**version** | **string**| This value is used to perform a conditional delete or update of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.  | 
- **optional** | ***DetachVolumeOpts** | optional parameters | nil if no parameters
+**namespaceID** | **string** | ID of a Namespace | 
+**id** | **string** | ID of a Volume | 
 
-### Optional Parameters
+### Other Parameters
 
-Optional parameters are passed through a pointer to a DetachVolumeOpts struct
+Other parameters are passed through a pointer to a apiDetachVolumeRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
 
-
- **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
- **asyncMax** | **optional.String**| Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \&quot;async-max\&quot; header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \&quot;300ms\&quot;, or \&quot;2h45m\&quot;. Valid time units are \&quot;ns\&quot;, \&quot;us\&quot; (or \&quot;µs\&quot;), \&quot;ms\&quot;, \&quot;s\&quot;, \&quot;m\&quot;, \&quot;h\&quot;. We reject negative or nil duration values.  | 
+ **version** | **string** | This value is used to perform a conditional delete or update of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.  | 
+ **ignoreVersion** | **bool** | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+ **asyncMax** | **string** | Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \&quot;async-max\&quot; header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \&quot;300ms\&quot;, or \&quot;2h45m\&quot;. Valid time units are \&quot;ns\&quot;, \&quot;us\&quot; (or \&quot;µs\&quot;), \&quot;ms\&quot;, \&quot;s\&quot;, \&quot;m\&quot;, \&quot;h\&quot;. We reject negative or nil duration values.  | 
 
 ### Return type
 
@@ -726,15 +1185,46 @@ Name | Type | Description  | Notes
 
 ## GetAuthenticatedUser
 
-> User GetAuthenticatedUser(ctx, )
+> User GetAuthenticatedUser(ctx).Execute()
 
 Get the currently authenticated user's information
 
-Fetch authenticated user's information.
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.GetAuthenticatedUser(context.Background()).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.GetAuthenticatedUser``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `GetAuthenticatedUser`: User
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.GetAuthenticatedUser`: %v\n", resp)
+}
+```
+
+### Path Parameters
 
 This endpoint does not need any parameter.
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetAuthenticatedUserRequest struct via the builder pattern
+
 
 ### Return type
 
@@ -756,15 +1246,46 @@ This endpoint does not need any parameter.
 
 ## GetCluster
 
-> Cluster GetCluster(ctx, )
+> Cluster GetCluster(ctx).Execute()
 
 Retrieves the cluster's global configuration settings
 
-Retrieves the current global configuration settings in use by the cluster. 
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.GetCluster(context.Background()).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.GetCluster``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `GetCluster`: Cluster
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.GetCluster`: %v\n", resp)
+}
+```
+
+### Path Parameters
 
 This endpoint does not need any parameter.
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetClusterRequest struct via the builder pattern
+
 
 ### Return type
 
@@ -786,15 +1307,46 @@ This endpoint does not need any parameter.
 
 ## GetDiagnostics
 
-> *os.File GetDiagnostics(ctx, )
+> *os.File GetDiagnostics(ctx).Execute()
 
 Retrieves a diagnostics bundle from the target node
 
-Requests that the recipient node gathers information about the global state of the cluster and detailed information about the local state of each node in the cluster, using it to then build and return a bundle which can be used for  troubleshooting. For clusters in an unhealthy state this may result in a slower, incomplete response.  If the cluster has many nodes, it is recommended to use the  single node diagnostic collection endpoint to target the desired nodes in turn. The request will only be served when the authenticated user is an administrator. 
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.GetDiagnostics(context.Background()).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.GetDiagnostics``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `GetDiagnostics`: *os.File
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.GetDiagnostics`: %v\n", resp)
+}
+```
+
+### Path Parameters
 
 This endpoint does not need any parameter.
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetDiagnosticsRequest struct via the builder pattern
+
 
 ### Return type
 
@@ -816,15 +1368,46 @@ This endpoint does not need any parameter.
 
 ## GetLicence
 
-> Licence GetLicence(ctx, )
+> Licence GetLicence(ctx).Execute()
 
 Retrieves the cluster's licence information
 
-Retrieves the cluster's current licence information 
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.GetLicence(context.Background()).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.GetLicence``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `GetLicence`: Licence
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.GetLicence`: %v\n", resp)
+}
+```
+
+### Path Parameters
 
 This endpoint does not need any parameter.
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetLicenceRequest struct via the builder pattern
+
 
 ### Return type
 
@@ -846,19 +1429,55 @@ This endpoint does not need any parameter.
 
 ## GetNamespace
 
-> Namespace GetNamespace(ctx, id)
+> Namespace GetNamespace(ctx, id).Execute()
 
 Fetch a namespace
 
-Fetch the namespace identified by id.
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    id := "id_example" // string | ID of a namespace
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.GetNamespace(context.Background(), id).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.GetNamespace``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `GetNamespace`: Namespace
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.GetNamespace`: %v\n", resp)
+}
+```
+
+### Path Parameters
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**id** | **string**| ID of a namespace | 
+**id** | **string** | ID of a namespace | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetNamespaceRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
 
 ### Return type
 
@@ -880,19 +1499,55 @@ Name | Type | Description  | Notes
 
 ## GetNode
 
-> Node GetNode(ctx, id)
+> Node GetNode(ctx, id).Execute()
 
 Fetch a node
 
-Fetch the node identified by id.
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    id := "id_example" // string | ID of a node
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.GetNode(context.Background(), id).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.GetNode``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `GetNode`: Node
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.GetNode`: %v\n", resp)
+}
+```
+
+### Path Parameters
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**id** | **string**| ID of a node | 
+**id** | **string** | ID of a node | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetNodeRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
 
 ### Return type
 
@@ -914,19 +1569,55 @@ Name | Type | Description  | Notes
 
 ## GetPolicyGroup
 
-> PolicyGroup GetPolicyGroup(ctx, id)
+> PolicyGroup GetPolicyGroup(ctx, id).Execute()
 
 Fetch a policy group
 
-Fetch the policy group identified by id.
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    id := "id_example" // string | ID of a policy group
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.GetPolicyGroup(context.Background(), id).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.GetPolicyGroup``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `GetPolicyGroup`: PolicyGroup
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.GetPolicyGroup`: %v\n", resp)
+}
+```
+
+### Path Parameters
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**id** | **string**| ID of a policy group | 
+**id** | **string** | ID of a policy group | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetPolicyGroupRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
 
 ### Return type
 
@@ -948,19 +1639,55 @@ Name | Type | Description  | Notes
 
 ## GetSingleNodeDiagnostics
 
-> *os.File GetSingleNodeDiagnostics(ctx, id)
+> *os.File GetSingleNodeDiagnostics(ctx, id).Execute()
 
 Retrieves a single node diagnostics bundle from the target node
 
-Requests that the recipient node gathers information about the global state of the cluster and detailed information about the target node, using it to then build and return a bundle which can be used for troubleshooting. If the target node is in an unhealthy state then the response may be slower and  incomplete. The request will only be served when the authenticated user is an administrator. 
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    id := "id_example" // string | ID of a node
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.GetSingleNodeDiagnostics(context.Background(), id).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.GetSingleNodeDiagnostics``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `GetSingleNodeDiagnostics`: *os.File
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.GetSingleNodeDiagnostics`: %v\n", resp)
+}
+```
+
+### Path Parameters
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**id** | **string**| ID of a node | 
+**id** | **string** | ID of a node | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetSingleNodeDiagnosticsRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
 
 ### Return type
 
@@ -982,19 +1709,55 @@ Name | Type | Description  | Notes
 
 ## GetUser
 
-> User GetUser(ctx, id)
+> User GetUser(ctx, id).Execute()
 
 Fetch a user
 
-Fetch the user identified by id.
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    id := "id_example" // string | ID of a user
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.GetUser(context.Background(), id).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.GetUser``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `GetUser`: User
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.GetUser`: %v\n", resp)
+}
+```
+
+### Path Parameters
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**id** | **string**| ID of a user | 
+**id** | **string** | ID of a user | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetUserRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
 
 ### Return type
 
@@ -1016,20 +1779,58 @@ Name | Type | Description  | Notes
 
 ## GetVolume
 
-> Volume GetVolume(ctx, namespaceID, id)
+> Volume GetVolume(ctx, namespaceID, id).Execute()
 
 Fetch a volume
 
-Fetch the volume identified by id.
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    namespaceID := "namespaceID_example" // string | ID of a Namespace
+    id := "id_example" // string | ID of a Volume
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.GetVolume(context.Background(), namespaceID, id).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.GetVolume``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `GetVolume`: Volume
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.GetVolume`: %v\n", resp)
+}
+```
+
+### Path Parameters
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**namespaceID** | **string**| ID of a Namespace | 
-**id** | **string**| ID of a Volume | 
+**namespaceID** | **string** | ID of a Namespace | 
+**id** | **string** | ID of a Volume | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetVolumeRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
 
 ### Return type
 
@@ -1051,15 +1852,46 @@ Name | Type | Description  | Notes
 
 ## ListNamespaces
 
-> []Namespace ListNamespaces(ctx, )
+> []Namespace ListNamespaces(ctx).Execute()
 
 Fetch the list of namespaces
 
-Fetch the list of namespaces in the cluster.
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.ListNamespaces(context.Background()).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.ListNamespaces``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `ListNamespaces`: []Namespace
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.ListNamespaces`: %v\n", resp)
+}
+```
+
+### Path Parameters
 
 This endpoint does not need any parameter.
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiListNamespacesRequest struct via the builder pattern
+
 
 ### Return type
 
@@ -1081,15 +1913,46 @@ This endpoint does not need any parameter.
 
 ## ListNodes
 
-> []Node ListNodes(ctx, )
+> []Node ListNodes(ctx).Execute()
 
 Fetch the list of nodes
 
-Fetch the list of nodes of the cluster.
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.ListNodes(context.Background()).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.ListNodes``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `ListNodes`: []Node
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.ListNodes`: %v\n", resp)
+}
+```
+
+### Path Parameters
 
 This endpoint does not need any parameter.
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiListNodesRequest struct via the builder pattern
+
 
 ### Return type
 
@@ -1111,15 +1974,46 @@ This endpoint does not need any parameter.
 
 ## ListPolicyGroups
 
-> []PolicyGroup ListPolicyGroups(ctx, )
+> []PolicyGroup ListPolicyGroups(ctx).Execute()
 
 Fetch the list of policy groups
 
-Fetch the list of policy groups in the cluster.
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.ListPolicyGroups(context.Background()).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.ListPolicyGroups``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `ListPolicyGroups`: []PolicyGroup
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.ListPolicyGroups`: %v\n", resp)
+}
+```
+
+### Path Parameters
 
 This endpoint does not need any parameter.
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiListPolicyGroupsRequest struct via the builder pattern
+
 
 ### Return type
 
@@ -1141,15 +2035,46 @@ This endpoint does not need any parameter.
 
 ## ListUsers
 
-> []User ListUsers(ctx, )
+> []User ListUsers(ctx).Execute()
 
 Fetch the list of users
 
-Fetch the list of users of the cluster.
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.ListUsers(context.Background()).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.ListUsers``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `ListUsers`: []User
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.ListUsers`: %v\n", resp)
+}
+```
+
+### Path Parameters
 
 This endpoint does not need any parameter.
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiListUsersRequest struct via the builder pattern
+
 
 ### Return type
 
@@ -1171,19 +2096,55 @@ This endpoint does not need any parameter.
 
 ## ListVolumes
 
-> []Volume ListVolumes(ctx, namespaceID)
+> []Volume ListVolumes(ctx, namespaceID).Execute()
 
 Fetch the list of volumes in the given namespace
 
-Fetch the list of volumes in the cluster.
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    namespaceID := "namespaceID_example" // string | ID of a Namespace
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.ListVolumes(context.Background(), namespaceID).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.ListVolumes``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `ListVolumes`: []Volume
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.ListVolumes`: %v\n", resp)
+}
+```
+
+### Path Parameters
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**namespaceID** | **string**| ID of a Namespace | 
+**namespaceID** | **string** | ID of a Namespace | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiListVolumesRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
 
 ### Return type
 
@@ -1205,15 +2166,46 @@ Name | Type | Description  | Notes
 
 ## RefreshJwt
 
-> UserSession RefreshJwt(ctx, )
+> UserSession RefreshJwt(ctx).Execute()
 
 Refresh the JWT
 
-Obtain a fresh token with an updated expiry deadline.
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.RefreshJwt(context.Background()).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.RefreshJwt``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `RefreshJwt`: UserSession
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.RefreshJwt`: %v\n", resp)
+}
+```
+
+### Path Parameters
 
 This endpoint does not need any parameter.
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiRefreshJwtRequest struct via the builder pattern
+
 
 ### Return type
 
@@ -1235,35 +2227,64 @@ This endpoint does not need any parameter.
 
 ## ResizeVolume
 
-> Volume ResizeVolume(ctx, namespaceID, id, resizeVolumeRequest, optional)
+> Volume ResizeVolume(ctx, namespaceID, id).ResizeVolumeRequest(resizeVolumeRequest).AsyncMax(asyncMax).IgnoreVersion(ignoreVersion).Execute()
 
 Increase the size of a volume.
 
-Resize the volume identified by id in the namespace identified by namespaceID. A volume's size cannot be reduced. 
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    namespaceID := "namespaceID_example" // string | ID of a Namespace
+    id := "id_example" // string | ID of a Volume
+    resizeVolumeRequest := *openapiclient.NewResizeVolumeRequest() // ResizeVolumeRequest | 
+    asyncMax := "asyncMax_example" // string | Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \"async-max\" header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\", or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". We reject negative or nil duration values.  (optional)
+    ignoreVersion := true // bool | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.  (optional) (default to false)
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.ResizeVolume(context.Background(), namespaceID, id).ResizeVolumeRequest(resizeVolumeRequest).AsyncMax(asyncMax).IgnoreVersion(ignoreVersion).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.ResizeVolume``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `ResizeVolume`: Volume
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.ResizeVolume`: %v\n", resp)
+}
+```
+
+### Path Parameters
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**namespaceID** | **string**| ID of a Namespace | 
-**id** | **string**| ID of a Volume | 
-**resizeVolumeRequest** | [**ResizeVolumeRequest**](ResizeVolumeRequest.md)|  | 
- **optional** | ***ResizeVolumeOpts** | optional parameters | nil if no parameters
+**namespaceID** | **string** | ID of a Namespace | 
+**id** | **string** | ID of a Volume | 
 
-### Optional Parameters
+### Other Parameters
 
-Optional parameters are passed through a pointer to a ResizeVolumeOpts struct
+Other parameters are passed through a pointer to a apiResizeVolumeRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
 
-
- **asyncMax** | **optional.String**| Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \&quot;async-max\&quot; header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \&quot;300ms\&quot;, or \&quot;2h45m\&quot;. Valid time units are \&quot;ns\&quot;, \&quot;us\&quot; (or \&quot;µs\&quot;), \&quot;ms\&quot;, \&quot;s\&quot;, \&quot;m\&quot;, \&quot;h\&quot;. We reject negative or nil duration values.  | 
- **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+ **resizeVolumeRequest** | [**ResizeVolumeRequest**](ResizeVolumeRequest.md) |  | 
+ **asyncMax** | **string** | Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \&quot;async-max\&quot; header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \&quot;300ms\&quot;, or \&quot;2h45m\&quot;. Valid time units are \&quot;ns\&quot;, \&quot;us\&quot; (or \&quot;µs\&quot;), \&quot;ms\&quot;, \&quot;s\&quot;, \&quot;m\&quot;, \&quot;h\&quot;. We reject negative or nil duration values.  | 
+ **ignoreVersion** | **bool** | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
 
 ### Return type
 
@@ -1285,32 +2306,59 @@ Name | Type | Description  | Notes
 
 ## SetComputeOnly
 
-> Node SetComputeOnly(ctx, id, setComputeOnlyNodeData, optional)
+> Node SetComputeOnly(ctx, id).SetComputeOnlyNodeData(setComputeOnlyNodeData).IgnoreVersion(ignoreVersion).Execute()
 
 Modify the computeonly behaviour state for a node
 
-Set the compute-only configuration state for the node corresponding  to id given by the request. 
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    id := "id_example" // string | ID of a Node
+    setComputeOnlyNodeData := *openapiclient.NewSetComputeOnlyNodeData() // SetComputeOnlyNodeData | 
+    ignoreVersion := true // bool | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.  (optional) (default to false)
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.SetComputeOnly(context.Background(), id).SetComputeOnlyNodeData(setComputeOnlyNodeData).IgnoreVersion(ignoreVersion).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.SetComputeOnly``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `SetComputeOnly`: Node
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.SetComputeOnly`: %v\n", resp)
+}
+```
+
+### Path Parameters
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**id** | **string**| ID of a Node | 
-**setComputeOnlyNodeData** | [**SetComputeOnlyNodeData**](SetComputeOnlyNodeData.md)|  | 
- **optional** | ***SetComputeOnlyOpts** | optional parameters | nil if no parameters
+**id** | **string** | ID of a Node | 
 
-### Optional Parameters
+### Other Parameters
 
-Optional parameters are passed through a pointer to a SetComputeOnlyOpts struct
+Other parameters are passed through a pointer to a apiSetComputeOnlyRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
-
- **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+ **setComputeOnlyNodeData** | [**SetComputeOnlyNodeData**](SetComputeOnlyNodeData.md) |  | 
+ **ignoreVersion** | **bool** | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
 
 ### Return type
 
@@ -1332,32 +2380,59 @@ Name | Type | Description  | Notes
 
 ## SetCordoned
 
-> Node SetCordoned(ctx, id, setCordonedNodeData, optional)
+> Node SetCordoned(ctx, id).SetCordonedNodeData(setCordonedNodeData).IgnoreVersion(ignoreVersion).Execute()
 
 Modify the cordoned state for a node
 
-Set the cordoned state for the node corresponding  to id given by the request. 
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    id := "id_example" // string | ID of a Node
+    setCordonedNodeData := *openapiclient.NewSetCordonedNodeData() // SetCordonedNodeData | 
+    ignoreVersion := true // bool | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.  (optional) (default to false)
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.SetCordoned(context.Background(), id).SetCordonedNodeData(setCordonedNodeData).IgnoreVersion(ignoreVersion).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.SetCordoned``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `SetCordoned`: Node
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.SetCordoned`: %v\n", resp)
+}
+```
+
+### Path Parameters
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**id** | **string**| ID of a Node | 
-**setCordonedNodeData** | [**SetCordonedNodeData**](SetCordonedNodeData.md)|  | 
- **optional** | ***SetCordonedOpts** | optional parameters | nil if no parameters
+**id** | **string** | ID of a Node | 
 
-### Optional Parameters
+### Other Parameters
 
-Optional parameters are passed through a pointer to a SetCordonedOpts struct
+Other parameters are passed through a pointer to a apiSetCordonedRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
-
- **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+ **setCordonedNodeData** | [**SetCordonedNodeData**](SetCordonedNodeData.md) |  | 
+ **ignoreVersion** | **bool** | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
 
 ### Return type
 
@@ -1379,34 +2454,62 @@ Name | Type | Description  | Notes
 
 ## SetFailureMode
 
-> Volume SetFailureMode(ctx, namespaceID, id, setFailureModeRequest, optional)
+> Volume SetFailureMode(ctx, namespaceID, id).SetFailureModeRequest(setFailureModeRequest).IgnoreVersion(ignoreVersion).Execute()
 
 Set the failure mode of the volume.
 
-Set the behaviour of the volume identified by id when responding to observed replica failure. This modifies the protected  StorageOS system label \"storageos.com/failure-mode\". This request may either specify a precise failure threshold or a more flexible intent-based failure mode operating with respect  to the volume's current replication target. A request will be denied if the current state of the volume does not satisfy the requested failure behaviour. 
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    namespaceID := "namespaceID_example" // string | ID of a Namespace
+    id := "id_example" // string | ID of a Volume
+    setFailureModeRequest := openapiclient.SetFailureModeRequest{SetFailureModeIntentRequestData: openapiclient.NewSetFailureModeIntentRequestData()} // SetFailureModeRequest | Failure mode to use
+    ignoreVersion := true // bool | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.  (optional) (default to false)
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.SetFailureMode(context.Background(), namespaceID, id).SetFailureModeRequest(setFailureModeRequest).IgnoreVersion(ignoreVersion).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.SetFailureMode``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `SetFailureMode`: Volume
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.SetFailureMode`: %v\n", resp)
+}
+```
+
+### Path Parameters
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**namespaceID** | **string**| ID of a Namespace | 
-**id** | **string**| ID of a Volume | 
-**setFailureModeRequest** | [**SetFailureModeRequest**](SetFailureModeRequest.md)| Failure mode to use | 
- **optional** | ***SetFailureModeOpts** | optional parameters | nil if no parameters
+**namespaceID** | **string** | ID of a Namespace | 
+**id** | **string** | ID of a Volume | 
 
-### Optional Parameters
+### Other Parameters
 
-Optional parameters are passed through a pointer to a SetFailureModeOpts struct
+Other parameters are passed through a pointer to a apiSetFailureModeRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
 
-
- **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+ **setFailureModeRequest** | [**SetFailureModeRequest**](SetFailureModeRequest.md) | Failure mode to use | 
+ **ignoreVersion** | **bool** | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
 
 ### Return type
 
@@ -1428,34 +2531,62 @@ Name | Type | Description  | Notes
 
 ## SetPlacementStrategy
 
-> AcceptedMessage SetPlacementStrategy(ctx, namespaceID, id, setPlacementStrategyData, optional)
+> AcceptedMessage SetPlacementStrategy(ctx, namespaceID, id).SetPlacementStrategyData(setPlacementStrategyData).IgnoreVersion(ignoreVersion).Execute()
 
 Sets the placement strategy of the volume.
 
-Sets the desired behaviour of the volume identified by id when provisioning new replicas. The already placed replicas will not be moved, instead, during future failovers, node restarts (containing the volume replicas) and any other operation that requires a replica to be provisioned will now follow this rule thus having an \"eventually consistent\" response. 
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    namespaceID := "namespaceID_example" // string | ID of a Namespace
+    id := "id_example" // string | ID of a Volume
+    setPlacementStrategyData := *openapiclient.NewSetPlacementStrategyData() // SetPlacementStrategyData | 
+    ignoreVersion := true // bool | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.  (optional) (default to false)
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.SetPlacementStrategy(context.Background(), namespaceID, id).SetPlacementStrategyData(setPlacementStrategyData).IgnoreVersion(ignoreVersion).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.SetPlacementStrategy``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `SetPlacementStrategy`: AcceptedMessage
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.SetPlacementStrategy`: %v\n", resp)
+}
+```
+
+### Path Parameters
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**namespaceID** | **string**| ID of a Namespace | 
-**id** | **string**| ID of a Volume | 
-**setPlacementStrategyData** | [**SetPlacementStrategyData**](SetPlacementStrategyData.md)|  | 
- **optional** | ***SetPlacementStrategyOpts** | optional parameters | nil if no parameters
+**namespaceID** | **string** | ID of a Namespace | 
+**id** | **string** | ID of a Volume | 
 
-### Optional Parameters
+### Other Parameters
 
-Optional parameters are passed through a pointer to a SetPlacementStrategyOpts struct
+Other parameters are passed through a pointer to a apiSetPlacementStrategyRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
 
-
- **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+ **setPlacementStrategyData** | [**SetPlacementStrategyData**](SetPlacementStrategyData.md) |  | 
+ **ignoreVersion** | **bool** | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
 
 ### Return type
 
@@ -1477,34 +2608,62 @@ Name | Type | Description  | Notes
 
 ## SetReplicas
 
-> AcceptedMessage SetReplicas(ctx, namespaceID, id, setReplicasRequest, optional)
+> AcceptedMessage SetReplicas(ctx, namespaceID, id).SetReplicasRequest(setReplicasRequest).IgnoreVersion(ignoreVersion).Execute()
 
 Set the number of replicas to maintain for the volume.
 
-Set the number of replicas for the volume identified by id to the number specified in the request's body. This modifies the protected StorageOS system label \"storageos.com/replicas\". This request changes the desired replica count, and returns an error if changing the desired replica count failed. StorageOS satisfies the new replica configuration asynchronously. 
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    namespaceID := "namespaceID_example" // string | ID of a Namespace
+    id := "id_example" // string | ID of a Volume
+    setReplicasRequest := *openapiclient.NewSetReplicasRequest() // SetReplicasRequest | 
+    ignoreVersion := true // bool | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.  (optional) (default to false)
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.SetReplicas(context.Background(), namespaceID, id).SetReplicasRequest(setReplicasRequest).IgnoreVersion(ignoreVersion).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.SetReplicas``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `SetReplicas`: AcceptedMessage
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.SetReplicas`: %v\n", resp)
+}
+```
+
+### Path Parameters
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**namespaceID** | **string**| ID of a Namespace | 
-**id** | **string**| ID of a Volume | 
-**setReplicasRequest** | [**SetReplicasRequest**](SetReplicasRequest.md)|  | 
- **optional** | ***SetReplicasOpts** | optional parameters | nil if no parameters
+**namespaceID** | **string** | ID of a Namespace | 
+**id** | **string** | ID of a Volume | 
 
-### Optional Parameters
+### Other Parameters
 
-Optional parameters are passed through a pointer to a SetReplicasOpts struct
+Other parameters are passed through a pointer to a apiSetReplicasRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
 
-
- **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+ **setReplicasRequest** | [**SetReplicasRequest**](SetReplicasRequest.md) |  | 
+ **ignoreVersion** | **bool** | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
 
 ### Return type
 
@@ -1526,15 +2685,46 @@ Name | Type | Description  | Notes
 
 ## Spec
 
-> string Spec(ctx, )
+> string Spec(ctx).Execute()
 
 Serves this openapi spec file
 
-Serves this openapi spec file
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.Spec(context.Background()).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.Spec``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `Spec`: string
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.Spec`: %v\n", resp)
+}
+```
+
+### Path Parameters
 
 This endpoint does not need any parameter.
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiSpecRequest struct via the builder pattern
+
 
 ### Return type
 
@@ -1556,30 +2746,53 @@ No authorization required
 
 ## UpdateAuthenticatedUser
 
-> User UpdateAuthenticatedUser(ctx, updateAuthenticatedUserData, optional)
+> User UpdateAuthenticatedUser(ctx).UpdateAuthenticatedUserData(updateAuthenticatedUserData).IgnoreVersion(ignoreVersion).Execute()
 
 Update the authenticated user's information
 
-Update the authenticated user.
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    updateAuthenticatedUserData := *openapiclient.NewUpdateAuthenticatedUserData() // UpdateAuthenticatedUserData | 
+    ignoreVersion := true // bool | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.  (optional) (default to false)
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.UpdateAuthenticatedUser(context.Background()).UpdateAuthenticatedUserData(updateAuthenticatedUserData).IgnoreVersion(ignoreVersion).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.UpdateAuthenticatedUser``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `UpdateAuthenticatedUser`: User
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.UpdateAuthenticatedUser`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiUpdateAuthenticatedUserRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
-**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**updateAuthenticatedUserData** | [**UpdateAuthenticatedUserData**](UpdateAuthenticatedUserData.md)|  | 
- **optional** | ***UpdateAuthenticatedUserOpts** | optional parameters | nil if no parameters
-
-### Optional Parameters
-
-Optional parameters are passed through a pointer to a UpdateAuthenticatedUserOpts struct
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-
- **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+ **updateAuthenticatedUserData** | [**UpdateAuthenticatedUserData**](UpdateAuthenticatedUserData.md) |  | 
+ **ignoreVersion** | **bool** | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
 
 ### Return type
 
@@ -1601,30 +2814,53 @@ Name | Type | Description  | Notes
 
 ## UpdateCluster
 
-> Cluster UpdateCluster(ctx, updateClusterData, optional)
+> Cluster UpdateCluster(ctx).UpdateClusterData(updateClusterData).IgnoreVersion(ignoreVersion).Execute()
 
 Update the cluster's global configuration settings
 
-Update the global configuration settings to use for the cluster. Updating the cluster log level does not require a restart 
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    updateClusterData := *openapiclient.NewUpdateClusterData() // UpdateClusterData | 
+    ignoreVersion := true // bool | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.  (optional) (default to false)
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.UpdateCluster(context.Background()).UpdateClusterData(updateClusterData).IgnoreVersion(ignoreVersion).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.UpdateCluster``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `UpdateCluster`: Cluster
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.UpdateCluster`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiUpdateClusterRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
-**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**updateClusterData** | [**UpdateClusterData**](UpdateClusterData.md)|  | 
- **optional** | ***UpdateClusterOpts** | optional parameters | nil if no parameters
-
-### Optional Parameters
-
-Optional parameters are passed through a pointer to a UpdateClusterOpts struct
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-
- **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+ **updateClusterData** | [**UpdateClusterData**](UpdateClusterData.md) |  | 
+ **ignoreVersion** | **bool** | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
 
 ### Return type
 
@@ -1646,30 +2882,53 @@ Name | Type | Description  | Notes
 
 ## UpdateLicence
 
-> Licence UpdateLicence(ctx, updateLicence, optional)
+> Licence UpdateLicence(ctx).UpdateLicence(updateLicence).IgnoreVersion(ignoreVersion).Execute()
 
 Update the licence global configuration settings
 
-Update the cluster's licence.
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    updateLicence := *openapiclient.NewUpdateLicence() // UpdateLicence | 
+    ignoreVersion := true // bool | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.  (optional) (default to false)
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.UpdateLicence(context.Background()).UpdateLicence(updateLicence).IgnoreVersion(ignoreVersion).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.UpdateLicence``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `UpdateLicence`: Licence
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.UpdateLicence`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiUpdateLicenceRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
-**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**updateLicence** | [**UpdateLicence**](UpdateLicence.md)|  | 
- **optional** | ***UpdateLicenceOpts** | optional parameters | nil if no parameters
-
-### Optional Parameters
-
-Optional parameters are passed through a pointer to a UpdateLicenceOpts struct
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-
- **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+ **updateLicence** | [**UpdateLicence**](UpdateLicence.md) |  | 
+ **ignoreVersion** | **bool** | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
 
 ### Return type
 
@@ -1691,35 +2950,62 @@ Name | Type | Description  | Notes
 
 ## UpdateNFSVolumeExports
 
-> UpdateNFSVolumeExports(ctx, namespaceID, id, nfsVolumeExports, optional)
+> UpdateNFSVolumeExports(ctx, namespaceID, id).NFSVolumeExports(nFSVolumeExports).IgnoreVersion(ignoreVersion).AsyncMax(asyncMax).Execute()
 
 Update an nfs volume's export configuration
 
-Update the NFS volume's export configuration 
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    namespaceID := "namespaceID_example" // string | ID of a Namespace
+    id := "id_example" // string | ID of a Volume
+    nFSVolumeExports := *openapiclient.NewNFSVolumeExports() // NFSVolumeExports | 
+    ignoreVersion := true // bool | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.  (optional) (default to false)
+    asyncMax := "asyncMax_example" // string | Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \"async-max\" header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\", or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". We reject negative or nil duration values.  (optional)
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.UpdateNFSVolumeExports(context.Background(), namespaceID, id).NFSVolumeExports(nFSVolumeExports).IgnoreVersion(ignoreVersion).AsyncMax(asyncMax).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.UpdateNFSVolumeExports``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+}
+```
+
+### Path Parameters
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**namespaceID** | **string**| ID of a Namespace | 
-**id** | **string**| ID of a Volume | 
-**nfsVolumeExports** | [**NfsVolumeExports**](NfsVolumeExports.md)|  | 
- **optional** | ***UpdateNFSVolumeExportsOpts** | optional parameters | nil if no parameters
+**namespaceID** | **string** | ID of a Namespace | 
+**id** | **string** | ID of a Volume | 
 
-### Optional Parameters
+### Other Parameters
 
-Optional parameters are passed through a pointer to a UpdateNFSVolumeExportsOpts struct
+Other parameters are passed through a pointer to a apiUpdateNFSVolumeExportsRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
 
-
- **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
- **asyncMax** | **optional.String**| Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \&quot;async-max\&quot; header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \&quot;300ms\&quot;, or \&quot;2h45m\&quot;. Valid time units are \&quot;ns\&quot;, \&quot;us\&quot; (or \&quot;µs\&quot;), \&quot;ms\&quot;, \&quot;s\&quot;, \&quot;m\&quot;, \&quot;h\&quot;. We reject negative or nil duration values.  | 
+ **nFSVolumeExports** | [**NFSVolumeExports**](NFSVolumeExports.md) |  | 
+ **ignoreVersion** | **bool** | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+ **asyncMax** | **string** | Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \&quot;async-max\&quot; header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \&quot;300ms\&quot;, or \&quot;2h45m\&quot;. Valid time units are \&quot;ns\&quot;, \&quot;us\&quot; (or \&quot;µs\&quot;), \&quot;ms\&quot;, \&quot;s\&quot;, \&quot;m\&quot;, \&quot;h\&quot;. We reject negative or nil duration values.  | 
 
 ### Return type
 
@@ -1741,35 +3027,62 @@ Name | Type | Description  | Notes
 
 ## UpdateNFSVolumeMountEndpoint
 
-> UpdateNFSVolumeMountEndpoint(ctx, namespaceID, id, nfsVolumeMountEndpoint, optional)
+> UpdateNFSVolumeMountEndpoint(ctx, namespaceID, id).NFSVolumeMountEndpoint(nFSVolumeMountEndpoint).IgnoreVersion(ignoreVersion).AsyncMax(asyncMax).Execute()
 
 Update an nfs volume's mount endpoint
 
-Update the NFS volume's mount endpoint 
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    namespaceID := "namespaceID_example" // string | ID of a Namespace
+    id := "id_example" // string | ID of a Volume
+    nFSVolumeMountEndpoint := *openapiclient.NewNFSVolumeMountEndpoint() // NFSVolumeMountEndpoint | 
+    ignoreVersion := true // bool | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.  (optional) (default to false)
+    asyncMax := "asyncMax_example" // string | Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \"async-max\" header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\", or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". We reject negative or nil duration values.  (optional)
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.UpdateNFSVolumeMountEndpoint(context.Background(), namespaceID, id).NFSVolumeMountEndpoint(nFSVolumeMountEndpoint).IgnoreVersion(ignoreVersion).AsyncMax(asyncMax).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.UpdateNFSVolumeMountEndpoint``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+}
+```
+
+### Path Parameters
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**namespaceID** | **string**| ID of a Namespace | 
-**id** | **string**| ID of a Volume | 
-**nfsVolumeMountEndpoint** | [**NfsVolumeMountEndpoint**](NfsVolumeMountEndpoint.md)|  | 
- **optional** | ***UpdateNFSVolumeMountEndpointOpts** | optional parameters | nil if no parameters
+**namespaceID** | **string** | ID of a Namespace | 
+**id** | **string** | ID of a Volume | 
 
-### Optional Parameters
+### Other Parameters
 
-Optional parameters are passed through a pointer to a UpdateNFSVolumeMountEndpointOpts struct
+Other parameters are passed through a pointer to a apiUpdateNFSVolumeMountEndpointRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
 
-
- **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
- **asyncMax** | **optional.String**| Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \&quot;async-max\&quot; header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \&quot;300ms\&quot;, or \&quot;2h45m\&quot;. Valid time units are \&quot;ns\&quot;, \&quot;us\&quot; (or \&quot;µs\&quot;), \&quot;ms\&quot;, \&quot;s\&quot;, \&quot;m\&quot;, \&quot;h\&quot;. We reject negative or nil duration values.  | 
+ **nFSVolumeMountEndpoint** | [**NFSVolumeMountEndpoint**](NFSVolumeMountEndpoint.md) |  | 
+ **ignoreVersion** | **bool** | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+ **asyncMax** | **string** | Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \&quot;async-max\&quot; header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \&quot;300ms\&quot;, or \&quot;2h45m\&quot;. Valid time units are \&quot;ns\&quot;, \&quot;us\&quot; (or \&quot;µs\&quot;), \&quot;ms\&quot;, \&quot;s\&quot;, \&quot;m\&quot;, \&quot;h\&quot;. We reject negative or nil duration values.  | 
 
 ### Return type
 
@@ -1791,32 +3104,59 @@ Name | Type | Description  | Notes
 
 ## UpdateNamespace
 
-> Namespace UpdateNamespace(ctx, id, updateNamespaceData, optional)
+> Namespace UpdateNamespace(ctx, id).UpdateNamespaceData(updateNamespaceData).IgnoreVersion(ignoreVersion).Execute()
 
 Update a namespace
 
-Update the namespace identified by id.
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    id := "id_example" // string | ID of a namespace
+    updateNamespaceData := *openapiclient.NewUpdateNamespaceData() // UpdateNamespaceData | 
+    ignoreVersion := true // bool | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.  (optional) (default to false)
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.UpdateNamespace(context.Background(), id).UpdateNamespaceData(updateNamespaceData).IgnoreVersion(ignoreVersion).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.UpdateNamespace``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `UpdateNamespace`: Namespace
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.UpdateNamespace`: %v\n", resp)
+}
+```
+
+### Path Parameters
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**id** | **string**| ID of a namespace | 
-**updateNamespaceData** | [**UpdateNamespaceData**](UpdateNamespaceData.md)|  | 
- **optional** | ***UpdateNamespaceOpts** | optional parameters | nil if no parameters
+**id** | **string** | ID of a namespace | 
 
-### Optional Parameters
+### Other Parameters
 
-Optional parameters are passed through a pointer to a UpdateNamespaceOpts struct
+Other parameters are passed through a pointer to a apiUpdateNamespaceRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
-
- **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+ **updateNamespaceData** | [**UpdateNamespaceData**](UpdateNamespaceData.md) |  | 
+ **ignoreVersion** | **bool** | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
 
 ### Return type
 
@@ -1838,20 +3178,57 @@ Name | Type | Description  | Notes
 
 ## UpdateNode
 
-> Node UpdateNode(ctx, id, updateNodeData)
+> Node UpdateNode(ctx, id).UpdateNodeData(updateNodeData).Execute()
 
 Update a node
 
-Update the non-storageos labels configured for the node  identified by id. 
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    id := "id_example" // string | ID of a node
+    updateNodeData := *openapiclient.NewUpdateNodeData() // UpdateNodeData | 
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.UpdateNode(context.Background(), id).UpdateNodeData(updateNodeData).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.UpdateNode``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `UpdateNode`: Node
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.UpdateNode`: %v\n", resp)
+}
+```
+
+### Path Parameters
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**id** | **string**| ID of a node | 
-**updateNodeData** | [**UpdateNodeData**](UpdateNodeData.md)|  | 
+**id** | **string** | ID of a node | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiUpdateNodeRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **updateNodeData** | [**UpdateNodeData**](UpdateNodeData.md) |  | 
 
 ### Return type
 
@@ -1873,32 +3250,59 @@ Name | Type | Description  | Notes
 
 ## UpdatePolicyGroup
 
-> PolicyGroup UpdatePolicyGroup(ctx, id, updatePolicyGroupData, optional)
+> PolicyGroup UpdatePolicyGroup(ctx, id).UpdatePolicyGroupData(updatePolicyGroupData).IgnoreVersion(ignoreVersion).Execute()
 
 Update a policy group
 
-Update the policy group identified by id.
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    id := "id_example" // string | ID of a policy group
+    updatePolicyGroupData := *openapiclient.NewUpdatePolicyGroupData() // UpdatePolicyGroupData | 
+    ignoreVersion := true // bool | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.  (optional) (default to false)
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.UpdatePolicyGroup(context.Background(), id).UpdatePolicyGroupData(updatePolicyGroupData).IgnoreVersion(ignoreVersion).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.UpdatePolicyGroup``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `UpdatePolicyGroup`: PolicyGroup
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.UpdatePolicyGroup`: %v\n", resp)
+}
+```
+
+### Path Parameters
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**id** | **string**| ID of a policy group | 
-**updatePolicyGroupData** | [**UpdatePolicyGroupData**](UpdatePolicyGroupData.md)|  | 
- **optional** | ***UpdatePolicyGroupOpts** | optional parameters | nil if no parameters
+**id** | **string** | ID of a policy group | 
 
-### Optional Parameters
+### Other Parameters
 
-Optional parameters are passed through a pointer to a UpdatePolicyGroupOpts struct
+Other parameters are passed through a pointer to a apiUpdatePolicyGroupRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
-
- **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+ **updatePolicyGroupData** | [**UpdatePolicyGroupData**](UpdatePolicyGroupData.md) |  | 
+ **ignoreVersion** | **bool** | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
 
 ### Return type
 
@@ -1920,32 +3324,59 @@ Name | Type | Description  | Notes
 
 ## UpdateUser
 
-> User UpdateUser(ctx, id, updateUserData, optional)
+> User UpdateUser(ctx, id).UpdateUserData(updateUserData).IgnoreVersion(ignoreVersion).Execute()
 
 Update a user
 
-Update the user identified by id. This request will not succeed if the target account is the currently authenticated account. Use the separate users/self endpoint for this purpose. 
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    id := "id_example" // string | ID of a user
+    updateUserData := *openapiclient.NewUpdateUserData() // UpdateUserData | 
+    ignoreVersion := true // bool | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.  (optional) (default to false)
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.UpdateUser(context.Background(), id).UpdateUserData(updateUserData).IgnoreVersion(ignoreVersion).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.UpdateUser``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `UpdateUser`: User
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.UpdateUser`: %v\n", resp)
+}
+```
+
+### Path Parameters
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**id** | **string**| ID of a user | 
-**updateUserData** | [**UpdateUserData**](UpdateUserData.md)|  | 
- **optional** | ***UpdateUserOpts** | optional parameters | nil if no parameters
+**id** | **string** | ID of a user | 
 
-### Optional Parameters
+### Other Parameters
 
-Optional parameters are passed through a pointer to a UpdateUserOpts struct
+Other parameters are passed through a pointer to a apiUpdateUserRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
-
- **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+ **updateUserData** | [**UpdateUserData**](UpdateUserData.md) |  | 
+ **ignoreVersion** | **bool** | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
 
 ### Return type
 
@@ -1967,35 +3398,64 @@ Name | Type | Description  | Notes
 
 ## UpdateVolume
 
-> Volume UpdateVolume(ctx, namespaceID, id, updateVolumeData, optional)
+> Volume UpdateVolume(ctx, namespaceID, id).UpdateVolumeData(updateVolumeData).IgnoreVersion(ignoreVersion).AsyncMax(asyncMax).Execute()
 
 Update a volume
 
-Update the description and non-storageos labels configured for the volume identified by id. 
 
-### Required Parameters
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    namespaceID := "namespaceID_example" // string | ID of a Namespace
+    id := "id_example" // string | ID of a Volume
+    updateVolumeData := *openapiclient.NewUpdateVolumeData() // UpdateVolumeData | 
+    ignoreVersion := true // bool | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.  (optional) (default to false)
+    asyncMax := "asyncMax_example" // string | Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \"async-max\" header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\", or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". We reject negative or nil duration values.  (optional)
+
+    configuration := openapiclient.NewConfiguration()
+    api_client := openapiclient.NewAPIClient(configuration)
+    resp, r, err := api_client.DefaultApi.UpdateVolume(context.Background(), namespaceID, id).UpdateVolumeData(updateVolumeData).IgnoreVersion(ignoreVersion).AsyncMax(asyncMax).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.UpdateVolume``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `UpdateVolume`: Volume
+    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.UpdateVolume`: %v\n", resp)
+}
+```
+
+### Path Parameters
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**namespaceID** | **string**| ID of a Namespace | 
-**id** | **string**| ID of a Volume | 
-**updateVolumeData** | [**UpdateVolumeData**](UpdateVolumeData.md)|  | 
- **optional** | ***UpdateVolumeOpts** | optional parameters | nil if no parameters
+**namespaceID** | **string** | ID of a Namespace | 
+**id** | **string** | ID of a Volume | 
 
-### Optional Parameters
+### Other Parameters
 
-Optional parameters are passed through a pointer to a UpdateVolumeOpts struct
+Other parameters are passed through a pointer to a apiUpdateVolumeRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
 
-
- **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
- **asyncMax** | **optional.String**| Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \&quot;async-max\&quot; header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \&quot;300ms\&quot;, or \&quot;2h45m\&quot;. Valid time units are \&quot;ns\&quot;, \&quot;us\&quot; (or \&quot;µs\&quot;), \&quot;ms\&quot;, \&quot;s\&quot;, \&quot;m\&quot;, \&quot;h\&quot;. We reject negative or nil duration values.  | 
+ **updateVolumeData** | [**UpdateVolumeData**](UpdateVolumeData.md) |  | 
+ **ignoreVersion** | **bool** | If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+ **asyncMax** | **string** | Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \&quot;async-max\&quot; header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \&quot;300ms\&quot;, or \&quot;2h45m\&quot;. Valid time units are \&quot;ns\&quot;, \&quot;us\&quot; (or \&quot;µs\&quot;), \&quot;ms\&quot;, \&quot;s\&quot;, \&quot;m\&quot;, \&quot;h\&quot;. We reject negative or nil duration values.  | 
 
 ### Return type
 

@@ -5,7 +5,7 @@ info:
     name: StorageOS
     url: https://storageos.com
   title: StorageOS API
-  version: v2.5.0-beta1
+  version: 2.5.0
 externalDocs:
   description: The latest StorageOS user documentation
   url: https://docs.storageos.com/
@@ -3544,6 +3544,8 @@ paths:
         content:
           application/json:
             schema:
+              example:
+                version: NDI0MjQyNDI0MjQyNDI0MjQy
               properties:
                 version:
                   description: |
@@ -3686,6 +3688,9 @@ paths:
         content:
           application/json:
             schema:
+              example:
+                mountEndpoint: mountEndpoint
+                version: NDI0MjQyNDI0MjQyNDI0MjQy
               properties:
                 mountEndpoint:
                   default: ""
@@ -3823,6 +3828,49 @@ paths:
         content:
           application/json:
             schema:
+              example:
+                exports:
+                - path: /very/important/files/
+                  acls:
+                  - squashConfig:
+                      uid: ""
+                      gid: ""
+                      squash: root
+                    accessLevel: rw
+                    identity:
+                      identityType: hostname
+                      matcher: '*.prod.storageos.com'
+                  - squashConfig:
+                      uid: ""
+                      gid: ""
+                      squash: root
+                    accessLevel: rw
+                    identity:
+                      identityType: hostname
+                      matcher: '*.prod.storageos.com'
+                  pseudoPath: /very/important/files/somewhere/else
+                  exportID: 42
+                - path: /very/important/files/
+                  acls:
+                  - squashConfig:
+                      uid: ""
+                      gid: ""
+                      squash: root
+                    accessLevel: rw
+                    identity:
+                      identityType: hostname
+                      matcher: '*.prod.storageos.com'
+                  - squashConfig:
+                      uid: ""
+                      gid: ""
+                      squash: root
+                    accessLevel: rw
+                    identity:
+                      identityType: hostname
+                      matcher: '*.prod.storageos.com'
+                  pseudoPath: /very/important/files/somewhere/else
+                  exportID: 42
+                version: NDI0MjQyNDI0MjQyNDI0MjQy
               properties:
                 exports:
                   items:
@@ -5820,6 +5868,7 @@ components:
       - $ref: '#/components/schemas/UserSession_allOf'
     Volume:
       example:
+        attachedOnHost: worker-1
         attachmentType: host
         replicas:
         - null
@@ -5897,6 +5946,11 @@ components:
           allOf:
           - $ref: '#/components/schemas/NodeID'
           readOnly: true
+        attachedOnHost:
+          description: The hostname of the node the volume is attached on
+          example: worker-1
+          readOnly: true
+          type: string
         nfs:
           $ref: '#/components/schemas/NfsConfig'
         namespaceID:
@@ -5976,6 +6030,10 @@ components:
             A unique identifier for a node. The format of this type is undefined and may change but the defined properties will not change.
           example: c5666b58-b805-4215-ab4a-cb094948ccc6
           readOnly: true
+          type: string
+        hostname:
+          description: |
+            The hostname of the node that is hosting the deployment
           type: string
         promotable:
           description: |
@@ -6662,6 +6720,7 @@ components:
             If true, disallows requests that attempt to mutate the resource.
           example: false
           type: boolean
+      type: object
     CreatePolicyGroupData:
       example:
         specs:
@@ -6714,6 +6773,7 @@ components:
             If true, disallows requests that attempt to mutate the resource.
           example: false
           type: boolean
+      type: object
     UpdatePolicyGroupData:
       example:
         specs:
@@ -6851,6 +6911,8 @@ components:
       title: AttachVolumeData
       type: object
     AttachNFSVolumeData:
+      example:
+        version: NDI0MjQyNDI0MjQyNDI0MjQy
       properties:
         version:
           description: |
@@ -6863,6 +6925,9 @@ components:
       title: AttachNFSVolumeData
       type: object
     NFSVolumeMountEndpoint:
+      example:
+        mountEndpoint: mountEndpoint
+        version: NDI0MjQyNDI0MjQyNDI0MjQy
       properties:
         mountEndpoint:
           default: ""
@@ -6880,6 +6945,49 @@ components:
       title: NFSVolumeMountEndpoint
       type: object
     NFSVolumeExports:
+      example:
+        exports:
+        - path: /very/important/files/
+          acls:
+          - squashConfig:
+              uid: ""
+              gid: ""
+              squash: root
+            accessLevel: rw
+            identity:
+              identityType: hostname
+              matcher: '*.prod.storageos.com'
+          - squashConfig:
+              uid: ""
+              gid: ""
+              squash: root
+            accessLevel: rw
+            identity:
+              identityType: hostname
+              matcher: '*.prod.storageos.com'
+          pseudoPath: /very/important/files/somewhere/else
+          exportID: 42
+        - path: /very/important/files/
+          acls:
+          - squashConfig:
+              uid: ""
+              gid: ""
+              squash: root
+            accessLevel: rw
+            identity:
+              identityType: hostname
+              matcher: '*.prod.storageos.com'
+          - squashConfig:
+              uid: ""
+              gid: ""
+              squash: root
+            accessLevel: rw
+            identity:
+              identityType: hostname
+              matcher: '*.prod.storageos.com'
+          pseudoPath: /very/important/files/somewhere/else
+          exportID: 42
+        version: NDI0MjQyNDI0MjQyNDI0MjQy
       properties:
         exports:
           items:
@@ -7040,6 +7148,7 @@ components:
             For netgroup, this must be in the form of "@netgroup" with ? and * wildcard characters.
           example: '*.prod.storageos.com'
           type: string
+      type: object
     NfsAcl_squashConfig:
       example:
         uid: ""
@@ -7067,6 +7176,7 @@ components:
           - all
           example: root
           type: string
+      type: object
     Strategy_options:
       description: |
         Used together with topology-aware strategy to further specify how the placement should be done.
@@ -7080,6 +7190,7 @@ components:
             Indicates the node label used to decribe the topology used for data placement decisions. If two nodes are  labelled with this key and have identical values  for that label, the scheduler treats both nodes  as being in the same topology domain.  When topology-aware provisioning is enabled,  the scheduler tries to spread a volume's master  and replica copies across different topology domains.
           example: my.custom.zone.label
           type: string
+      type: object
     UserSession_allOf_session:
       properties:
         expiresInSeconds:
@@ -7092,20 +7203,24 @@ components:
           description: |
             The JWT token for the auth session.
           type: string
+      type: object
     UserSession_allOf:
       properties:
         session:
           $ref: '#/components/schemas/UserSession_allOf_session'
+      type: object
     MasterDeploymentInfo_allOf:
       properties:
         health:
           $ref: '#/components/schemas/MasterHealth'
+      type: object
     ReplicaDeploymentInfo_allOf:
       properties:
         health:
           $ref: '#/components/schemas/ReplicaHealth'
         syncProgress:
           $ref: '#/components/schemas/SyncProgress'
+      type: object
     PolicyGroup_users:
       properties:
         id:
@@ -7116,6 +7231,7 @@ components:
         username:
           example: admin
           type: string
+      type: object
   securitySchemes:
     jwt:
       bearerFormat: JWT

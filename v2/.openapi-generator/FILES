@@ -1,5 +1,4 @@
 .gitignore
-.openapi-generator-ignore
 .travis.yml
 README.md
 api/openapi.yaml
@@ -7,7 +6,7 @@ api_default.go
 client.go
 configuration.go
 docs/AcceptedMessage.md
-docs/AttachNfsVolumeData.md
+docs/AttachNFSVolumeData.md
 docs/AttachType.md
 docs/AttachVolumeData.md
 docs/AuthUserData.md
@@ -28,14 +27,14 @@ docs/LogLevel.md
 docs/MasterDeploymentInfo.md
 docs/MasterDeploymentInfoAllOf.md
 docs/MasterHealth.md
+docs/NFSVolumeExports.md
+docs/NFSVolumeMountEndpoint.md
 docs/Namespace.md
 docs/NfsAcl.md
 docs/NfsAclIdentity.md
 docs/NfsAclSquashConfig.md
 docs/NfsConfig.md
 docs/NfsExportConfig.md
-docs/NfsVolumeExports.md
-docs/NfsVolumeMountEndpoint.md
 docs/Node.md
 docs/NodeHealth.md
 docs/PoliciesIdSpecs.md
@@ -135,3 +134,4 @@ model_user_session_all_of.go
 model_user_session_all_of_session.go
 model_volume.go
 response.go
+utils.go
