@@ -1,7 +1,7 @@
 openapi: "3.0.2"
 info:
     title: "StorageOS API"
-    version: "2.5.0"
+    version: "2.6.0"
     contact:
         name: StorageOS
         url: https://storageos.com
