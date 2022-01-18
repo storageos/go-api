@@ -5,7 +5,7 @@ info:
     name: StorageOS
     url: https://storageos.com
   title: StorageOS API
-  version: v2.5.0-beta1
+  version: 2.6.0
 externalDocs:
   description: The latest StorageOS user documentation
   url: https://docs.storageos.com/
@@ -5820,6 +5820,7 @@ components:
       - $ref: '#/components/schemas/UserSession_allOf'
     Volume:
       example:
+        attachedOnHost: worker-1
         attachmentType: host
         replicas:
         - null
@@ -5897,6 +5898,11 @@ components:
           allOf:
           - $ref: '#/components/schemas/NodeID'
           readOnly: true
+        attachedOnHost:
+          description: The hostname of the node the volume is attached on
+          example: worker-1
+          readOnly: true
+          type: string
         nfs:
           $ref: '#/components/schemas/NfsConfig'
         namespaceID:
@@ -5976,6 +5982,10 @@ components:
             A unique identifier for a node. The format of this type is undefined and may change but the defined properties will not change.
           example: c5666b58-b805-4215-ab4a-cb094948ccc6
           readOnly: true
+          type: string
+        hostname:
+          description: |
+            The hostname of the node that is hosting the deployment
           type: string
         promotable:
           description: |

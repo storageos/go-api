@@ -1,7 +1,7 @@
 openapi: "3.0.2"
 info:
     title: "StorageOS API"
-    version: "v2.5.0-beta1"
+    version: "2.6.0"
     contact:
         name: StorageOS
         url: https://storageos.com
@@ -621,6 +621,11 @@ components:
                     readOnly: true
                     allOf:
                         - $ref: "#/components/schemas/NodeID"
+                attachedOnHost:
+                    readOnly: true
+                    type: string
+                    description: The hostname of the node the volume is attached on
+                    example: worker-1
                 nfs:
                     readOnly: true
                     nullable: true
@@ -667,6 +672,10 @@ components:
                     $ref: "#/components/schemas/DeploymentID"
                 nodeID:
                     $ref: "#/components/schemas/NodeID"
+                hostname:
+                    type: string
+                    description: >
+                        The hostname of the node that is hosting the deployment
                 promotable:
                     type: boolean
                     description: >

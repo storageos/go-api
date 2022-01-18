@@ -14,7 +14,7 @@ build: generate customise ## Re-generates the API from openapi.yaml.
 generate: generate-base generate-node generate-namespace generate-volume ## Runs the openapi-generator on openapi.yaml.
 generate-base:
 	docker run --rm -v `pwd`:/local -u `id -u ${USER}`:`id -g ${USER}` \
-		openapitools/openapi-generator-cli:latest generate \
+		openapitools/openapi-generator-cli:v4.3.1 generate \
 		--strict-spec=true \
 		--additional-properties enumClassPrefix=true \
 		--additional-properties packageName=api \
@@ -22,7 +22,7 @@ generate-base:
 		-i /local/openapi.yaml -g go -o /local
 generate-node:
 	docker run --rm -v `pwd`:/local -u `id -u ${USER}`:`id -g ${USER}` \
-		openapitools/openapi-generator-cli:latest generate \
+		openapitools/openapi-generator-cli:v4.3.1 generate \
 		--strict-spec=true \
 		--additional-properties enumClassPrefix=true \
 		--additional-properties packageName=api \
@@ -32,7 +32,7 @@ generate-node:
 		-i /local/openapi.yaml -g go -o /local
 generate-namespace:
 	docker run --rm -v `pwd`:/local -u `id -u ${USER}`:`id -g ${USER}` \
-		openapitools/openapi-generator-cli:latest generate \
+		openapitools/openapi-generator-cli:v4.3.1 generate \
 		--strict-spec=true \
 		--additional-properties enumClassPrefix=true \
 		--additional-properties packageName=api \
@@ -42,7 +42,7 @@ generate-namespace:
 		-i /local/openapi.yaml -g go -o /local
 generate-volume:
 	docker run --rm -v `pwd`:/local -u `id -u ${USER}`:`id -g ${USER}` \
-		openapitools/openapi-generator-cli:latest generate \
+		openapitools/openapi-generator-cli:v4.3.1 generate \
 		--strict-spec=true \
 		--additional-properties enumClassPrefix=true \
 		--additional-properties packageName=api \
