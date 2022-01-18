@@ -1,0 +1,22 @@
+name: Vet and Test
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    name: Run vet and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '1.16.2'
+      - name: go get 
+        run: go get -v -t -d ./...
+        working-directory: v2
+      - name: go vet
+        run: go vet -v $(go list ./... | grep -v /vendor/)
+        working-directory: v2
+      - name: go test
+        run: go test -v -race $(go list ./... | grep -v /vendor/)
+        working-directory: v2
