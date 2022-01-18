@@ -3,8 +3,8 @@ name: Vet and Test
 on: [push, pull_request]
 
 jobs:
-  test-build:
-    name: Run tests and build
+  test:
+    name: Run vet and test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
