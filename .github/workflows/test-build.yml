@@ -1,4 +1,4 @@
-name: Test and build image
+name: Vet and Test
 
 on: [push, pull_request]
 
