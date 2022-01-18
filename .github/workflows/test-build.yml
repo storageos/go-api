@@ -1,0 +1,19 @@
+name: Test and build image
+
+on: [push, pull_request]
+
+jobs:
+  test-build:
+    name: Run tests and build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '1.16.2'
+      - name: go get 
+        run: go get -v -t -d ./...
+      - name: go vet
+        run: go vet -v $(go list ./... | grep -v /vendor/)
+      - name: go test
+        run: go test -v -race $(go list ./... | grep -v /vendor/)
