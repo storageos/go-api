@@ -1,4 +1,4 @@
-package storageos
+package errors
 
 import (
 	"fmt"
