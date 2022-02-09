@@ -1,4 +1,4 @@
-name: Vet and Test
+name: GO get and vet
 
 on: [push, pull_request]
 
