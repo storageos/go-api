@@ -1,6 +1,6 @@
 name: GO get and vet
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
   test:
