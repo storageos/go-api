@@ -1,14 +1,13 @@
 openapi: 3.0.2
 info:
   contact:
-    email: info@storageos.com
-    name: StorageOS
-    url: https://storageos.com
-  title: StorageOS API
-  version: 2.5.0
+    name: Ondat
+    url: https://www.ondat.io/
+  title: Ondat API
+  version: 2.8.0
 externalDocs:
-  description: The latest StorageOS user documentation
-  url: https://docs.storageos.com/
+  description: The latest Ondat user documentation
+  url: https://docs.ondat.io/
 servers:
 - url: /v2
 paths:
@@ -1124,7 +1123,7 @@ paths:
                     env: prod
                     rack: db-1
                   externalDocs:
-                    url: https://docs.storageos.com/docs/reference/labels
+                    url: https://docs.ondat.io/docs/reference/labels
                   type: object
               title: CreateNamespaceData
               type: object
@@ -1416,7 +1415,7 @@ paths:
                     env: prod
                     rack: db-1
                   externalDocs:
-                    url: https://docs.storageos.com/docs/reference/labels
+                    url: https://docs.ondat.io/docs/reference/labels
                   type: object
                 version:
                   description: |
@@ -1790,7 +1789,7 @@ paths:
                     env: prod
                     rack: db-1
                   externalDocs:
-                    url: https://docs.storageos.com/docs/reference/labels
+                    url: https://docs.ondat.io/docs/reference/labels
                   type: object
                 version:
                   description: |
@@ -2119,6 +2118,375 @@ paths:
       security:
       - jwt: []
       summary: Modify the cordoned state for a node
+  /pools:
+    get:
+      description: Fetch the list of pools in the cluster.
+      operationId: listPools
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PoolList'
+          description: A list of pools.
+        "401":
+          content:
+            application/json:
+              example:
+                error: authentication required
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The requested endpoint requires authentication - you must log in first.
+            If attempting to log in, your credentials were not recognised.
+        "403":
+          content:
+            application/json:
+              example:
+                error: unauthorised
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The authenticated user does not have permission to perform the requested action.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The request caused an internal server error and should be retried.
+            Check the health of the node/cluster and if the error persists, contact support.
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The server is currently unable to handle the request due to a temporary store failure.
+            Check the health of the node/cluster and if the error persists, contact support.
+      security:
+      - jwt: []
+      summary: Fetch the list of pools
+    post:
+      description: Create a new Pool
+      operationId: createPool
+      requestBody:
+        $ref: '#/components/requestBodies/CreatePoolData'
+        content:
+          application/json:
+            schema:
+              example:
+                nodeToDriveMapping:
+                  node1:
+                  - /drive1
+                  - /drive2
+                  node2:
+                  - /drive3
+                  node3: []
+                name: pool1
+              properties:
+                name:
+                  description: |
+                    The name of the pool
+                  example: pool1
+                  pattern: ^[a-z0-9.\-]{1,253}$
+                  type: string
+                nodeToDriveMapping:
+                  additionalProperties: {}
+                  example:
+                    node1:
+                    - /drive1
+                    - /drive2
+                    node2:
+                    - /drive3
+                    node3: []
+                  type: object
+              required:
+              - name
+              - nodeToDriveMapping
+              title: CreatePoolData
+              type: object
+        description: Data required to create a new pool for the cluster.
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pool'
+          description: The pool was successfully created
+        "400":
+          content:
+            application/json:
+              example:
+                error: a short description of the validation failure
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request does not conform to the API specification.
+        "401":
+          content:
+            application/json:
+              example:
+                error: authentication required
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The requested endpoint requires authentication - you must log in first.
+            If attempting to log in, your credentials were not recognised.
+        "403":
+          content:
+            application/json:
+              example:
+                error: unauthorised
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The authenticated user does not have permission to perform the requested action.
+        "409":
+          content:
+            application/json:
+              example:
+                error: already exists
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The entity to be wrote uses an identifier that already exists.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The request caused an internal server error and should be retried.
+            Check the health of the node/cluster and if the error persists, contact support.
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The server is currently unable to handle the request due to a temporary store failure.
+            Check the health of the node/cluster and if the error persists, contact support.
+      security:
+      - jwt: []
+      summary: Create a new Pool
+  /pools/{id}:
+    get:
+      description: Fetch the pool identified by id.
+      operationId: getPool
+      parameters:
+      - description: ID of a Pool
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          $ref: '#/components/schemas/PoolID'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pool'
+          description: The pool information.
+        "400":
+          content:
+            application/json:
+              example:
+                error: a short description of the validation failure
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request does not conform to the API specification.
+        "401":
+          content:
+            application/json:
+              example:
+                error: authentication required
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The requested endpoint requires authentication - you must log in first.
+            If attempting to log in, your credentials were not recognised.
+        "403":
+          content:
+            application/json:
+              example:
+                error: unauthorised
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The authenticated user does not have permission to perform the requested action.
+        "404":
+          content:
+            application/json:
+              example:
+                error: not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            A referenced resource does not exist.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The request caused an internal server error and should be retried.
+            Check the health of the node/cluster and if the error persists, contact support.
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The server is currently unable to handle the request due to a temporary store failure.
+            Check the health of the node/cluster and if the error persists, contact support.
+      security:
+      - jwt: []
+      summary: Fetch a Pool
+    put:
+      description: |
+        Update the node-drive mapping for the pool identified by id.
+      operationId: updatePool
+      parameters:
+      - description: ID of a Pool
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          $ref: '#/components/schemas/PoolID'
+        style: simple
+      - description: |
+          If set to true this value indicates that the user wants to ignore entity version constraints, thereby "forcing" the operation.
+        explode: true
+        in: query
+        name: ignore-version
+        required: false
+        schema:
+          $ref: '#/components/schemas/IgnoreVersion'
+        style: form
+      requestBody:
+        $ref: '#/components/requestBodies/UpdatePoolData'
+        content:
+          application/json:
+            schema:
+              example:
+                nodeToDriveMapping:
+                  node1:
+                  - /drive1
+                  - /drive2
+                  node2:
+                  - /drive3
+                  node3: []
+                version: NDI0MjQyNDI0MjQyNDI0MjQy
+              properties:
+                nodeToDriveMapping:
+                  additionalProperties: {}
+                  example:
+                    node1:
+                    - /drive1
+                    - /drive2
+                    node2:
+                    - /drive3
+                    node3: []
+                  type: object
+                version:
+                  description: |
+                    An opaque representation of an entity version at the time it was obtained from the API.
+                    All operations that mutate the entity must include this version field in the request unchanged.
+                    The format of this type is undefined and may change but the defined properties will not change.
+                  example: NDI0MjQyNDI0MjQyNDI0MjQy
+                  maxLength: 30
+                  type: string
+              title: UpdatePoolData
+              type: object
+        description: |
+          Update the node-drive mapping to the desired stated. Requests removing nodes or drives from the pool are rejected.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pool'
+          description: The Pool was successfully updated
+        "400":
+          content:
+            application/json:
+              example:
+                error: a short description of the validation failure
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request does not conform to the API specification.
+        "401":
+          content:
+            application/json:
+              example:
+                error: authentication required
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The requested endpoint requires authentication - you must log in first.
+            If attempting to log in, your credentials were not recognised.
+        "403":
+          content:
+            application/json:
+              example:
+                error: unauthorised
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The authenticated user does not have permission to perform the requested action.
+        "404":
+          content:
+            application/json:
+              example:
+                error: not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            A referenced resource does not exist.
+        "412":
+          content:
+            application/json:
+              example:
+                error: attempting to write stale object
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
+            The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
+        "451":
+          content:
+            application/json:
+              example:
+                error: insufficient allowed capacity (bytes) (used 53687091200, allowed
+                  53687091200, requested 5000000)
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The requested operation failed because your Ondat licence does not allow it, either create an account for a free licence or buy a professional licence.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The request caused an internal server error and should be retried.
+            Check the health of the node/cluster and if the error persists, contact support.
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The server is currently unable to handle the request due to a temporary store failure.
+            Check the health of the node/cluster and if the error persists, contact support.
+      security:
+      - jwt: []
+      summary: Update a Pool
   /policies:
     get:
       description: Fetch the list of policy groups in the cluster.
@@ -2705,7 +3073,7 @@ paths:
                     env: prod
                     rack: db-1
                   externalDocs:
-                    url: https://docs.storageos.com/docs/reference/labels
+                    url: https://docs.ondat.io/docs/reference/labels
                   type: object
                 name:
                   description: |
@@ -2794,7 +3162,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: |
-            The requested operation failed because your storageOS licence does not allow it, either create an account for a free licence or buy a professional licence.
+            The requested operation failed because your Ondat licence does not allow it, either create an account for a free licence or buy a professional licence.
         "500":
           content:
             application/json:
@@ -3137,7 +3505,7 @@ paths:
                     env: prod
                     rack: db-1
                   externalDocs:
-                    url: https://docs.storageos.com/docs/reference/labels
+                    url: https://docs.ondat.io/docs/reference/labels
                   type: object
                 description:
                   example: This volume contains the data for my app
@@ -3217,7 +3585,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: |
-            The requested operation failed because your storageOS licence does not allow it, either create an account for a free licence or buy a professional licence.
+            The requested operation failed because your Ondat licence does not allow it, either create an account for a free licence or buy a professional licence.
         "500":
           content:
             application/json:
@@ -4497,6 +4865,201 @@ paths:
       security:
       - jwt: []
       summary: Sets the placement strategy of the volume.
+  /namespaces/{namespaceID}/volumes/{id}/debug/evict/{deploymentID}:
+    delete:
+      operationId: evictReplica
+      parameters:
+      - description: ID of a Namespace
+        explode: false
+        in: path
+        name: namespaceID
+        required: true
+        schema:
+          $ref: '#/components/schemas/NamespaceID'
+        style: simple
+      - description: ID of a Volume
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          $ref: '#/components/schemas/VolumeID'
+        style: simple
+      - description: ID of an existing replica that should become the main deployment
+        explode: false
+        in: path
+        name: deploymentID
+        required: true
+        schema:
+          $ref: '#/components/schemas/DeploymentID'
+        style: simple
+      responses:
+        "202":
+          description: Eviction request has been accepted
+        "400":
+          content:
+            application/json:
+              example:
+                error: a short description of the validation failure
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request does not conform to the API specification.
+        "401":
+          content:
+            application/json:
+              example:
+                error: authentication required
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The requested endpoint requires authentication - you must log in first.
+            If attempting to log in, your credentials were not recognised.
+        "403":
+          content:
+            application/json:
+              example:
+                error: unauthorised
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The authenticated user does not have permission to perform the requested action.
+        "404":
+          content:
+            application/json:
+              example:
+                error: not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            A referenced resource does not exist.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The request caused an internal server error and should be retried.
+            Check the health of the node/cluster and if the error persists, contact support.
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The server is currently unable to handle the request due to a temporary store failure.
+            Check the health of the node/cluster and if the error persists, contact support.
+      security:
+      - jwt: []
+      summary: "Remove a replica from the volume's replica set, create a new replica\
+        \ somwewhere else.\nNote: if the node the evicted replica is located on is\
+        \ not cordoned, the new \nreplica might be created on that node.\n"
+  /namespaces/{namespaceID}/volumes/{id}/debug/attempt-replica-promotion/{deploymentID}:
+    put:
+      description: |
+        A debug method that will attempt to promote a replica to a master This will introduce instability to the cluster and should not be used unless instructed by an Ondat engineer This will likely not succeed if the master is healthy.
+      operationId: attemptPromotion
+      parameters:
+      - description: ID of a Namespace
+        explode: false
+        in: path
+        name: namespaceID
+        required: true
+        schema:
+          $ref: '#/components/schemas/NamespaceID'
+        style: simple
+      - description: ID of a Volume
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          $ref: '#/components/schemas/VolumeID'
+        style: simple
+      - description: ID of an existing replica that should become the main deployment
+        explode: false
+        in: path
+        name: deploymentID
+        required: true
+        schema:
+          $ref: '#/components/schemas/DeploymentID'
+        style: simple
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          content:
+            application/json:
+              example:
+                error: a short description of the validation failure
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request does not conform to the API specification.
+        "401":
+          content:
+            application/json:
+              example:
+                error: authentication required
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The requested endpoint requires authentication - you must log in first.
+            If attempting to log in, your credentials were not recognised.
+        "403":
+          content:
+            application/json:
+              example:
+                error: unauthorised
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The authenticated user does not have permission to perform the requested action.
+        "404":
+          content:
+            application/json:
+              example:
+                error: not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            A referenced resource does not exist.
+        "412":
+          content:
+            application/json:
+              example:
+                error: deploymen is syncing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The replica marked for promotion is not promotable. Most likely it means that it is syncing and does not have the full copy of the volume data.
+        "422":
+          content:
+            application/json:
+              example:
+                error: invalid state for operation (currently "deleted")
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            An action was requested that cannot be performed on the entity in it's current state.
+            As an example, this error might be returned when trying to delete a currently mounted volume.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The request caused an internal server error and should be retried.
+            Check the health of the node/cluster and if the error persists, contact support.
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The server is currently unable to handle the request due to a temporary store failure.
+            Check the health of the node/cluster and if the error persists, contact support.
+      security:
+      - jwt: []
+      summary: Attempt a promotion of a replica to a master
   /cluster:
     get:
       description: |
@@ -4589,7 +5152,7 @@ paths:
                 disableVersionCheck:
                   default: false
                   description: |
-                    Disables the mechanism responsible for checking if there is an updated version of StorageOS available for installation.
+                    Disables the mechanism responsible for checking if there is an updated version of Ondat available for installation.
                   example: false
                   type: boolean
                 logLevel:
@@ -4745,7 +5308,7 @@ paths:
               properties:
                 key:
                   description: |
-                    A StorageOS product licence key, used to register a cluster. The format of this type is opaque and may change.
+                    An Ondat product licence key, used to register a cluster. The format of this type is opaque and may change.
                   type: string
                 version:
                   description: |
@@ -4758,7 +5321,7 @@ paths:
               title: UpdateLicence
               type: object
         description: |
-          A StorageOS product licence key, used to register a cluster. The format of this type is opaque and may change.
+          An Ondat product licence key, used to register a cluster. The format of this type is opaque and may change.
         required: true
       responses:
         "200":
@@ -4879,7 +5442,7 @@ paths:
           description: |
             The server is returning an incomplete diagnostic bundle.
             A bundle may contain partial information if one or more nodes failed to respond, or some other error occurred during the collection process.
-            The returned bundle is still valid and should be sent to StorageOS.
+            The returned bundle is still valid and should be sent to Ondat.
         "503":
           content:
             application/json:
@@ -4951,7 +5514,7 @@ paths:
           description: |
             The server is returning an incomplete diagnostic bundle.
             A single-node bundle may contain partial information if the target node failed to respond, or did not gather all available diagnostics during the collection process.
-            The returned bundle may still contain useful data and  should be sent to StorageOS.
+            The returned bundle may still contain useful data and  should be sent to Ondat.
         "503":
           content:
             application/json:
@@ -5105,6 +5668,12 @@ components:
           schema:
             $ref: '#/components/schemas/NFSVolumeExports'
       required: true
+    CreatePoolData:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreatePoolData'
+      required: true
     SetReplicasRequest:
       content:
         application/json:
@@ -5116,6 +5685,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/UpdateAuthenticatedUserData'
+      required: true
+    UpdatePoolData:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdatePoolData'
       required: true
     AuthUserData:
       content:
@@ -5193,7 +5768,7 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
       description: |
-        The requested operation failed because your storageOS licence does not allow it, either create an account for a free licence or buy a professional licence.
+        The requested operation failed because your Ondat licence does not allow it, either create an account for a free licence or buy a professional licence.
     Unauthorised:
       content:
         application/json:
@@ -5222,6 +5797,15 @@ components:
             $ref: '#/components/schemas/Error'
       description: |
         A referenced resource does not exist.
+    NotPromotable:
+      content:
+        application/json:
+          example:
+            error: deploymen is syncing
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: |
+        The replica marked for promotion is not promotable. Most likely it means that it is syncing and does not have the full copy of the volume data.
     InsufficientStorage:
       content:
         application/json:
@@ -5473,7 +6057,7 @@ components:
         accessLevel: rw
         identity:
           identityType: hostname
-          matcher: '*.prod.storageos.com'
+          matcher: '*.prod.ondat.com'
       properties:
         identity:
           $ref: '#/components/schemas/NfsAcl_identity'
@@ -5499,7 +6083,7 @@ components:
           accessLevel: rw
           identity:
             identityType: hostname
-            matcher: '*.prod.storageos.com'
+            matcher: '*.prod.ondat.com'
         - squashConfig:
             uid: ""
             gid: ""
@@ -5507,7 +6091,7 @@ components:
           accessLevel: rw
           identity:
             identityType: hostname
-            matcher: '*.prod.storageos.com'
+            matcher: '*.prod.ondat.com'
         pseudoPath: /very/important/files/somewhere/else
         exportID: 42
       properties:
@@ -5545,7 +6129,7 @@ components:
             accessLevel: rw
             identity:
               identityType: hostname
-              matcher: '*.prod.storageos.com'
+              matcher: '*.prod.ondat.com'
           - squashConfig:
               uid: ""
               gid: ""
@@ -5553,7 +6137,7 @@ components:
             accessLevel: rw
             identity:
               identityType: hostname
-              matcher: '*.prod.storageos.com'
+              matcher: '*.prod.ondat.com'
           pseudoPath: /very/important/files/somewhere/else
           exportID: 42
         - path: /very/important/files/
@@ -5565,7 +6149,7 @@ components:
             accessLevel: rw
             identity:
               identityType: hostname
-              matcher: '*.prod.storageos.com'
+              matcher: '*.prod.ondat.com'
           - squashConfig:
               uid: ""
               gid: ""
@@ -5573,7 +6157,7 @@ components:
             accessLevel: rw
             identity:
               identityType: hostname
-              matcher: '*.prod.storageos.com'
+              matcher: '*.prod.ondat.com'
           pseudoPath: /very/important/files/somewhere/else
           exportID: 42
         serviceEndpoint: serviceEndpoint
@@ -5600,7 +6184,27 @@ components:
         env: prod
         rack: db-1
       externalDocs:
-        url: https://docs.storageos.com/docs/reference/labels
+        url: https://docs.ondat.io/docs/reference/labels
+      type: object
+    TopologyLabels:
+      description: |
+        List of requisite and preferred topology zones where the volume should be accessible from.
+      example:
+        preferredZones:
+        - preferredZones
+        - preferredZones
+        requisiteZones:
+        - requisiteZones
+        - requisiteZones
+      properties:
+        requisiteZones:
+          items:
+            type: string
+          type: array
+        preferredZones:
+          items:
+            type: string
+          type: array
       type: object
     LogLevel:
       default: info
@@ -5678,6 +6282,11 @@ components:
         A unique identifier for a policy group. The format of this type is undefined and may change but the defined properties will not change..
       example: c5666b58-b805-4215-ab4a-cb094948ccc6
       type: string
+    PoolID:
+      description: |
+        A unique identifier for a pool. The format of this type is undefined and may change but the defined properties will not change..
+      example: c5666b58-b805-4215-ab4a-cb094948ccc6
+      type: string
     Cluster:
       example:
         disableVersionCheck: false
@@ -5710,7 +6319,7 @@ components:
         disableVersionCheck:
           default: false
           description: |
-            Disables the mechanism responsible for checking if there is an updated version of StorageOS available for installation.
+            Disables the mechanism responsible for checking if there is an updated version of Ondat available for installation.
           example: false
           type: boolean
         logLevel:
@@ -5836,7 +6445,89 @@ components:
         attachedOn: ""
         createdAt: 2019-03-10T13:42:42Z
         namespaceID: ""
+        snapshotConfig:
+          key:
+            createdAt: 2000-01-23T04:56:07.000+00:00
+            name: name
+            location: location
+            id: id
+            sizeBytes: 0.8008281904610115
+        topologyLabels:
+          preferredZones:
+          - preferredZones
+          - preferredZones
+          requisiteZones:
+          - requisiteZones
+          - requisiteZones
         name: app-data
+        snapshotVolumes:
+          key:
+            attachedOnHost: worker-1
+            attachmentType: host
+            replicas:
+            - null
+            - null
+            description: This volume contains the data for my app
+            fsType: ext4
+            version: NDI0MjQyNDI0MjQyNDI0MjQy
+            labels:
+              env: prod
+              rack: db-1
+            master: ""
+            sizeBytes: 5368709000
+            attachedOn: ""
+            createdAt: 2019-03-10T13:42:42Z
+            namespaceID: ""
+            name: app-data
+            nfs:
+              exports:
+              - path: /very/important/files/
+                acls:
+                - squashConfig:
+                    uid: ""
+                    gid: ""
+                    squash: root
+                  accessLevel: rw
+                  identity:
+                    identityType: hostname
+                    matcher: '*.prod.ondat.com'
+                - squashConfig:
+                    uid: ""
+                    gid: ""
+                    squash: root
+                  accessLevel: rw
+                  identity:
+                    identityType: hostname
+                    matcher: '*.prod.ondat.com'
+                pseudoPath: /very/important/files/somewhere/else
+                exportID: 42
+              - path: /very/important/files/
+                acls:
+                - squashConfig:
+                    uid: ""
+                    gid: ""
+                    squash: root
+                  accessLevel: rw
+                  identity:
+                    identityType: hostname
+                    matcher: '*.prod.ondat.com'
+                - squashConfig:
+                    uid: ""
+                    gid: ""
+                    squash: root
+                  accessLevel: rw
+                  identity:
+                    identityType: hostname
+                    matcher: '*.prod.ondat.com'
+                pseudoPath: /very/important/files/somewhere/else
+                exportID: 42
+              serviceEndpoint: serviceEndpoint
+            id: c5666b58-b805-4215-ab4a-cb094948ccc6
+            parentInfo:
+              snapshotID: snapshotID
+              namespaceID: namespaceID
+              id: id
+            updatedAt: 2019-03-29T23:13:13Z
         nfs:
           exports:
           - path: /very/important/files/
@@ -5848,7 +6539,7 @@ components:
               accessLevel: rw
               identity:
                 identityType: hostname
-                matcher: '*.prod.storageos.com'
+                matcher: '*.prod.ondat.com'
             - squashConfig:
                 uid: ""
                 gid: ""
@@ -5856,7 +6547,7 @@ components:
               accessLevel: rw
               identity:
                 identityType: hostname
-                matcher: '*.prod.storageos.com'
+                matcher: '*.prod.ondat.com'
             pseudoPath: /very/important/files/somewhere/else
             exportID: 42
           - path: /very/important/files/
@@ -5868,7 +6559,7 @@ components:
               accessLevel: rw
               identity:
                 identityType: hostname
-                matcher: '*.prod.storageos.com'
+                matcher: '*.prod.ondat.com'
             - squashConfig:
                 uid: ""
                 gid: ""
@@ -5876,11 +6567,15 @@ components:
               accessLevel: rw
               identity:
                 identityType: hostname
-                matcher: '*.prod.storageos.com'
+                matcher: '*.prod.ondat.com'
             pseudoPath: /very/important/files/somewhere/else
             exportID: 42
           serviceEndpoint: serviceEndpoint
         id: c5666b58-b805-4215-ab4a-cb094948ccc6
+        parentInfo:
+          snapshotID: snapshotID
+          namespaceID: namespaceID
+          id: id
         updatedAt: 2019-03-29T23:13:13Z
       properties:
         id:
@@ -5918,7 +6613,175 @@ components:
             env: prod
             rack: db-1
           externalDocs:
-            url: https://docs.storageos.com/docs/reference/labels
+            url: https://docs.ondat.io/docs/reference/labels
+          type: object
+        topologyLabels:
+          $ref: '#/components/schemas/TopologyLabels'
+        fsType:
+          $ref: '#/components/schemas/FsType'
+        attachmentType:
+          $ref: '#/components/schemas/AttachType'
+        master:
+          allOf:
+          - $ref: '#/components/schemas/MasterDeploymentInfo'
+          readOnly: true
+        replicas:
+          default: []
+          items:
+            $ref: '#/components/schemas/ReplicaDeploymentInfo'
+          nullable: true
+          readOnly: true
+          type: array
+        sizeBytes:
+          description: |
+            A volume's size in bytes
+          example: 5368709000
+          minimum: 1073742000
+          type: uint64
+        snapshotConfig:
+          additionalProperties:
+            $ref: '#/components/schemas/Snapshot'
+          type: object
+        snapshotVolumes:
+          additionalProperties:
+            $ref: '#/components/schemas/SnapshotVolume'
+          type: object
+        parentInfo:
+          $ref: '#/components/schemas/ParentInfo'
+        createdAt:
+          description: |
+            The time the entity was created.
+            This timestamp is set by the node that created the entity, and may not be correct if the node's local clock was skewed.
+            This value is for the user's informative purposes only, and correctness is not required.
+            String format is RFC3339.
+          example: 2019-03-10T13:42:42Z
+          format: date-time
+          readOnly: true
+          type: string
+        updatedAt:
+          description: |
+            The time the entity was last updated.
+            This timestamp is set by the node that last updated the entity, and may not be correct if the node's local clock was skewed.
+            This value is for the user's informative purposes only, and correctness is not required.
+            String format is RFC3339.
+          example: 2019-03-29T23:13:13Z
+          format: date-time
+          readOnly: true
+          type: string
+        version:
+          description: |
+            An opaque representation of an entity version at the time it was obtained from the API.
+            All operations that mutate the entity must include this version field in the request unchanged.
+            The format of this type is undefined and may change but the defined properties will not change.
+          example: NDI0MjQyNDI0MjQyNDI0MjQy
+          maxLength: 30
+          type: string
+      type: object
+    SnapshotVolume:
+      example:
+        attachedOnHost: worker-1
+        attachmentType: host
+        replicas:
+        - null
+        - null
+        description: This volume contains the data for my app
+        fsType: ext4
+        version: NDI0MjQyNDI0MjQyNDI0MjQy
+        labels:
+          env: prod
+          rack: db-1
+        master: ""
+        sizeBytes: 5368709000
+        attachedOn: ""
+        createdAt: 2019-03-10T13:42:42Z
+        namespaceID: ""
+        name: app-data
+        nfs:
+          exports:
+          - path: /very/important/files/
+            acls:
+            - squashConfig:
+                uid: ""
+                gid: ""
+                squash: root
+              accessLevel: rw
+              identity:
+                identityType: hostname
+                matcher: '*.prod.ondat.com'
+            - squashConfig:
+                uid: ""
+                gid: ""
+                squash: root
+              accessLevel: rw
+              identity:
+                identityType: hostname
+                matcher: '*.prod.ondat.com'
+            pseudoPath: /very/important/files/somewhere/else
+            exportID: 42
+          - path: /very/important/files/
+            acls:
+            - squashConfig:
+                uid: ""
+                gid: ""
+                squash: root
+              accessLevel: rw
+              identity:
+                identityType: hostname
+                matcher: '*.prod.ondat.com'
+            - squashConfig:
+                uid: ""
+                gid: ""
+                squash: root
+              accessLevel: rw
+              identity:
+                identityType: hostname
+                matcher: '*.prod.ondat.com'
+            pseudoPath: /very/important/files/somewhere/else
+            exportID: 42
+          serviceEndpoint: serviceEndpoint
+        id: c5666b58-b805-4215-ab4a-cb094948ccc6
+        parentInfo:
+          snapshotID: snapshotID
+          namespaceID: namespaceID
+          id: id
+        updatedAt: 2019-03-29T23:13:13Z
+      properties:
+        id:
+          description: |
+            A unique identifier for a volume. The format of this type is undefined and may change but the defined properties will not change.
+          example: c5666b58-b805-4215-ab4a-cb094948ccc6
+          type: string
+        name:
+          example: app-data
+          type: string
+        description:
+          example: This volume contains the data for my app
+          type: string
+        attachedOn:
+          allOf:
+          - $ref: '#/components/schemas/NodeID'
+          readOnly: true
+        attachedOnHost:
+          description: The hostname of the node the volume is attached on
+          example: worker-1
+          readOnly: true
+          type: string
+        nfs:
+          $ref: '#/components/schemas/NfsConfig'
+        namespaceID:
+          allOf:
+          - $ref: '#/components/schemas/NamespaceID'
+          readOnly: true
+        labels:
+          additionalProperties:
+            type: string
+          description: |
+            A set of arbitrary key value labels to apply to the entity.
+          example:
+            env: prod
+            rack: db-1
+          externalDocs:
+            url: https://docs.ondat.io/docs/reference/labels
           type: object
         fsType:
           $ref: '#/components/schemas/FsType'
@@ -5941,6 +6804,8 @@ components:
           example: 5368709000
           minimum: 1073742000
           type: uint64
+        parentInfo:
+          $ref: '#/components/schemas/ParentInfo'
         createdAt:
           description: |
             The time the entity was created.
@@ -6015,7 +6880,7 @@ components:
           rack: db-1
         createdAt: 2019-03-10T13:42:42Z
         ioEndpoint: '["192.0.2.1:5703"]'
-        name: db1.lcy.storageos.network
+        name: db1.lcy.ondat.network
         cordoned: false
         id: c5666b58-b805-4215-ab4a-cb094948ccc6
         supervisorEndpoint: '["192.0.2.1:5704"]'
@@ -6031,8 +6896,8 @@ components:
         name:
           description: |
             The hostname of the node.
-            This value is set by the node each time it joins the StorageOS cluster.
-          example: db1.lcy.storageos.network
+            This value is set by the node each time it joins the Ondat cluster.
+          example: db1.lcy.ondat.network
           readOnly: true
           type: string
         health:
@@ -6092,7 +6957,7 @@ components:
             env: prod
             rack: db-1
           externalDocs:
-            url: https://docs.storageos.com/docs/reference/labels
+            url: https://docs.ondat.io/docs/reference/labels
           type: object
         createdAt:
           description: |
@@ -6121,6 +6986,47 @@ components:
             The format of this type is undefined and may change but the defined properties will not change.
           example: NDI0MjQyNDI0MjQyNDI0MjQy
           maxLength: 30
+          type: string
+      type: object
+    SnapshotConfig:
+      additionalProperties:
+        $ref: '#/components/schemas/Snapshot'
+      type: object
+    Snapshot:
+      example:
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        name: name
+        location: location
+        id: id
+        sizeBytes: 0.8008281904610115
+      properties:
+        name:
+          type: string
+        id:
+          type: string
+        location:
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+        sizeBytes:
+          type: number
+      type: object
+    SnapshotVolumes:
+      additionalProperties:
+        $ref: '#/components/schemas/SnapshotVolume'
+      type: object
+    ParentInfo:
+      example:
+        snapshotID: snapshotID
+        namespaceID: namespaceID
+        id: id
+      properties:
+        id:
+          type: string
+        namespaceID:
+          type: string
+        snapshotID:
           type: string
       type: object
     Namespace:
@@ -6152,7 +7058,7 @@ components:
             env: prod
             rack: db-1
           externalDocs:
-            url: https://docs.storageos.com/docs/reference/labels
+            url: https://docs.ondat.io/docs/reference/labels
           type: object
         createdAt:
           description: |
@@ -6240,6 +7146,68 @@ components:
             $ref: '#/components/schemas/_policies__id__specs'
           nullable: true
           type: array
+        createdAt:
+          description: |
+            The time the entity was created.
+            This timestamp is set by the node that created the entity, and may not be correct if the node's local clock was skewed.
+            This value is for the user's informative purposes only, and correctness is not required.
+            String format is RFC3339.
+          example: 2019-03-10T13:42:42Z
+          format: date-time
+          readOnly: true
+          type: string
+        updatedAt:
+          description: |
+            The time the entity was last updated.
+            This timestamp is set by the node that last updated the entity, and may not be correct if the node's local clock was skewed.
+            This value is for the user's informative purposes only, and correctness is not required.
+            String format is RFC3339.
+          example: 2019-03-29T23:13:13Z
+          format: date-time
+          readOnly: true
+          type: string
+        version:
+          description: |
+            An opaque representation of an entity version at the time it was obtained from the API.
+            All operations that mutate the entity must include this version field in the request unchanged.
+            The format of this type is undefined and may change but the defined properties will not change.
+          example: NDI0MjQyNDI0MjQyNDI0MjQy
+          maxLength: 30
+          type: string
+      type: object
+    Pool:
+      example:
+        createdAt: 2019-03-10T13:42:42Z
+        nodeToDriveMapping:
+          node1:
+          - /drive1
+          - /drive2
+          node2:
+          - /drive3
+        name: fast-pool
+        id: c5666b58-b805-4215-ab4a-cb094948ccc6
+        version: NDI0MjQyNDI0MjQyNDI0MjQy
+        updatedAt: 2019-03-29T23:13:13Z
+      properties:
+        id:
+          description: |
+            A unique identifier for a pool. The format of this type is undefined and may change but the defined properties will not change..
+          example: c5666b58-b805-4215-ab4a-cb094948ccc6
+          type: string
+        name:
+          description: |
+            The name of the pool
+          example: fast-pool
+          type: string
+        nodeToDriveMapping:
+          additionalProperties: {}
+          example:
+            node1:
+            - /drive1
+            - /drive2
+            node2:
+            - /drive3
+          type: object
         createdAt:
           description: |
             The time the entity was created.
@@ -6363,6 +7331,10 @@ components:
     VolumeList:
       items:
         $ref: '#/components/schemas/Volume'
+      type: array
+    PoolList:
+      items:
+        $ref: '#/components/schemas/Pool'
       type: array
     SetFailureThresholdRequestData:
       properties:
@@ -6546,7 +7518,7 @@ components:
             env: prod
             rack: db-1
           externalDocs:
-            url: https://docs.storageos.com/docs/reference/labels
+            url: https://docs.ondat.io/docs/reference/labels
           type: object
       title: CreateNamespaceData
       type: object
@@ -6566,7 +7538,7 @@ components:
             env: prod
             rack: db-1
           externalDocs:
-            url: https://docs.storageos.com/docs/reference/labels
+            url: https://docs.ondat.io/docs/reference/labels
           type: object
         version:
           description: |
@@ -6594,7 +7566,7 @@ components:
             env: prod
             rack: db-1
           externalDocs:
-            url: https://docs.storageos.com/docs/reference/labels
+            url: https://docs.ondat.io/docs/reference/labels
           type: object
         version:
           description: |
@@ -6645,6 +7617,69 @@ components:
           maxLength: 30
           type: string
       title: SetCordonedNodeData
+      type: object
+    CreatePoolData:
+      example:
+        nodeToDriveMapping:
+          node1:
+          - /drive1
+          - /drive2
+          node2:
+          - /drive3
+          node3: []
+        name: pool1
+      properties:
+        name:
+          description: |
+            The name of the pool
+          example: pool1
+          pattern: ^[a-z0-9.\-]{1,253}$
+          type: string
+        nodeToDriveMapping:
+          additionalProperties: {}
+          example:
+            node1:
+            - /drive1
+            - /drive2
+            node2:
+            - /drive3
+            node3: []
+          type: object
+      required:
+      - name
+      - nodeToDriveMapping
+      title: CreatePoolData
+      type: object
+    UpdatePoolData:
+      example:
+        nodeToDriveMapping:
+          node1:
+          - /drive1
+          - /drive2
+          node2:
+          - /drive3
+          node3: []
+        version: NDI0MjQyNDI0MjQyNDI0MjQy
+      properties:
+        nodeToDriveMapping:
+          additionalProperties: {}
+          example:
+            node1:
+            - /drive1
+            - /drive2
+            node2:
+            - /drive3
+            node3: []
+          type: object
+        version:
+          description: |
+            An opaque representation of an entity version at the time it was obtained from the API.
+            All operations that mutate the entity must include this version field in the request unchanged.
+            The format of this type is undefined and may change but the defined properties will not change.
+          example: NDI0MjQyNDI0MjQyNDI0MjQy
+          maxLength: 30
+          type: string
+      title: UpdatePoolData
       type: object
     _policies_specs:
       properties:
@@ -6788,7 +7823,7 @@ components:
             env: prod
             rack: db-1
           externalDocs:
-            url: https://docs.storageos.com/docs/reference/labels
+            url: https://docs.ondat.io/docs/reference/labels
           type: object
         name:
           description: |
@@ -6833,7 +7868,7 @@ components:
             env: prod
             rack: db-1
           externalDocs:
-            url: https://docs.storageos.com/docs/reference/labels
+            url: https://docs.ondat.io/docs/reference/labels
           type: object
         description:
           example: This volume contains the data for my app
@@ -6992,7 +8027,7 @@ components:
         disableVersionCheck:
           default: false
           description: |
-            Disables the mechanism responsible for checking if there is an updated version of StorageOS available for installation.
+            Disables the mechanism responsible for checking if there is an updated version of Ondat available for installation.
           example: false
           type: boolean
         logLevel:
@@ -7016,7 +8051,7 @@ components:
       properties:
         key:
           description: |
-            A StorageOS product licence key, used to register a cluster. The format of this type is opaque and may change.
+            An Ondat product licence key, used to register a cluster. The format of this type is opaque and may change.
           type: string
         version:
           description: |
@@ -7031,7 +8066,7 @@ components:
     NfsAcl_identity:
       example:
         identityType: hostname
-        matcher: '*.prod.storageos.com'
+        matcher: '*.prod.ondat.com'
       properties:
         identityType:
           description: |
@@ -7048,7 +8083,7 @@ components:
             For "cidr", this should be a valid CIDR block string such as "10.0.0.0/8".
             For "hostname", this must be the hostname sent by the client, with ? and * wildcard characters.
             For netgroup, this must be in the form of "@netgroup" with ? and * wildcard characters.
-          example: '*.prod.storageos.com'
+          example: '*.prod.ondat.com'
           type: string
     NfsAcl_squashConfig:
       example:
@@ -7129,6 +8164,6 @@ components:
   securitySchemes:
     jwt:
       bearerFormat: JWT
-      description: StorageOS uses JSON web tokens for authentication.
+      description: Ondat uses JSON web tokens for authentication.
       scheme: bearer
       type: http

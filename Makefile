@@ -1,4 +1,4 @@
-VERSION ?= 2.4.0
+VERSION ?= 2.9.0
 
 .DEFAULT_GOAL:=help
 

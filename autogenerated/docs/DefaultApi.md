@@ -6,9 +6,11 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**AttachNFSVolume**](DefaultApi.md#AttachNFSVolume) | **Post** /namespaces/{namespaceID}/volumes/{id}/nfs/attach | attach and share the volume using NFS
 [**AttachVolume**](DefaultApi.md#AttachVolume) | **Post** /namespaces/{namespaceID}/volumes/{id}/attach | Attach a volume to the given node
+[**AttemptPromotion**](DefaultApi.md#AttemptPromotion) | **Put** /namespaces/{namespaceID}/volumes/{id}/debug/attempt-replica-promotion/{deploymentID} | Attempt a promotion of a replica to a master
 [**AuthenticateUser**](DefaultApi.md#AuthenticateUser) | **Post** /auth/login | Authenticate a user
 [**CreateNamespace**](DefaultApi.md#CreateNamespace) | **Post** /namespaces | Create a new namespace
 [**CreatePolicyGroup**](DefaultApi.md#CreatePolicyGroup) | **Post** /policies | Create a new policy group
+[**CreatePool**](DefaultApi.md#CreatePool) | **Post** /pools | Create a new Pool
 [**CreateUser**](DefaultApi.md#CreateUser) | **Post** /users | Create a new user
 [**CreateVolume**](DefaultApi.md#CreateVolume) | **Post** /namespaces/{namespaceID}/volumes | Create a new Volume in the specified namespace
 [**DeleteAuthenticatedUser**](DefaultApi.md#DeleteAuthenticatedUser) | **Delete** /users/self | Delete the authenticated user
@@ -20,6 +22,7 @@ Method | HTTP request | Description
 [**DeleteUser**](DefaultApi.md#DeleteUser) | **Delete** /users/{id} | Delete a user
 [**DeleteVolume**](DefaultApi.md#DeleteVolume) | **Delete** /namespaces/{namespaceID}/volumes/{id} | Delete a volume
 [**DetachVolume**](DefaultApi.md#DetachVolume) | **Delete** /namespaces/{namespaceID}/volumes/{id}/attach | Detach the given volume
+[**EvictReplica**](DefaultApi.md#EvictReplica) | **Delete** /namespaces/{namespaceID}/volumes/{id}/debug/evict/{deploymentID} | Remove a replica from the volume&#39;s replica set, create a new replica somwewhere else. Note: if the node the evicted replica is located on is not cordoned, the new  replica might be created on that node. 
 [**GetAuthenticatedUser**](DefaultApi.md#GetAuthenticatedUser) | **Get** /users/self | Get the currently authenticated user&#39;s information
 [**GetCluster**](DefaultApi.md#GetCluster) | **Get** /cluster | Retrieves the cluster&#39;s global configuration settings
 [**GetDiagnostics**](DefaultApi.md#GetDiagnostics) | **Get** /diagnostics | Retrieves a diagnostics bundle from the target node
@@ -27,12 +30,14 @@ Method | HTTP request | Description
 [**GetNamespace**](DefaultApi.md#GetNamespace) | **Get** /namespaces/{id} | Fetch a namespace
 [**GetNode**](DefaultApi.md#GetNode) | **Get** /nodes/{id} | Fetch a node
 [**GetPolicyGroup**](DefaultApi.md#GetPolicyGroup) | **Get** /policies/{id} | Fetch a policy group
+[**GetPool**](DefaultApi.md#GetPool) | **Get** /pools/{id} | Fetch a Pool
 [**GetSingleNodeDiagnostics**](DefaultApi.md#GetSingleNodeDiagnostics) | **Get** /diagnostics/{id} | Retrieves a single node diagnostics bundle from the target node
 [**GetUser**](DefaultApi.md#GetUser) | **Get** /users/{id} | Fetch a user
 [**GetVolume**](DefaultApi.md#GetVolume) | **Get** /namespaces/{namespaceID}/volumes/{id} | Fetch a volume
 [**ListNamespaces**](DefaultApi.md#ListNamespaces) | **Get** /namespaces | Fetch the list of namespaces
 [**ListNodes**](DefaultApi.md#ListNodes) | **Get** /nodes | Fetch the list of nodes
 [**ListPolicyGroups**](DefaultApi.md#ListPolicyGroups) | **Get** /policies | Fetch the list of policy groups
+[**ListPools**](DefaultApi.md#ListPools) | **Get** /pools | Fetch the list of pools
 [**ListUsers**](DefaultApi.md#ListUsers) | **Get** /users | Fetch the list of users
 [**ListVolumes**](DefaultApi.md#ListVolumes) | **Get** /namespaces/{namespaceID}/volumes | Fetch the list of volumes in the given namespace
 [**RefreshJwt**](DefaultApi.md#RefreshJwt) | **Post** /auth/refresh | Refresh the JWT
@@ -51,6 +56,7 @@ Method | HTTP request | Description
 [**UpdateNamespace**](DefaultApi.md#UpdateNamespace) | **Put** /namespaces/{id} | Update a namespace
 [**UpdateNode**](DefaultApi.md#UpdateNode) | **Put** /nodes/{id} | Update a node
 [**UpdatePolicyGroup**](DefaultApi.md#UpdatePolicyGroup) | **Put** /policies/{id} | Update a policy group
+[**UpdatePool**](DefaultApi.md#UpdatePool) | **Put** /pools/{id} | Update a Pool
 [**UpdateUser**](DefaultApi.md#UpdateUser) | **Put** /users/{id} | Update a user
 [**UpdateVolume**](DefaultApi.md#UpdateVolume) | **Put** /namespaces/{namespaceID}/volumes/{id} | Update a volume
 
@@ -135,6 +141,42 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## AttemptPromotion
+
+> AttemptPromotion(ctx, namespaceID, id, deploymentID)
+
+Attempt a promotion of a replica to a master
+
+A debug method that will attempt to promote a replica to a master This will introduce instability to the cluster and should not be used unless instructed by an Ondat engineer This will likely not succeed if the master is healthy. 
+
+### Required Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**namespaceID** | **string**| ID of a Namespace | 
+**id** | **string**| ID of a Volume | 
+**deploymentID** | **string**| ID of an existing replica that should become the main deployment | 
+
+### Return type
+
+ (empty response body)
+
+### Authorization
+
+[jwt](../README.md#jwt)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
 - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
@@ -229,6 +271,40 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**PolicyGroup**](PolicyGroup.md)
+
+### Authorization
+
+[jwt](../README.md#jwt)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## CreatePool
+
+> Pool CreatePool(ctx, createPoolData)
+
+Create a new Pool
+
+Create a new Pool
+
+### Required Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**createPoolData** | [**CreatePoolData**](CreatePoolData.md)|  | 
+
+### Return type
+
+[**Pool**](Pool.md)
 
 ### Authorization
 
@@ -724,6 +800,40 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
+## EvictReplica
+
+> EvictReplica(ctx, namespaceID, id, deploymentID)
+
+Remove a replica from the volume's replica set, create a new replica somwewhere else. Note: if the node the evicted replica is located on is not cordoned, the new  replica might be created on that node. 
+
+### Required Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**namespaceID** | **string**| ID of a Namespace | 
+**id** | **string**| ID of a Volume | 
+**deploymentID** | **string**| ID of an existing replica that should become the main deployment | 
+
+### Return type
+
+ (empty response body)
+
+### Authorization
+
+[jwt](../README.md#jwt)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
 ## GetAuthenticatedUser
 
 > User GetAuthenticatedUser(ctx, )
@@ -946,6 +1056,40 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
+## GetPool
+
+> Pool GetPool(ctx, id)
+
+Fetch a Pool
+
+Fetch the pool identified by id.
+
+### Required Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string**| ID of a Pool | 
+
+### Return type
+
+[**Pool**](Pool.md)
+
+### Authorization
+
+[jwt](../README.md#jwt)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
 ## GetSingleNodeDiagnostics
 
 > *os.File GetSingleNodeDiagnostics(ctx, id)
@@ -1124,6 +1268,36 @@ This endpoint does not need any parameter.
 ### Return type
 
 [**[]PolicyGroup**](PolicyGroup.md)
+
+### Authorization
+
+[jwt](../README.md#jwt)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## ListPools
+
+> []Pool ListPools(ctx, )
+
+Fetch the list of pools
+
+Fetch the list of pools in the cluster.
+
+### Required Parameters
+
+This endpoint does not need any parameter.
+
+### Return type
+
+[**[]Pool**](Pool.md)
 
 ### Authorization
 
@@ -1903,6 +2077,53 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**PolicyGroup**](PolicyGroup.md)
+
+### Authorization
+
+[jwt](../README.md#jwt)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## UpdatePool
+
+> Pool UpdatePool(ctx, id, updatePoolData, optional)
+
+Update a Pool
+
+Update the node-drive mapping for the pool identified by id. 
+
+### Required Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string**| ID of a Pool | 
+**updatePoolData** | [**UpdatePoolData**](UpdatePoolData.md)|  | 
+ **optional** | ***UpdatePoolOpts** | optional parameters | nil if no parameters
+
+### Optional Parameters
+
+Optional parameters are passed through a pointer to a UpdatePoolOpts struct
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+ **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+
+### Return type
+
+[**Pool**](Pool.md)
 
 ### Authorization
 

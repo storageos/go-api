@@ -1,0 +1,27 @@
+# SnapshotVolume
+
+## Properties
+
+Name | Type | Description | Notes
+------------ | ------------- | ------------- | -------------
+**Id** | **string** | A unique identifier for a volume. The format of this type is undefined and may change but the defined properties will not change.  | [optional] 
+**Name** | **string** |  | [optional] 
+**Description** | **string** |  | [optional] 
+**AttachedOn** | **string** |  | [optional] [readonly] 
+**AttachedOnHost** | **string** | The hostname of the node the volume is attached on | [optional] [readonly] 
+**Nfs** | [**NfsConfig**](NfsConfig.md) |  | [optional] 
+**NamespaceID** | **string** |  | [optional] [readonly] 
+**Labels** | **map[string]string** | A set of arbitrary key value labels to apply to the entity.  | [optional] 
+**FsType** | [**FsType**](FsType.md) |  | [optional] 
+**AttachmentType** | [**AttachType**](AttachType.md) |  | [optional] 
+**Master** | [**MasterDeploymentInfo**](MasterDeploymentInfo.md) |  | [optional] [readonly] 
+**Replicas** | Pointer to [**[]ReplicaDeploymentInfo**](ReplicaDeploymentInfo.md) |  | [optional] [readonly] [default to []]
+**SizeBytes** | **uint64** | A volume&#39;s size in bytes  | [optional] 
+**ParentInfo** | [**ParentInfo**](ParentInfo.md) |  | [optional] 
+**CreatedAt** | [**time.Time**](time.Time.md) | The time the entity was created. This timestamp is set by the node that created the entity, and may not be correct if the node&#39;s local clock was skewed. This value is for the user&#39;s informative purposes only, and correctness is not required. String format is RFC3339.  | [optional] [readonly] 
+**UpdatedAt** | [**time.Time**](time.Time.md) | The time the entity was last updated. This timestamp is set by the node that last updated the entity, and may not be correct if the node&#39;s local clock was skewed. This value is for the user&#39;s informative purposes only, and correctness is not required. String format is RFC3339.  | [optional] [readonly] 
+**Version** | **string** | An opaque representation of an entity version at the time it was obtained from the API. All operations that mutate the entity must include this version field in the request unchanged. The format of this type is undefined and may change but the defined properties will not change.  | [optional] 
+
+[[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
+
