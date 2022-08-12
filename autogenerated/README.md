@@ -47,6 +47,7 @@ Class | Method | HTTP request | Description
 *DefaultApi* | [**DeleteNamespace**](docs/DefaultApi.md#deletenamespace) | **Delete** /namespaces/{id} | Delete a namespace
 *DefaultApi* | [**DeleteNode**](docs/DefaultApi.md#deletenode) | **Delete** /nodes/{id} | Delete a node
 *DefaultApi* | [**DeletePolicyGroup**](docs/DefaultApi.md#deletepolicygroup) | **Delete** /policies/{id} | Delete a policy group
+*DefaultApi* | [**DeletePool**](docs/DefaultApi.md#deletepool) | **Delete** /pools/{id} | Delete a pool
 *DefaultApi* | [**DeleteSessions**](docs/DefaultApi.md#deletesessions) | **Delete** /users/{id}/sessions | Invalidate login sessions
 *DefaultApi* | [**DeleteUser**](docs/DefaultApi.md#deleteuser) | **Delete** /users/{id} | Delete a user
 *DefaultApi* | [**DeleteVolume**](docs/DefaultApi.md#deletevolume) | **Delete** /namespaces/{namespaceID}/volumes/{id} | Delete a volume

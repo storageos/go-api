@@ -18,6 +18,7 @@ Method | HTTP request | Description
 [**DeleteNamespace**](DefaultApi.md#DeleteNamespace) | **Delete** /namespaces/{id} | Delete a namespace
 [**DeleteNode**](DefaultApi.md#DeleteNode) | **Delete** /nodes/{id} | Delete a node
 [**DeletePolicyGroup**](DefaultApi.md#DeletePolicyGroup) | **Delete** /policies/{id} | Delete a policy group
+[**DeletePool**](DefaultApi.md#DeletePool) | **Delete** /pools/{id} | Delete a pool
 [**DeleteSessions**](DefaultApi.md#DeleteSessions) | **Delete** /users/{id}/sessions | Invalidate login sessions
 [**DeleteUser**](DefaultApi.md#DeleteUser) | **Delete** /users/{id} | Delete a user
 [**DeleteVolume**](DefaultApi.md#DeleteVolume) | **Delete** /namespaces/{namespaceID}/volumes/{id} | Delete a volume
@@ -592,6 +593,53 @@ Name | Type | Description  | Notes
 ### Optional Parameters
 
 Optional parameters are passed through a pointer to a DeletePolicyGroupOpts struct
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+ **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+
+### Return type
+
+ (empty response body)
+
+### Authorization
+
+[jwt](../README.md#jwt)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## DeletePool
+
+> DeletePool(ctx, id, version, optional)
+
+Delete a pool
+
+Remove the pool identified by id. If there are volumes using the pool this request will be reject.
+
+### Required Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string**| ID of a Pool | 
+**version** | **string**| This value is used to perform a conditional delete or update of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.  | 
+ **optional** | ***DeletePoolOpts** | optional parameters | nil if no parameters
+
+### Optional Parameters
+
+Optional parameters are passed through a pointer to a DeletePoolOpts struct
 
 
 Name | Type | Description  | Notes

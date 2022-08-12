@@ -2626,6 +2626,46 @@ paths:
 
                 "503":
                     $ref: "#/components/responses/StoreError"
+        delete:
+            summary: Delete a pool
+            operationId: deletePool
+            description: Remove the pool identified by id. If there are volumes using the pool this request will be reject.
+            security:
+                - jwt: []
+            parameters:
+                - $ref: "#/components/parameters/ObjectVersion"
+                - $ref: "#/components/parameters/IgnoreVersion"
+
+            responses:
+                "200":
+                    description: The pool was successfully deleted.
+
+                "202":
+                    $ref: "#/components/responses/Accepted"
+
+                "400":
+                    $ref: "#/components/responses/BadRequest"
+
+                "401":
+                    $ref: "#/components/responses/Unauthorised"
+
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+
+                "404":
+                    $ref: "#/components/responses/NotFound"
+
+                "409":
+                    $ref: "#/components/responses/InUse"
+
+                "412":
+                    $ref: "#/components/responses/StaleWrite"
+
+                "500":
+                    $ref: "#/components/responses/ServerError"
+
+                "503":
+                    $ref: "#/components/responses/StoreError"
 
     /policies:
         post:
