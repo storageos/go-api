@@ -1,27 +1,26 @@
 openapi: "3.0.2"
 info:
-    title: "StorageOS API"
-    version: "2.5.0"
+    title: "Ondat API"
+    version: "2.8.0"
     contact:
-        name: StorageOS
-        url: https://storageos.com
-        email: info@storageos.com
+        name: Ondat
+        url: https://www.ondat.io/
 
 externalDocs:
-    url: https://docs.storageos.com/
-    description: "The latest StorageOS user documentation"
+    url: https://docs.ondat.io/
+    description: "The latest Ondat user documentation"
 
 servers:
     - url: /v2
 
 components:
     securitySchemes:
-        # The StorageOS API uses JWT (JSON web token) based authentication.
+        # The Ondat API uses JWT (JSON web token) based authentication.
         jwt:
             type: http
             scheme: bearer
             bearerFormat: "JWT"
-            description: StorageOS uses JSON web tokens for authentication.
+            description: Ondat uses JSON web tokens for authentication.
 
     schemas:
         OpenAPISpec:
@@ -269,7 +268,7 @@ components:
 
                             For netgroup, this must be in the form of
                             "@netgroup" with ? and * wildcard characters.
-                        example: "*.prod.storageos.com"
+                        example: "*.prod.ondat.com"
               squashConfig:
                 type: object
                 properties:
@@ -364,12 +363,26 @@ components:
             description: >
                 A set of arbitrary key value labels to apply to the entity.
             externalDocs:
-                url:  https://docs.storageos.com/docs/reference/labels
+                url:  https://docs.ondat.io/docs/reference/labels
             additionalProperties:
                 type: string
             example:
                 env: prod
                 rack: db-1
+        
+        TopologyLabels:
+            type: object
+            description: >
+                List of requisite and preferred topology zones where the volume should be accessible from.
+            properties:
+                requisiteZones:
+                    type: array
+                    items:
+                        type: string
+                preferredZones:
+                    type: array
+                    items:
+                        type: string
 
         LogLevel:
             type: string
@@ -504,6 +517,14 @@ components:
                 defined properties will not change..
             example: c5666b58-b805-4215-ab4a-cb094948ccc6
 
+        PoolID:
+            type: string
+            description: >
+                A unique identifier for a pool.
+                The format of this type is undefined and may change but the
+                defined properties will not change..
+            example: c5666b58-b805-4215-ab4a-cb094948ccc6
+
         # ------------------------------------------------------------------------------
         # entity objects (e.g user)
         #
@@ -533,7 +554,7 @@ components:
                     default: false
                     description: >
                         Disables the mechanism responsible for checking if there is an
-                        updated version of StorageOS available for installation.
+                        updated version of Ondat available for installation.
                     example: false
                 logLevel:
                     $ref: "#/components/schemas/LogLevel"
@@ -636,6 +657,8 @@ components:
                         - $ref: "#/components/schemas/NamespaceID"
                 labels:
                     $ref: "#/components/schemas/Labels"
+                topologyLabels:
+                    $ref: "#/components/schemas/TopologyLabels"
                 fsType:
                     $ref: "#/components/schemas/FsType"
                 attachmentType:
@@ -658,6 +681,73 @@ components:
                         A volume's size in bytes
                     minimum: 1073742000
                     example: 5368709000
+                snapshotConfig:
+                    $ref: "#/components/schemas/SnapshotConfig"
+                snapshotVolumes:
+                    $ref: "#/components/schemas/SnapshotVolumes"
+                parentInfo:
+                    $ref: "#/components/schemas/ParentInfo"
+                createdAt:
+                    $ref: "#/components/schemas/CreatedAt"
+                updatedAt:
+                    $ref: "#/components/schemas/UpdatedAt"
+                version:
+                    $ref: "#/components/schemas/Version"
+
+        SnapshotVolume:
+            type: object
+            properties:
+                id:
+                    $ref: "#/components/schemas/VolumeID"
+                name:
+                    type: string
+                    example: "app-data"
+                description:
+                    type: string
+                    example: "This volume contains the data for my app"
+                attachedOn:
+                    readOnly: true
+                    allOf:
+                        - $ref: "#/components/schemas/NodeID"
+                attachedOnHost:
+                    readOnly: true
+                    type: string
+                    description: The hostname of the node the volume is attached on
+                    example: worker-1
+                nfs:
+                    readOnly: true
+                    nullable: true
+                    $ref: "#/components/schemas/NfsConfig"
+                namespaceID:
+                    readOnly: true
+                    allOf:
+                        - $ref: "#/components/schemas/NamespaceID"
+                labels:
+                    $ref: "#/components/schemas/Labels"
+                fsType:
+                    $ref: "#/components/schemas/FsType"
+                attachmentType:
+                    readOnly: true
+                    $ref: "#/components/schemas/AttachType"
+                master:
+                    readOnly: true
+                    allOf:
+                        - $ref: "#/components/schemas/MasterDeploymentInfo"
+                replicas:
+                    type: array
+                    nullable: true
+                    readOnly: true
+                    default: []
+                    items:
+                        $ref: "#/components/schemas/ReplicaDeploymentInfo"
+                sizeBytes:
+                    type: uint64
+                    description: >
+                        A volume's size in bytes
+                    minimum: 1073742000
+                    example: 5368709000
+                parentInfo:
+                    $ref: "#/components/schemas/ParentInfo"
                 createdAt:
                     $ref: "#/components/schemas/CreatedAt"
                 updatedAt:
@@ -711,8 +801,8 @@ components:
                         The hostname of the node.
 
                         This value is set by the node each time it joins the
-                        StorageOS cluster.
-                    example: db1.lcy.storageos.network
+                        Ondat cluster.
+                    example: db1.lcy.ondat.network
                 health:
                     $ref: "#/components/schemas/NodeHealth"
                 capacity:
@@ -784,6 +874,41 @@ components:
                     $ref: "#/components/schemas/UpdatedAt"
                 version:
                     $ref: "#/components/schemas/Version"
+
+        SnapshotConfig:
+            type: object
+            additionalProperties:
+                $ref: "#/components/schemas/Snapshot"
+
+        Snapshot:
+            type: object
+            properties:
+                name:
+                    type: string
+                id: 
+                    type: string 
+                location: 
+                    type: string 
+                createdAt: 
+                    type: string
+                    format: date-time
+                sizeBytes:
+                    type: number
+
+        SnapshotVolumes:
+            type: object
+            additionalProperties:
+                $ref: "#/components/schemas/SnapshotVolume"
+        
+        ParentInfo:
+            type: object
+            properties:
+                id:
+                    type: string
+                namespaceID:
+                    type: string 
+                snapshotID:
+                    type: string
 
         Namespace:
             type: object
@@ -870,6 +995,29 @@ components:
                 version:
                     $ref: "#/components/schemas/Version"
 
+        Pool:
+            type: object
+            properties:
+                id:
+                    $ref: "#/components/schemas/PoolID"
+                name:
+                    type: string
+                    description: >
+                        The name of the pool
+                    example: fast-pool
+                nodeToDriveMapping:
+                    type: object
+                    additionalProperties: {}
+                    example: 
+                        node1: ["/drive1", "/drive2"]
+                        node2: ["/drive3"]
+                createdAt:
+                    $ref: "#/components/schemas/CreatedAt"
+                updatedAt:
+                    $ref: "#/components/schemas/UpdatedAt"
+                version:
+                    $ref: "#/components/schemas/Version"
+
         Licence:
             type: object
             properties:
@@ -948,6 +1096,11 @@ components:
             type: array
             items:
                 $ref: "#/components/schemas/Volume"
+        
+        PoolList:
+            type: array
+            items:
+                $ref: "#/components/schemas/Pool"
 
         # ------------------------------------------------------------------------------
         # request schemas
@@ -1083,7 +1236,7 @@ components:
 
         LicenceRestricted:
             description: >
-                The requested operation failed because your storageOS licence
+                The requested operation failed because your Ondat licence
                 does not allow it, either create an account for a free licence
                 or buy a professional licence.
 
@@ -1127,6 +1280,18 @@ components:
                         $ref: "#/components/schemas/Error"
                     example:
                         error: not found
+
+        NotPromotable:
+            description: >
+                The replica marked for promotion is not promotable.
+                Most likely it means that it is syncing and does
+                not have the full copy of the volume data.
+            content:
+                application/json:
+                    schema:
+                        $ref: "#/components/schemas/Error"
+                    example:
+                        error: deploymen is syncing
 
         InsufficientStorage:
             description: >
@@ -2282,6 +2447,185 @@ paths:
                 "503":
                     $ref: "#/components/responses/StoreError"
 
+    /pools:
+        post:
+            summary: Create a new Pool
+            operationId: createPool
+            description: Create a new Pool
+            security:
+                - jwt: []
+            requestBody:
+                description: Data required to create a new pool for the cluster.
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            title: CreatePoolData
+                            required:
+                                - name
+                                - nodeToDriveMapping
+                            properties:
+                                name:
+                                    type: string
+                                    pattern: '^[a-z0-9.\-]{1,253}$'
+                                    description: >
+                                        The name of the pool
+                                    example: "pool1"
+                                nodeToDriveMapping:
+                                    type: object
+                                    additionalProperties: {}
+                                    example: {
+                                        "node1": ["/drive1", "/drive2"],
+                                        "node2": ["/drive3"],
+                                        "node3": []
+                                    }
+            responses:
+                "201":
+                    description: The pool was successfully created
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Pool"
+                "400":
+                    $ref: "#/components/responses/BadRequest"
+                "401":
+                    $ref: "#/components/responses/Unauthorised"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "409":
+                    $ref: "#/components/responses/AlreadyExists"
+                "500":
+                    $ref: "#/components/responses/ServerError"
+                "503":
+                    $ref: "#/components/responses/StoreError"
+
+        get:
+            summary: Fetch the list of pools
+            operationId: listPools
+            description: Fetch the list of pools in the cluster.
+            security:
+                - jwt: []
+            responses:
+                "200":
+                    description: A list of pools.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/PoolList"
+                "401":
+                    $ref: "#/components/responses/Unauthorised"
+
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+
+                "500":
+                    $ref: "#/components/responses/ServerError"
+
+                "503":
+                    $ref: "#/components/responses/StoreError"
+
+
+    /pools/{id}:
+        parameters:
+            - name: id
+              in: path
+              description: ID of a Pool
+              required: true
+              schema:
+                  $ref: "#/components/schemas/PoolID"
+
+        get:
+            summary: Fetch a Pool
+            operationId: getPool
+            description: Fetch the pool identified by id.
+            security:
+                - jwt: []
+            responses:
+                "200":
+                    description: The pool information.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Pool"
+                "400":
+                    $ref: "#/components/responses/BadRequest"
+
+                "401":
+                    $ref: "#/components/responses/Unauthorised"
+
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+
+                "404":
+                    $ref: "#/components/responses/NotFound"
+
+                "500":
+                    $ref: "#/components/responses/ServerError"
+
+                "503":
+                    $ref: "#/components/responses/StoreError"
+        put:
+            summary: Update a Pool
+            operationId: updatePool
+            description: >
+                Update the node-drive mapping for
+                the pool identified by id.
+            security:
+                - jwt: []
+            parameters:
+                - $ref: "#/components/parameters/IgnoreVersion"
+            requestBody:
+                description: >
+                    Update the node-drive mapping to the desired stated.
+                    Requests removing nodes or drives from the pool are rejected.
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            title: UpdatePoolData
+                            properties:
+                                nodeToDriveMapping:
+                                    type: object
+                                    additionalProperties: {}
+                                    example: {
+                                        "node1": ["/drive1", "/drive2"],
+                                        "node2": ["/drive3"],
+                                        "node3": []
+                                    }
+                                version:
+                                    $ref: "#/components/schemas/Version"
+            responses:
+                "200":
+                    description: The Pool was successfully updated
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Pool"
+                "400":
+                    $ref: "#/components/responses/BadRequest"
+
+                "401":
+                    $ref: "#/components/responses/Unauthorised"
+
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+
+                "404":
+                    $ref: "#/components/responses/NotFound"
+
+                "412":
+                    $ref: "#/components/responses/StaleWrite"
+
+                "451":
+                    $ref: "#/components/responses/LicenceRestricted"
+
+                "500":
+                    $ref: "#/components/responses/ServerError"
+
+                "503":
+                    $ref: "#/components/responses/StoreError"
 
     /policies:
         post:
@@ -3454,6 +3798,108 @@ paths:
 
                 "503":
                     $ref: "#/components/responses/StoreError"
+    /namespaces/{namespaceID}/volumes/{id}/debug/evict/{deploymentID}:
+        parameters:
+            - name: namespaceID
+              in: path
+              description: ID of a Namespace
+              required: true
+              schema:
+                  $ref: "#/components/schemas/NamespaceID"
+            - name: id
+              in: path
+              description: ID of a Volume
+              required: true
+              schema:
+                  $ref: "#/components/schemas/VolumeID"
+            - name: deploymentID
+              in: path
+              description: ID of an existing replica that should become the main deployment
+              required: true
+              schema:
+                  $ref: "#/components/schemas/DeploymentID"
+        delete:
+            summary: | 
+                Remove a replica from the volume's replica set, create a new replica somwewhere else.
+                Note: if the node the evicted replica is located on is not cordoned, the new 
+                replica might be created on that node.
+            operationId: evictReplica
+            security:
+                - jwt: []
+            responses:
+                "202":
+                    description: "Eviction request has been accepted"
+                "400":
+                    $ref: "#/components/responses/BadRequest"
+
+                "401":
+                    $ref: "#/components/responses/Unauthorised"
+
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "500":
+                    $ref: "#/components/responses/ServerError"
+
+                "503":
+                    $ref: "#/components/responses/StoreError"
+    /namespaces/{namespaceID}/volumes/{id}/debug/attempt-replica-promotion/{deploymentID}:
+        parameters:
+            - name: namespaceID
+              in: path
+              description: ID of a Namespace
+              required: true
+              schema:
+                  $ref: "#/components/schemas/NamespaceID"
+            - name: id
+              in: path
+              description: ID of a Volume
+              required: true
+              schema:
+                  $ref: "#/components/schemas/VolumeID"
+            - name: deploymentID
+              in: path
+              description: ID of an existing replica that should become the main deployment
+              required: true
+              schema:
+                  $ref: "#/components/schemas/DeploymentID"
+        put:
+            summary: Attempt a promotion of a replica to a master
+            operationId: attemptPromotion
+            description: > 
+                A debug method that will attempt to promote a replica to a
+                master
+                This will introduce instability to the cluster and should not be
+                used unless instructed by an Ondat engineer
+                This will likely not succeed if the master is healthy.
+            security:
+                - jwt: []
+            responses:
+                "202":
+                    description: Accepted
+                "400":
+                    $ref: "#/components/responses/BadRequest"
+
+                "401":
+                    $ref: "#/components/responses/Unauthorised"
+
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "412":
+                    $ref: "#/components/responses/NotPromotable"
+                "422":
+                    $ref: "#/components/responses/InvalidStateTransition"
+
+                "500":
+                    $ref: "#/components/responses/ServerError"
+
+                "503":
+                    $ref: "#/components/responses/StoreError"
 
     /cluster:
         get:
@@ -3523,7 +3969,7 @@ paths:
                                     description: >
                                         Disables the mechanism responsible for
                                         checking if there is an updated version
-                                        of StorageOS available for installation.
+                                        of Ondat available for installation.
                                     example: false
                                 logLevel:
                                     $ref: "#/components/schemas/LogLevel"
@@ -3595,7 +4041,7 @@ paths:
                 - $ref: "#/components/parameters/IgnoreVersion"
             requestBody:
                 description: >
-                    A StorageOS product licence key, used to
+                    An Ondat product licence key, used to
                     register a cluster. The format of this
                     type is opaque and may change.
                 required: true
@@ -3608,7 +4054,7 @@ paths:
                                 key:
                                     type: string
                                     description: >
-                                        A StorageOS product licence key, used to
+                                        An Ondat product licence key, used to
                                         register a cluster. The format of this
                                         type is opaque and may change.
                                 version:
@@ -3689,7 +4135,7 @@ paths:
                         during the collection process.
 
                         The returned bundle is still valid and should be sent to
-                        StorageOS.
+                        Ondat.
                     content:
                         application/octet-stream:
                             schema:
@@ -3750,7 +4196,7 @@ paths:
                         available diagnostics during the collection process.
 
                         The returned bundle may still contain useful data and 
-                        should be sent to StorageOS.
+                        should be sent to Ondat.
                     content:
                         application/octet-stream:
                             schema:
