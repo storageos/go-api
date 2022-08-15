@@ -1006,17 +1006,26 @@ components:
                         The name of the pool
                     example: fast-pool
                 nodeToDriveMapping:
-                    type: object
-                    additionalProperties: {}
-                    example: 
-                        node1: ["/drive1", "/drive2"]
-                        node2: ["/drive3"]
+                    $ref: "#/components/schemas/NodeToDriveMapping"
                 createdAt:
                     $ref: "#/components/schemas/CreatedAt"
                 updatedAt:
                     $ref: "#/components/schemas/UpdatedAt"
                 version:
                     $ref: "#/components/schemas/Version"
+
+        NodeToDriveMapping:
+            type: object
+            additionalProperties:
+                type: array,
+                items:
+                    type: string
+            example: {
+                "node1": ["/drive1", "/drive2"],
+                "node2": ["/drive3"],
+                "node3": []
+            }
+
 
         Licence:
             type: object
@@ -2473,13 +2482,9 @@ paths:
                                         The name of the pool
                                     example: "pool1"
                                 nodeToDriveMapping:
-                                    type: object
-                                    additionalProperties: {}
-                                    example: {
-                                        "node1": ["/drive1", "/drive2"],
-                                        "node2": ["/drive3"],
-                                        "node3": []
-                                    }
+                                    $ref: "#/components/schemas/NodeToDriveMapping"
+                                
+                                
             responses:
                 "201":
                     description: The pool was successfully created
@@ -2587,13 +2592,7 @@ paths:
                             title: UpdatePoolData
                             properties:
                                 nodeToDriveMapping:
-                                    type: object
-                                    additionalProperties: {}
-                                    example: {
-                                        "node1": ["/drive1", "/drive2"],
-                                        "node2": ["/drive3"],
-                                        "node3": []
-                                    }
+                                    $ref: "#/components/schemas/NodeToDriveMapping"
                                 version:
                                     $ref: "#/components/schemas/Version"
             responses:

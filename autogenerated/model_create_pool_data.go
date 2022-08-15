@@ -12,5 +12,5 @@ package api
 type CreatePoolData struct {
 	// The name of the pool 
 	Name string `json:"name"`
-	NodeToDriveMapping map[string]interface{} `json:"nodeToDriveMapping"`
+	NodeToDriveMapping map[string][]string `json:"nodeToDriveMapping"`
 }

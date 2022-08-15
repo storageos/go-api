@@ -17,7 +17,7 @@ type Pool struct {
 	Id string `json:"id,omitempty"`
 	// The name of the pool 
 	Name string `json:"name,omitempty"`
-	NodeToDriveMapping map[string]interface{} `json:"nodeToDriveMapping,omitempty"`
+	NodeToDriveMapping map[string][]string `json:"nodeToDriveMapping,omitempty"`
 	// The time the entity was created. This timestamp is set by the node that created the entity, and may not be correct if the node's local clock was skewed. This value is for the user's informative purposes only, and correctness is not required. String format is RFC3339. 
 	CreatedAt time.Time `json:"createdAt,omitempty"`
 	// The time the entity was last updated. This timestamp is set by the node that last updated the entity, and may not be correct if the node's local clock was skewed. This value is for the user's informative purposes only, and correctness is not required. String format is RFC3339. 

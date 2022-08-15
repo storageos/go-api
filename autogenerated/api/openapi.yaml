@@ -2192,7 +2192,10 @@ paths:
                   pattern: ^[a-z0-9.\-]{1,253}$
                   type: string
                 nodeToDriveMapping:
-                  additionalProperties: {}
+                  additionalProperties:
+                    items:
+                      type: string
+                    type: array
                   example:
                     node1:
                     - /drive1
@@ -2499,7 +2502,10 @@ paths:
                 version: NDI0MjQyNDI0MjQyNDI0MjQy
               properties:
                 nodeToDriveMapping:
-                  additionalProperties: {}
+                  additionalProperties:
+                    items:
+                      type: string
+                    type: array
                   example:
                     node1:
                     - /drive1
@@ -7300,6 +7306,7 @@ components:
           - /drive2
           node2:
           - /drive3
+          node3: []
         name: fast-pool
         id: c5666b58-b805-4215-ab4a-cb094948ccc6
         version: NDI0MjQyNDI0MjQyNDI0MjQy
@@ -7316,13 +7323,17 @@ components:
           example: fast-pool
           type: string
         nodeToDriveMapping:
-          additionalProperties: {}
+          additionalProperties:
+            items:
+              type: string
+            type: array
           example:
             node1:
             - /drive1
             - /drive2
             node2:
             - /drive3
+            node3: []
           type: object
         createdAt:
           description: |
@@ -7352,6 +7363,19 @@ components:
           example: NDI0MjQyNDI0MjQyNDI0MjQy
           maxLength: 30
           type: string
+      type: object
+    NodeToDriveMapping:
+      additionalProperties:
+        items:
+          type: string
+        type: array
+      example:
+        node1:
+        - /drive1
+        - /drive2
+        node2:
+        - /drive3
+        node3: []
       type: object
     Licence:
       description: |
@@ -7752,7 +7776,10 @@ components:
           pattern: ^[a-z0-9.\-]{1,253}$
           type: string
         nodeToDriveMapping:
-          additionalProperties: {}
+          additionalProperties:
+            items:
+              type: string
+            type: array
           example:
             node1:
             - /drive1
@@ -7778,7 +7805,10 @@ components:
         version: NDI0MjQyNDI0MjQyNDI0MjQy
       properties:
         nodeToDriveMapping:
-          additionalProperties: {}
+          additionalProperties:
+            items:
+              type: string
+            type: array
           example:
             node1:
             - /drive1

@@ -10,7 +10,7 @@
 package api
 // UpdatePoolData struct for UpdatePoolData
 type UpdatePoolData struct {
-	NodeToDriveMapping map[string]interface{} `json:"nodeToDriveMapping,omitempty"`
+	NodeToDriveMapping map[string][]string `json:"nodeToDriveMapping,omitempty"`
 	// An opaque representation of an entity version at the time it was obtained from the API. All operations that mutate the entity must include this version field in the request unchanged. The format of this type is undefined and may change but the defined properties will not change. 
 	Version string `json:"version,omitempty"`
 }
