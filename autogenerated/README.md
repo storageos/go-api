@@ -33,6 +33,7 @@ All URIs are relative to *http://localhost/v2*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
+*DefaultApi* | [**AddDeploymentOnNode**](docs/DefaultApi.md#adddeploymentonnode) | **Put** /namespaces/{namespaceID}/volumes/{id}/add-deployment-on-node | Creates a new replica deployment on a specific node.
 *DefaultApi* | [**AttachNFSVolume**](docs/DefaultApi.md#attachnfsvolume) | **Post** /namespaces/{namespaceID}/volumes/{id}/nfs/attach | attach and share the volume using NFS
 *DefaultApi* | [**AttachVolume**](docs/DefaultApi.md#attachvolume) | **Post** /namespaces/{namespaceID}/volumes/{id}/attach | Attach a volume to the given node
 *DefaultApi* | [**AttemptPromotion**](docs/DefaultApi.md#attemptpromotion) | **Put** /namespaces/{namespaceID}/volumes/{id}/debug/attempt-replica-promotion/{deploymentID} | Attempt a promotion of a replica to a master
@@ -76,6 +77,7 @@ Class | Method | HTTP request | Description
 *DefaultApi* | [**SetCordoned**](docs/DefaultApi.md#setcordoned) | **Put** /nodes/{id}/cordon | Modify the cordoned state for a node
 *DefaultApi* | [**SetFailureMode**](docs/DefaultApi.md#setfailuremode) | **Put** /namespaces/{namespaceID}/volumes/{id}/failure-mode | Set the failure mode of the volume.
 *DefaultApi* | [**SetPlacementStrategy**](docs/DefaultApi.md#setplacementstrategy) | **Put** /namespaces/{namespaceID}/volumes/{id}/placement-strategy | Sets the placement strategy of the volume.
+*DefaultApi* | [**SetPreferredEvictionCandidates**](docs/DefaultApi.md#setpreferredevictioncandidates) | **Put** /namespaces/{namespaceID}/volumes/{id}/preferred-eviction-candidates | Specifies a list of deployments to be preferred to be evicted.
 *DefaultApi* | [**SetReplicas**](docs/DefaultApi.md#setreplicas) | **Put** /namespaces/{namespaceID}/volumes/{id}/replicas | Set the number of replicas to maintain for the volume.
 *DefaultApi* | [**Spec**](docs/DefaultApi.md#spec) | **Get** /openapi | Serves this openapi spec file
 *DefaultApi* | [**UpdateAuthenticatedUser**](docs/DefaultApi.md#updateauthenticateduser) | **Put** /users/self | Update the authenticated user&#39;s information
@@ -94,6 +96,7 @@ Class | Method | HTTP request | Description
 ## Documentation For Models
 
  - [AcceptedMessage](docs/AcceptedMessage.md)
+ - [AddDeploymentOnNodeData](docs/AddDeploymentOnNodeData.md)
  - [AttachNfsVolumeData](docs/AttachNfsVolumeData.md)
  - [AttachType](docs/AttachType.md)
  - [AttachVolumeData](docs/AttachVolumeData.md)
@@ -141,6 +144,7 @@ Class | Method | HTTP request | Description
  - [SetFailureModeRequest](docs/SetFailureModeRequest.md)
  - [SetFailureThresholdRequestData](docs/SetFailureThresholdRequestData.md)
  - [SetPlacementStrategyData](docs/SetPlacementStrategyData.md)
+ - [SetPreferredEvictionCandidatesData](docs/SetPreferredEvictionCandidatesData.md)
  - [SetReplicasRequest](docs/SetReplicasRequest.md)
  - [Snapshot](docs/Snapshot.md)
  - [SnapshotVolume](docs/SnapshotVolume.md)
