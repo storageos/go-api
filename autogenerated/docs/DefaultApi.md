@@ -4,6 +4,7 @@ All URIs are relative to *http://localhost/v2*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**AddDeploymentOnNode**](DefaultApi.md#AddDeploymentOnNode) | **Put** /namespaces/{namespaceID}/volumes/{id}/add-deployment-on-node | Creates a new replica deployment on a specific node.
 [**AttachNFSVolume**](DefaultApi.md#AttachNFSVolume) | **Post** /namespaces/{namespaceID}/volumes/{id}/nfs/attach | attach and share the volume using NFS
 [**AttachVolume**](DefaultApi.md#AttachVolume) | **Post** /namespaces/{namespaceID}/volumes/{id}/attach | Attach a volume to the given node
 [**AttemptPromotion**](DefaultApi.md#AttemptPromotion) | **Put** /namespaces/{namespaceID}/volumes/{id}/debug/attempt-replica-promotion/{deploymentID} | Attempt a promotion of a replica to a master
@@ -47,6 +48,7 @@ Method | HTTP request | Description
 [**SetCordoned**](DefaultApi.md#SetCordoned) | **Put** /nodes/{id}/cordon | Modify the cordoned state for a node
 [**SetFailureMode**](DefaultApi.md#SetFailureMode) | **Put** /namespaces/{namespaceID}/volumes/{id}/failure-mode | Set the failure mode of the volume.
 [**SetPlacementStrategy**](DefaultApi.md#SetPlacementStrategy) | **Put** /namespaces/{namespaceID}/volumes/{id}/placement-strategy | Sets the placement strategy of the volume.
+[**SetPreferredEvictionCandidates**](DefaultApi.md#SetPreferredEvictionCandidates) | **Put** /namespaces/{namespaceID}/volumes/{id}/preferred-eviction-candidates | Specifies a list of deployments to be preferred to be evicted.
 [**SetReplicas**](DefaultApi.md#SetReplicas) | **Put** /namespaces/{namespaceID}/volumes/{id}/replicas | Set the number of replicas to maintain for the volume.
 [**Spec**](DefaultApi.md#Spec) | **Get** /openapi | Serves this openapi spec file
 [**UpdateAuthenticatedUser**](DefaultApi.md#UpdateAuthenticatedUser) | **Put** /users/self | Update the authenticated user&#39;s information
@@ -61,6 +63,55 @@ Method | HTTP request | Description
 [**UpdateUser**](DefaultApi.md#UpdateUser) | **Put** /users/{id} | Update a user
 [**UpdateVolume**](DefaultApi.md#UpdateVolume) | **Put** /namespaces/{namespaceID}/volumes/{id} | Update a volume
 
+
+
+## AddDeploymentOnNode
+
+> AcceptedMessage AddDeploymentOnNode(ctx, namespaceID, id, addDeploymentOnNodeData, optional)
+
+Creates a new replica deployment on a specific node.
+
+Creates a new replica deployment on a specific node. The new deployment is not excluded from any rules that move, failover or remove deployments and as such it can still be moved elsewhere if the Control Plane thinks wise to do so after being created. 
+
+### Required Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**namespaceID** | **string**| ID of a Namespace | 
+**id** | **string**| ID of a Volume | 
+**addDeploymentOnNodeData** | [**AddDeploymentOnNodeData**](AddDeploymentOnNodeData.md)|  | 
+ **optional** | ***AddDeploymentOnNodeOpts** | optional parameters | nil if no parameters
+
+### Optional Parameters
+
+Optional parameters are passed through a pointer to a AddDeploymentOnNodeOpts struct
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+
+ **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+
+### Return type
+
+[**AcceptedMessage**](AcceptedMessage.md)
+
+### Authorization
+
+[jwt](../README.md#jwt)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
 
 
 ## AttachNFSVolume
@@ -1670,6 +1721,55 @@ Name | Type | Description  | Notes
 ### Optional Parameters
 
 Optional parameters are passed through a pointer to a SetPlacementStrategyOpts struct
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+
+ **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+
+### Return type
+
+[**AcceptedMessage**](AcceptedMessage.md)
+
+### Authorization
+
+[jwt](../README.md#jwt)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## SetPreferredEvictionCandidates
+
+> AcceptedMessage SetPreferredEvictionCandidates(ctx, namespaceID, id, setPreferredEvictionCandidatesData, optional)
+
+Specifies a list of deployments to be preferred to be evicted.
+
+Sets a list of volume deployments as preferred to be selected and evicted next time we do so. This does not trigger an immediate action in response to the request. Failed deployments are still selected over deployments specified by this method. 
+
+### Required Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**namespaceID** | **string**| ID of a Namespace | 
+**id** | **string**| ID of a Volume | 
+**setPreferredEvictionCandidatesData** | [**SetPreferredEvictionCandidatesData**](SetPreferredEvictionCandidatesData.md)|  | 
+ **optional** | ***SetPreferredEvictionCandidatesOpts** | optional parameters | nil if no parameters
+
+### Optional Parameters
+
+Optional parameters are passed through a pointer to a SetPreferredEvictionCandidatesOpts struct
 
 
 Name | Type | Description  | Notes

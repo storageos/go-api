@@ -1441,17 +1441,12 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/UserSession"
-
                 "400":
                     $ref: "#/components/responses/BadRequest"
-
                 "401":
-                    # The user is not recognised, or the password is incorrect
                     $ref: "#/components/responses/Unauthorised"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
 
@@ -1485,13 +1480,10 @@ paths:
                     # The user has been removed from the system since acquiring
                     # the token
                     $ref: "#/components/responses/Unauthorised"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
-
     /users:
         post:
             summary: Create a new user
@@ -1558,25 +1550,18 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/User"
-
                 "400":
                     $ref: "#/components/responses/BadRequest"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "409":
                     $ref: "#/components/responses/AlreadyExists"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
-
         get:
             summary: Fetch the list of users
             operationId: listUsers
@@ -1592,13 +1577,10 @@ paths:
                                 $ref: "#/components/schemas/UserList"
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
 
@@ -1610,7 +1592,6 @@ paths:
               required: true
               schema:
                   $ref: "#/components/schemas/UserID"
-
         get:
             summary: Fetch a user
             operationId: getUser
@@ -1624,22 +1605,16 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/User"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "404":
                     $ref: "#/components/responses/NotFound"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
-
         put:
             summary: Update a user
             operationId: updateUser
@@ -1705,28 +1680,20 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/User"
-
                 "400":
                     $ref: "#/components/responses/BadRequest"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "404":
                     $ref: "#/components/responses/NotFound"
-
                 "412":
                     $ref: "#/components/responses/StaleWrite"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
-
         delete:
             summary: Delete a user
             operationId: deleteUser
@@ -1741,31 +1708,24 @@ paths:
             parameters:
                 - $ref: "#/components/parameters/ObjectVersion"
                 - $ref: "#/components/parameters/IgnoreVersion"
-
             responses:
                 "200":
                     description: The user was successfully deleted.
-
                 "400":
                     $ref: "#/components/responses/BadRequest"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "404":
                     $ref: "#/components/responses/NotFound"
-
                 "412":
                     $ref: "#/components/responses/StaleWrite"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
+
     /users/{id}/sessions:
         parameters:
             - name: id
@@ -1774,7 +1734,6 @@ paths:
               required: true
               schema:
                   $ref: "#/components/schemas/UserID"
-
         delete:
             summary: Invalidate login sessions
             operationId: deleteSessions
@@ -1790,27 +1749,21 @@ paths:
             responses:
                 "200":
                     description: The users current session was successfully invalidated.
-
                 "400":
                     $ref: "#/components/responses/BadRequest"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "404":
                     $ref: "#/components/responses/NotFound"
-
                 "412":
                     $ref: "#/components/responses/StaleWrite"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
+
     /users/self:
         get:
             summary: Get the currently authenticated user's information
@@ -1825,22 +1778,16 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/User"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "404":
                     $ref: "#/components/responses/NotFound"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
-
         put:
             summary: Update the authenticated user's information
             operationId: updateAuthenticatedUser
@@ -1874,28 +1821,20 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/User"
-
                 "400":
                     $ref: "#/components/responses/BadRequest"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "404":
                     $ref: "#/components/responses/NotFound"
-
                 "412":
                     $ref: "#/components/responses/StaleWrite"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
-
         delete:
             summary: Delete the authenticated user
             operationId: deleteAuthenticatedUser
@@ -1905,31 +1844,24 @@ paths:
             parameters:
                 - $ref: "#/components/parameters/ObjectVersion"
                 - $ref: "#/components/parameters/IgnoreVersion"
-
             responses:
                 "200":
                     description: The authenticated user was successfully deleted.
-
                 "400":
                     $ref: "#/components/responses/BadRequest"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "404":
                     $ref: "#/components/responses/NotFound"
-
                 "412":
                     $ref: "#/components/responses/StaleWrite"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
+
     /users/self/sessions:
         delete:
             summary: Invalidate the logged in user's sessions
@@ -1940,25 +1872,18 @@ paths:
             responses:
                 "200":
                     description: The authenticated user's sessions have been invalidated.
-
                 "400":
                     $ref: "#/components/responses/BadRequest"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "404":
                     $ref: "#/components/responses/NotFound"
-
                 "412":
                     $ref: "#/components/responses/StaleWrite"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
 
@@ -1995,25 +1920,18 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/Namespace"
-
                 "400":
                     $ref: "#/components/responses/BadRequest"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "409":
                     $ref: "#/components/responses/AlreadyExists"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
-
         get:
             summary: Fetch the list of namespaces
             operationId: listNamespaces
@@ -2027,16 +1945,12 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/NamespaceList"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
 
@@ -2048,7 +1962,6 @@ paths:
               required: true
               schema:
                   $ref: "#/components/schemas/NamespaceID"
-
         get:
             summary: Fetch a namespace
             operationId: getNamespace
@@ -2062,25 +1975,18 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/Namespace"
-
                 "400":
                     $ref: "#/components/responses/BadRequest"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "404":
                     $ref: "#/components/responses/NotFound"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
-
         put:
             summary: Update a namespace
             operationId: updateNamespace
@@ -2109,28 +2015,20 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/Namespace"
-
                 "400":
                     $ref: "#/components/responses/BadRequest"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "404":
                     $ref: "#/components/responses/NotFound"
-
                 "412":
                     $ref: "#/components/responses/StaleWrite"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
-
         delete:
             summary: Delete a namespace
             operationId: deleteNamespace
@@ -2140,32 +2038,23 @@ paths:
             parameters:
                 - $ref: "#/components/parameters/ObjectVersion"
                 - $ref: "#/components/parameters/IgnoreVersion"
-
             responses:
                 "200":
                     description: The namespace was successfully deleted.
-
                 "400":
                     $ref: "#/components/responses/BadRequest"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "404":
                     $ref: "#/components/responses/NotFound"
-
                 "409":
                     $ref: "#/components/responses/InUse"
-
                 "412":
                     $ref: "#/components/responses/StaleWrite"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
 
@@ -2183,16 +2072,12 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/NodeList"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
 
@@ -2218,19 +2103,14 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/Node"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "404":
                     $ref: "#/components/responses/NotFound"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
 
@@ -2264,25 +2144,18 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/Node"
-
                 "400":
                     $ref: "#/components/responses/BadRequest"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "404":
                     $ref: "#/components/responses/NotFound"
-
                 "412":
                     $ref: "#/components/responses/StaleWrite"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
 
@@ -2301,38 +2174,27 @@ paths:
                 - $ref: "#/components/parameters/IgnoreVersion"
                 - $ref: "#/components/parameters/AsyncHeader"
                 - $ref: "#/components/parameters/AsyncParam"
-
             responses:
                 "200":
                     description: The node was successfully deleted.
-
                 "202":
                     $ref: "#/components/responses/Accepted"
-
                 "400":
                     $ref: "#/components/responses/BadRequest"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "404":
                     $ref: "#/components/responses/NotFound"
-
                 "409":
                     $ref: "#/components/responses/InUse"
-
                 "412":
                     $ref: "#/components/responses/StaleWrite"
-
                 "423":
                     $ref: "#/components/responses/Locked"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
 
@@ -2381,7 +2243,6 @@ paths:
                         application/json: 
                             schema: 
                                 $ref: "#/components/schemas/Node"
-
                 "400":
                     $ref: "#/components/responses/BadRequest"
                 "401":
@@ -2440,7 +2301,6 @@ paths:
                         application/json: 
                             schema: 
                                 $ref: "#/components/schemas/Node"
-
                 "400":
                     $ref: "#/components/responses/BadRequest"
                 "401":
@@ -2483,8 +2343,6 @@ paths:
                                     example: "pool1"
                                 nodeToDriveMapping:
                                     $ref: "#/components/schemas/NodeToDriveMapping"
-                                
-                                
             responses:
                 "201":
                     description: The pool was successfully created
@@ -2520,16 +2378,12 @@ paths:
                                 $ref: "#/components/schemas/PoolList"
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
-
 
     /pools/{id}:
         parameters:
@@ -2555,19 +2409,14 @@ paths:
                                 $ref: "#/components/schemas/Pool"
                 "400":
                     $ref: "#/components/responses/BadRequest"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "404":
                     $ref: "#/components/responses/NotFound"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
         put:
@@ -2604,27 +2453,21 @@ paths:
                                 $ref: "#/components/schemas/Pool"
                 "400":
                     $ref: "#/components/responses/BadRequest"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "404":
                     $ref: "#/components/responses/NotFound"
-
                 "412":
                     $ref: "#/components/responses/StaleWrite"
-
                 "451":
                     $ref: "#/components/responses/LicenceRestricted"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
+
         delete:
             summary: Delete a pool
             operationId: deletePool
@@ -2634,35 +2477,25 @@ paths:
             parameters:
                 - $ref: "#/components/parameters/ObjectVersion"
                 - $ref: "#/components/parameters/IgnoreVersion"
-
             responses:
                 "200":
                     description: The pool was successfully deleted.
-
                 "202":
                     $ref: "#/components/responses/Accepted"
-
                 "400":
                     $ref: "#/components/responses/BadRequest"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "404":
                     $ref: "#/components/responses/NotFound"
-
                 "409":
                     $ref: "#/components/responses/InUse"
-
                 "412":
                     $ref: "#/components/responses/StaleWrite"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
 
@@ -2731,22 +2564,16 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/PolicyGroup"
-
                 "400":
                     $ref: "#/components/responses/BadRequest"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "409":
                     $ref: "#/components/responses/AlreadyExists"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
 
@@ -2763,16 +2590,12 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/PolicyGroupList"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
 
@@ -2784,7 +2607,6 @@ paths:
               required: true
               schema:
                   $ref: "#/components/schemas/PolicyGroupID"
-
         get:
             summary: Fetch a policy group
             operationId: getPolicyGroup
@@ -2798,22 +2620,16 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/PolicyGroup"
-
                 "400":
                     $ref: "#/components/responses/BadRequest"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "404":
                     $ref: "#/components/responses/NotFound"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
 
@@ -2876,25 +2692,18 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/PolicyGroup"
-
                 "400":
                     $ref: "#/components/responses/BadRequest"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "404":
                     $ref: "#/components/responses/NotFound"
-
                 "412":
                     $ref: "#/components/responses/StaleWrite"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
 
@@ -2907,32 +2716,23 @@ paths:
             parameters:
                 - $ref: "#/components/parameters/ObjectVersion"
                 - $ref: "#/components/parameters/IgnoreVersion"
-
             responses:
                 "200":
                     description: The policy group was successfully deleted.
-
                 "400":
                     $ref: "#/components/responses/BadRequest"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "404":
                     $ref: "#/components/responses/NotFound"
-
                 "409":
                     $ref: "#/components/responses/InUse"
-
                 "412":
                     $ref: "#/components/responses/StaleWrite"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
 
@@ -2999,31 +2799,22 @@ paths:
                                 $ref: "#/components/schemas/Volume"
                 "202":
                     $ref: "#/components/responses/Accepted"
-
                 "400":
                     $ref: "#/components/responses/BadRequest"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "409":
                     $ref: "#/components/responses/AlreadyExists"
-
                 "451":
                     $ref: "#/components/responses/LicenceRestricted"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
-
                 "507":
                     $ref: "#/components/responses/InsufficientStorage"
-
         get:
             summary: Fetch the list of volumes in the given namespace
             operationId: listVolumes
@@ -3039,13 +2830,10 @@ paths:
                                 $ref: "#/components/schemas/VolumeList"
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
 
@@ -3063,7 +2851,6 @@ paths:
               required: true
               schema:
                   $ref: "#/components/schemas/VolumeID"
-
         get:
             summary: Fetch a volume
             operationId: getVolume
@@ -3079,19 +2866,14 @@ paths:
                                 $ref: "#/components/schemas/Volume"
                 "400":
                     $ref: "#/components/responses/BadRequest"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "404":
                     $ref: "#/components/responses/NotFound"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
         put:
@@ -3133,28 +2915,20 @@ paths:
                                 $ref: "#/components/schemas/Volume"
                 "400":
                     $ref: "#/components/responses/BadRequest"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "404":
                     $ref: "#/components/responses/NotFound"
-
                 "412":
                     $ref: "#/components/responses/StaleWrite"
-
                 "451":
                     $ref: "#/components/responses/LicenceRestricted"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
-
 
         delete:
             summary: Delete a volume
@@ -3165,10 +2939,8 @@ paths:
             parameters:
                 - $ref: "#/components/parameters/ObjectVersion"
                 - $ref: "#/components/parameters/IgnoreVersion"
-
                 - $ref: "#/components/parameters/AsyncHeader"
                 - $ref: "#/components/parameters/AsyncParam"
-
                 - name: offline-delete
                   in: query
                   description: >
@@ -3185,41 +2957,29 @@ paths:
                       type: boolean
                       default: false
                       example: true
-
             responses:
                 "200":
                     description: The volume was successfully deleted.
-
                 "202":
                     $ref: "#/components/responses/Accepted"
-
                 "400":
                     $ref: "#/components/responses/BadRequest"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "404":
                     $ref: "#/components/responses/NotFound"
-
                 "409":
                     $ref: "#/components/responses/InUse"
-
                 "412":
                     $ref: "#/components/responses/StaleWrite"
-
                 "422":
                     $ref: "#/components/responses/InvalidStateTransition"
-
                 "423":
                     $ref: "#/components/responses/Locked"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
     /namespaces/{namespaceID}/volumes/{id}/attach:
@@ -3236,7 +2996,6 @@ paths:
               required: true
               schema:
                   $ref: "#/components/schemas/VolumeID"
-
         post:
             summary: Attach a volume to the given node
             operationId: attachVolume
@@ -3283,7 +3042,6 @@ paths:
 
                 "507":
                     $ref: "#/components/responses/InsufficientStorage"
-
         delete:
             summary: Detach the given volume
             operationId: detachVolume
@@ -3298,31 +3056,22 @@ paths:
             responses:
                 "200":
                     description: The volume was successfully detached.
-
                 "400":
                     $ref: "#/components/responses/BadRequest"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "404":
                     $ref: "#/components/responses/NotFound"
-
                 "409":
                     $ref: "#/components/responses/InUse"
-
                 "412":
                     $ref: "#/components/responses/StaleWrite"
-
                 "422":
                     $ref: "#/components/responses/InvalidStateTransition"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
     /namespaces/{namespaceID}/volumes/{id}/nfs/attach:
@@ -3339,7 +3088,6 @@ paths:
               required: true
               schema:
                   $ref: "#/components/schemas/VolumeID"
-
         post:
             summary: attach and share the volume using NFS
             operationId: attachNFSVolume
@@ -3366,32 +3114,23 @@ paths:
                             properties:
                                 version:
                                     $ref: "#/components/schemas/Version"
-
             responses:
                 "200":
                     description: The volume was successfully attached.
-
                 "400":
                     $ref: "#/components/responses/BadRequest"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "404":
                     $ref: "#/components/responses/NotFound"
-
                 "409":
                     $ref: "#/components/responses/InUse"
-
                 "412":
                     $ref: "#/components/responses/StaleWrite"
-
                 "422":
                     $ref: "#/components/responses/InvalidStateTransition"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
                     
@@ -3442,25 +3181,18 @@ paths:
             responses:
                 "200":
                     description: The volume's mount endpoint was successfully updated.
-
                 "400":
                     $ref: "#/components/responses/BadRequest"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "404":
                     $ref: "#/components/responses/NotFound"
-
                 "409":
                     $ref: "#/components/responses/InUse"
-
                 "412":
                     $ref: "#/components/responses/StaleWrite"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
 
@@ -3513,25 +3245,18 @@ paths:
             responses:
                 "200":
                     description: The volume's NFS export configuration was successfully updated.
-
                 "400":
                     $ref: "#/components/responses/BadRequest"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "404":
                     $ref: "#/components/responses/NotFound"
-
                 "409":
                     $ref: "#/components/responses/InUse"
-
                 "412":
                     $ref: "#/components/responses/StaleWrite"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
 
@@ -3586,28 +3311,20 @@ paths:
             responses:
                 "202":
                     $ref: "#/components/responses/Accepted"
-
                 "400":
                     $ref: "#/components/responses/BadRequest"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "404":
                     $ref: "#/components/responses/NotFound"
-
                 "412":
                     $ref: "#/components/responses/StaleWrite"
-
                 "422":
                     $ref: "#/components/responses/InvalidStateTransition"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
 
@@ -3657,31 +3374,22 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/Volume"
-
                 "400":
                     $ref: "#/components/responses/BadRequest"
-                
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "404":
                     $ref: "#/components/responses/NotFound"
-
                 "409":
                     $ref: "#/components/responses/InvalidResult"
-
                 "412":
                     $ref: "#/components/responses/StaleWrite"
-
                 "422":
                     $ref: "#/components/responses/InvalidStateTransition"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
     
@@ -3699,7 +3407,6 @@ paths:
               required: true
               schema:
                   $ref: "#/components/schemas/VolumeID"
-
         put:
             summary: Increase the size of a volume.
             operationId: resizeVolume
@@ -3740,28 +3447,20 @@ paths:
                             $ref: "#/components/schemas/Volume"
                 "202":
                     $ref: "#/components/responses/Accepted"
-
                 "400":
                     $ref: "#/components/responses/BadRequest"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "404":
                     $ref: "#/components/responses/NotFound"
-
                 "412":
                     $ref: "#/components/responses/StaleWrite"
-
                 "422":
                     $ref: "#/components/responses/InvalidStateTransition"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
 
@@ -3813,30 +3512,142 @@ paths:
                     $ref: "#/components/responses/Accepted"
                 "400":
                     $ref: "#/components/responses/BadRequest"
-                
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "404":
                     $ref: "#/components/responses/NotFound"
-
                 "409":
                     $ref: "#/components/responses/InvalidResult"
-
                 "412":
                     $ref: "#/components/responses/StaleWrite"
-
                 "422":
                     $ref: "#/components/responses/InvalidStateTransition"
+                "500":
+                    $ref: "#/components/responses/ServerError"
+                "503":
+                    $ref: "#/components/responses/StoreError"
 
+    /namespaces/{namespaceID}/volumes/{id}/preferred-eviction-candidates:
+        parameters:
+            - name: namespaceID
+              in: path
+              description: ID of a Namespace
+              required: true
+              schema:
+                  $ref: "#/components/schemas/NamespaceID"
+            - name: id
+              in: path
+              description: ID of a Volume
+              required: true
+              schema:
+                  $ref: "#/components/schemas/VolumeID"
+        put:
+            summary: Specifies a list of deployments to be preferred to be evicted.
+            operationId: setPreferredEvictionCandidates
+            description: >
+                Sets a list of volume deployments as preferred to be selected
+                and evicted next time we do so.
+
+                This does not trigger an immediate action in response to the request.
+                
+                Failed deployments are still selected over deployments specified
+                by this method.
+            security:
+                - jwt: []
+            parameters:
+                - $ref: "#/components/parameters/IgnoreVersion"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            title: SetPreferredEvictionCandidatesData
+                            properties:
+                                deploymentIDs:
+                                    type: array
+                                    items:
+                                        type: string
+                                version:
+                                    $ref: "#/components/schemas/Version"
+            responses:
+                "200":
+                    $ref: "#/components/responses/Accepted"
+                "400":
+                    $ref: "#/components/responses/BadRequest"
+                "401":
+                    $ref: "#/components/responses/Unauthorised"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "409":
+                    $ref: "#/components/responses/InvalidResult"
+                "412":
+                    $ref: "#/components/responses/StaleWrite"
                 "500":
                     $ref: "#/components/responses/ServerError"
 
-                "503":
-                    $ref: "#/components/responses/StoreError"
+    /namespaces/{namespaceID}/volumes/{id}/add-deployment-on-node:
+        parameters:
+            - name: namespaceID
+              in: path
+              description: ID of a Namespace
+              required: true
+              schema:
+                  $ref: "#/components/schemas/NamespaceID"
+            - name: id
+              in: path
+              description: ID of a Volume
+              required: true
+              schema:
+                  $ref: "#/components/schemas/VolumeID"
+        put:
+            summary: Creates a new replica deployment on a specific node.
+            operationId: addDeploymentOnNode
+            description: >
+                Creates a new replica deployment on a specific node.
+
+                The new deployment is not excluded from any rules that move,
+                failover or remove deployments and as such it can still be moved
+                elsewhere if the Control Plane thinks wise to do so after being
+                created.
+            security:
+                - jwt: []
+            parameters:
+                - $ref: "#/components/parameters/IgnoreVersion"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            title: AddDeploymentOnNodeData
+                            properties:
+                                nodeID:
+                                    type: string
+                                version:
+                                    $ref: "#/components/schemas/Version"
+            responses:
+                "200":
+                    $ref: "#/components/responses/Accepted"
+                "400":
+                    $ref: "#/components/responses/BadRequest"
+                "401":
+                    $ref: "#/components/responses/Unauthorised"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "409":
+                    $ref: "#/components/responses/InvalidResult"
+                "412":
+                    $ref: "#/components/responses/StaleWrite"
+                "500":
+                    $ref: "#/components/responses/ServerError"
+
     /namespaces/{namespaceID}/volumes/{id}/debug/evict/{deploymentID}:
         parameters:
             - name: namespaceID
@@ -3870,20 +3681,17 @@ paths:
                     description: "Eviction request has been accepted"
                 "400":
                     $ref: "#/components/responses/BadRequest"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "404":
                     $ref: "#/components/responses/NotFound"
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
+
     /namespaces/{namespaceID}/volumes/{id}/debug/attempt-replica-promotion/{deploymentID}:
         parameters:
             - name: namespaceID
@@ -3920,23 +3728,18 @@ paths:
                     description: Accepted
                 "400":
                     $ref: "#/components/responses/BadRequest"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "404":
                     $ref: "#/components/responses/NotFound"
                 "412":
                     $ref: "#/components/responses/NotPromotable"
                 "422":
                     $ref: "#/components/responses/InvalidStateTransition"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
 
@@ -3956,19 +3759,14 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/Cluster"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
-
         put:
             summary: Update the cluster's global configuration settings
             operationId: updateCluster
@@ -4023,22 +3821,16 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/Cluster"
-
                 "400":
                     $ref: "#/components/responses/BadRequest"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "412":
                     $ref: "#/components/responses/StaleWrite"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
     
@@ -4057,19 +3849,14 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/Licence"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
-
         put:
             summary: Update the licence global configuration settings
             operationId: updateLicence
@@ -4105,26 +3892,19 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/Licence"
-
                 "400":
                     $ref: "#/components/responses/BadRequest"
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "412":
                     $ref: "#/components/responses/StaleWrite"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "503":
                     $ref: "#/components/responses/StoreError"
                 
-
     /diagnostics:
         get:
             summary: Retrieves a diagnostics bundle from the target node
@@ -4155,16 +3935,12 @@ paths:
                             schema:
                                 type: string
                                 format: binary
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "502":
                     description: >
                         The server is returning an incomplete diagnostic bundle.
@@ -4180,9 +3956,9 @@ paths:
                             schema:
                                 type: string
                                 format: binary
-
                 "503":
                     $ref: "#/components/responses/StoreError"
+                    
     /diagnostics/{id}:
         parameters:
             - name: id
@@ -4216,16 +3992,12 @@ paths:
                             schema:
                                 type: string
                                 format: binary
-
                 "401":
                     $ref: "#/components/responses/Unauthorised"
-
                 "403":
                     $ref: "#/components/responses/Forbidden"
-
                 "500":
                     $ref: "#/components/responses/ServerError"
-
                 "502":
                     description: >
                         The server is returning an incomplete diagnostic bundle.
@@ -4241,7 +4013,6 @@ paths:
                             schema:
                                 type: string
                                 format: binary
-
                 "503":
                     $ref: "#/components/responses/StoreError"
 

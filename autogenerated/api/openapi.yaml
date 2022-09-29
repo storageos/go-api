@@ -4987,6 +4987,269 @@ paths:
       security:
       - jwt: []
       summary: Sets the placement strategy of the volume.
+  /namespaces/{namespaceID}/volumes/{id}/preferred-eviction-candidates:
+    put:
+      description: |
+        Sets a list of volume deployments as preferred to be selected and evicted next time we do so.
+        This does not trigger an immediate action in response to the request.
+        Failed deployments are still selected over deployments specified by this method.
+      operationId: setPreferredEvictionCandidates
+      parameters:
+      - description: ID of a Namespace
+        explode: false
+        in: path
+        name: namespaceID
+        required: true
+        schema:
+          $ref: '#/components/schemas/NamespaceID'
+        style: simple
+      - description: ID of a Volume
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          $ref: '#/components/schemas/VolumeID'
+        style: simple
+      - description: |
+          If set to true this value indicates that the user wants to ignore entity version constraints, thereby "forcing" the operation.
+        explode: true
+        in: query
+        name: ignore-version
+        required: false
+        schema:
+          $ref: '#/components/schemas/IgnoreVersion'
+        style: form
+      requestBody:
+        $ref: '#/components/requestBodies/SetPreferredEvictionCandidatesData'
+        content:
+          application/json:
+            schema:
+              example:
+                version: NDI0MjQyNDI0MjQyNDI0MjQy
+                deploymentIDs:
+                - deploymentIDs
+                - deploymentIDs
+              properties:
+                deploymentIDs:
+                  items:
+                    type: string
+                  type: array
+                version:
+                  description: |
+                    An opaque representation of an entity version at the time it was obtained from the API.
+                    All operations that mutate the entity must include this version field in the request unchanged.
+                    The format of this type is undefined and may change but the defined properties will not change.
+                  example: NDI0MjQyNDI0MjQyNDI0MjQy
+                  maxLength: 30
+                  type: string
+              title: SetPreferredEvictionCandidatesData
+              type: object
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcceptedMessage'
+          description: |
+            An asynchronous request has been accepted
+        "400":
+          content:
+            application/json:
+              example:
+                error: a short description of the validation failure
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request does not conform to the API specification.
+        "401":
+          content:
+            application/json:
+              example:
+                error: authentication required
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The requested endpoint requires authentication - you must log in first.
+            If attempting to log in, your credentials were not recognised.
+        "403":
+          content:
+            application/json:
+              example:
+                error: unauthorised
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The authenticated user does not have permission to perform the requested action.
+        "404":
+          content:
+            application/json:
+              example:
+                error: not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            A referenced resource does not exist.
+        "409":
+          content:
+            application/json:
+              example:
+                error: label \"a\" with value \"b\" conflicts with label \"c\" with
+                  value \"d\"
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The requested configuration change for the referenced entity cannot be made as it would result in a conflict which invalidates the resultant config.
+        "412":
+          content:
+            application/json:
+              example:
+                error: attempting to write stale object
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
+            The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The request caused an internal server error and should be retried.
+            Check the health of the node/cluster and if the error persists, contact support.
+      security:
+      - jwt: []
+      summary: Specifies a list of deployments to be preferred to be evicted.
+  /namespaces/{namespaceID}/volumes/{id}/add-deployment-on-node:
+    put:
+      description: |
+        Creates a new replica deployment on a specific node.
+        The new deployment is not excluded from any rules that move, failover or remove deployments and as such it can still be moved elsewhere if the Control Plane thinks wise to do so after being created.
+      operationId: addDeploymentOnNode
+      parameters:
+      - description: ID of a Namespace
+        explode: false
+        in: path
+        name: namespaceID
+        required: true
+        schema:
+          $ref: '#/components/schemas/NamespaceID'
+        style: simple
+      - description: ID of a Volume
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          $ref: '#/components/schemas/VolumeID'
+        style: simple
+      - description: |
+          If set to true this value indicates that the user wants to ignore entity version constraints, thereby "forcing" the operation.
+        explode: true
+        in: query
+        name: ignore-version
+        required: false
+        schema:
+          $ref: '#/components/schemas/IgnoreVersion'
+        style: form
+      requestBody:
+        $ref: '#/components/requestBodies/AddDeploymentOnNodeData'
+        content:
+          application/json:
+            schema:
+              example:
+                nodeID: nodeID
+                version: NDI0MjQyNDI0MjQyNDI0MjQy
+              properties:
+                nodeID:
+                  type: string
+                version:
+                  description: |
+                    An opaque representation of an entity version at the time it was obtained from the API.
+                    All operations that mutate the entity must include this version field in the request unchanged.
+                    The format of this type is undefined and may change but the defined properties will not change.
+                  example: NDI0MjQyNDI0MjQyNDI0MjQy
+                  maxLength: 30
+                  type: string
+              title: AddDeploymentOnNodeData
+              type: object
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcceptedMessage'
+          description: |
+            An asynchronous request has been accepted
+        "400":
+          content:
+            application/json:
+              example:
+                error: a short description of the validation failure
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request does not conform to the API specification.
+        "401":
+          content:
+            application/json:
+              example:
+                error: authentication required
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The requested endpoint requires authentication - you must log in first.
+            If attempting to log in, your credentials were not recognised.
+        "403":
+          content:
+            application/json:
+              example:
+                error: unauthorised
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The authenticated user does not have permission to perform the requested action.
+        "404":
+          content:
+            application/json:
+              example:
+                error: not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            A referenced resource does not exist.
+        "409":
+          content:
+            application/json:
+              example:
+                error: label \"a\" with value \"b\" conflicts with label \"c\" with
+                  value \"d\"
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The requested configuration change for the referenced entity cannot be made as it would result in a conflict which invalidates the resultant config.
+        "412":
+          content:
+            application/json:
+              example:
+                error: attempting to write stale object
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
+            The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The request caused an internal server error and should be retried.
+            Check the health of the node/cluster and if the error persists, contact support.
+      security:
+      - jwt: []
+      summary: Creates a new replica deployment on a specific node.
   /namespaces/{namespaceID}/volumes/{id}/debug/evict/{deploymentID}:
     delete:
       operationId: evictReplica
@@ -5712,35 +5975,11 @@ components:
         type: string
       style: form
   requestBodies:
-    SetComputeOnlyNodeData:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/SetComputeOnlyNodeData'
-      required: true
-    SetCordonedNodeData:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/SetCordonedNodeData'
-      required: true
-    CreateVolumeData:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/CreateVolumeData'
-      required: true
     UpdateVolumeData:
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/UpdateVolumeData'
-      required: true
-    UpdateUserData:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/UpdateUserData'
       required: true
     NFSVolumeMountEndpoint:
       content:
@@ -5766,47 +6005,11 @@ components:
           schema:
             $ref: '#/components/schemas/UpdateLicence'
       required: true
-    AttachNFSVolumeData:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/AttachNFSVolumeData'
-      required: true
     CreatePolicyGroupData:
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/CreatePolicyGroupData'
-      required: true
-    UpdatePolicyGroupData:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/UpdatePolicyGroupData'
-      required: true
-    NFSVolumeExports:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/NFSVolumeExports'
-      required: true
-    CreatePoolData:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/CreatePoolData'
-      required: true
-    SetReplicasRequest:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/SetReplicasRequest'
-      required: true
-    UpdateAuthenticatedUserData:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/UpdateAuthenticatedUserData'
       required: true
     UpdatePoolData:
       content:
@@ -5838,11 +6041,11 @@ components:
           schema:
             $ref: '#/components/schemas/UpdateClusterData'
       required: true
-    SetPlacementStrategyData:
+    SetPreferredEvictionCandidatesData:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/SetPlacementStrategyData'
+            $ref: '#/components/schemas/SetPreferredEvictionCandidatesData'
       required: true
     AttachVolumeData:
       content:
@@ -5855,6 +6058,78 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/CreateNamespaceData'
+      required: true
+    SetComputeOnlyNodeData:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SetComputeOnlyNodeData'
+      required: true
+    SetCordonedNodeData:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SetCordonedNodeData'
+      required: true
+    CreateVolumeData:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreateVolumeData'
+      required: true
+    UpdateUserData:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateUserData'
+      required: true
+    AttachNFSVolumeData:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AttachNFSVolumeData'
+      required: true
+    UpdatePolicyGroupData:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdatePolicyGroupData'
+      required: true
+    NFSVolumeExports:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NFSVolumeExports'
+      required: true
+    CreatePoolData:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreatePoolData'
+      required: true
+    SetReplicasRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SetReplicasRequest'
+      required: true
+    UpdateAuthenticatedUserData:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateAuthenticatedUserData'
+      required: true
+    AddDeploymentOnNodeData:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AddDeploymentOnNodeData'
+      required: true
+    SetPlacementStrategyData:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SetPlacementStrategyData'
       required: true
   responses:
     BadRequest:
@@ -8148,6 +8423,44 @@ components:
           maxLength: 30
           type: string
       title: SetPlacementStrategyData
+      type: object
+    SetPreferredEvictionCandidatesData:
+      example:
+        version: NDI0MjQyNDI0MjQyNDI0MjQy
+        deploymentIDs:
+        - deploymentIDs
+        - deploymentIDs
+      properties:
+        deploymentIDs:
+          items:
+            type: string
+          type: array
+        version:
+          description: |
+            An opaque representation of an entity version at the time it was obtained from the API.
+            All operations that mutate the entity must include this version field in the request unchanged.
+            The format of this type is undefined and may change but the defined properties will not change.
+          example: NDI0MjQyNDI0MjQyNDI0MjQy
+          maxLength: 30
+          type: string
+      title: SetPreferredEvictionCandidatesData
+      type: object
+    AddDeploymentOnNodeData:
+      example:
+        nodeID: nodeID
+        version: NDI0MjQyNDI0MjQyNDI0MjQy
+      properties:
+        nodeID:
+          type: string
+        version:
+          description: |
+            An opaque representation of an entity version at the time it was obtained from the API.
+            All operations that mutate the entity must include this version field in the request unchanged.
+            The format of this type is undefined and may change but the defined properties will not change.
+          example: NDI0MjQyNDI0MjQyNDI0MjQy
+          maxLength: 30
+          type: string
+      title: AddDeploymentOnNodeData
       type: object
     UpdateClusterData:
       example:
