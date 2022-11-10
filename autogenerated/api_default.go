@@ -34,7 +34,7 @@ type AddDeploymentOnNodeOpts struct {
 
 /*
 AddDeploymentOnNode Creates a new replica deployment on a specific node.
-Creates a new replica deployment on a specific node. The new deployment is not excluded from any rules that move, failover or remove deployments and as such it can still be moved elsewhere if the Control Plane thinks wise to do so after being created. 
+Creates a new replica deployment on a specific node and updates a volume&#39;s number of replicas. The new deployment is not excluded from any rules that move, failover or remove deployments and as such it can still be moved elsewhere if the Control Plane thinks wise to do so after being created. 
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param namespaceID ID of a Namespace
  * @param id ID of a Volume

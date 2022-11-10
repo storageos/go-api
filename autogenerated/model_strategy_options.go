@@ -10,6 +10,6 @@
 package api
 // StrategyOptions Used together with topology-aware strategy to further specify how the placement should be done. 
 type StrategyOptions struct {
-	// Indicates the node label used to decribe the topology used for data placement decisions. If two nodes are  labelled with this key and have identical values  for that label, the scheduler treats both nodes  as being in the same topology domain.  When topology-aware provisioning is enabled,  the scheduler tries to spread a volume's master  and replica copies across different topology domains. 
+	// Indicates the node label used to decribe the topology used for data placement decisions. If two nodes are  labelled with this key and have identical values  for that label, the scheduler treats both nodes  as being in the same topology domain.  When topology-aware provisioning is enabled,  the scheduler uses this label for that purpose. 
 	TopologyKey string `json:"topologyKey,omitempty"`
 }

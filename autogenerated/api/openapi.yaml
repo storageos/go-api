@@ -5124,7 +5124,7 @@ paths:
   /namespaces/{namespaceID}/volumes/{id}/add-deployment-on-node:
     put:
       description: |
-        Creates a new replica deployment on a specific node.
+        Creates a new replica deployment on a specific node and updates a volume's number of replicas.
         The new deployment is not excluded from any rules that move, failover or remove deployments and as such it can still be moved elsewhere if the Control Plane thinks wise to do so after being created.
       operationId: addDeploymentOnNode
       parameters:
@@ -6636,8 +6636,10 @@ components:
         strategy:
           default: recommended
           enum:
+          - random
           - recommended
           - topology-aware
+          - fixed-topology
           type: string
         options:
           $ref: '#/components/schemas/Strategy_options'
@@ -6659,6 +6661,12 @@ components:
         A unique identifier for a volume. The format of this type is undefined and may change but the defined properties will not change.
       example: c5666b58-b805-4215-ab4a-cb094948ccc6
       type: string
+    SnapshotID:
+      description: |
+        A unique identifier for a snapshot.
+      maximum: 18446744073709551615
+      minimum: 0
+      type: integer
     DeploymentID:
       description: |
         A unique identifier for a volume deployment. The format of this type is undefined and may change but the defined properties will not change.
@@ -6847,8 +6855,8 @@ components:
             createdAt: 2000-01-23T04:56:07.000+00:00
             name: name
             location: location
-            id: id
-            sizeBytes: 0.8008281904610115
+            id: 2147483647
+            sizeBytes: 6.027456183070403
         topologyLabels:
           preferredZones:
           - preferredZones
@@ -6921,7 +6929,7 @@ components:
               serviceEndpoint: serviceEndpoint
             id: c5666b58-b805-4215-ab4a-cb094948ccc6
             parentInfo:
-              snapshotID: snapshotID
+              snapshotID: 2147483647
               namespaceID: namespaceID
               id: id
             updatedAt: 2019-03-29T23:13:13Z
@@ -6970,7 +6978,7 @@ components:
           serviceEndpoint: serviceEndpoint
         id: c5666b58-b805-4215-ab4a-cb094948ccc6
         parentInfo:
-          snapshotID: snapshotID
+          snapshotID: 2147483647
           namespaceID: namespaceID
           id: id
         updatedAt: 2019-03-29T23:13:13Z
@@ -7138,7 +7146,7 @@ components:
           serviceEndpoint: serviceEndpoint
         id: c5666b58-b805-4215-ab4a-cb094948ccc6
         parentInfo:
-          snapshotID: snapshotID
+          snapshotID: 2147483647
           namespaceID: namespaceID
           id: id
         updatedAt: 2019-03-29T23:13:13Z
@@ -7394,13 +7402,17 @@ components:
         createdAt: 2000-01-23T04:56:07.000+00:00
         name: name
         location: location
-        id: id
-        sizeBytes: 0.8008281904610115
+        id: 2147483647
+        sizeBytes: 6.027456183070403
       properties:
         name:
           type: string
         id:
-          type: string
+          description: |
+            A unique identifier for a snapshot.
+          maximum: 18446744073709551615
+          minimum: 0
+          type: integer
         location:
           type: string
         createdAt:
@@ -7415,7 +7427,7 @@ components:
       type: object
     ParentInfo:
       example:
-        snapshotID: snapshotID
+        snapshotID: 2147483647
         namespaceID: namespaceID
         id: id
       properties:
@@ -7424,7 +7436,11 @@ components:
         namespaceID:
           type: string
         snapshotID:
-          type: string
+          description: |
+            A unique identifier for a snapshot.
+          maximum: 18446744073709551615
+          minimum: 0
+          type: integer
       type: object
     Namespace:
       example:
@@ -8581,7 +8597,7 @@ components:
         topologyKey:
           default: topology.kubernetes.io/zone
           description: |
-            Indicates the node label used to decribe the topology used for data placement decisions. If two nodes are  labelled with this key and have identical values  for that label, the scheduler treats both nodes  as being in the same topology domain.  When topology-aware provisioning is enabled,  the scheduler tries to spread a volume's master  and replica copies across different topology domains.
+            Indicates the node label used to decribe the topology used for data placement decisions. If two nodes are  labelled with this key and have identical values  for that label, the scheduler treats both nodes  as being in the same topology domain.  When topology-aware provisioning is enabled,  the scheduler uses this label for that purpose.
           example: my.custom.zone.label
           type: string
     UserSession_allOf_session:

@@ -14,7 +14,8 @@ import (
 // Snapshot struct for Snapshot
 type Snapshot struct {
 	Name string `json:"name,omitempty"`
-	Id string `json:"id,omitempty"`
+	// A unique identifier for a snapshot. 
+	Id int32 `json:"id,omitempty"`
 	Location string `json:"location,omitempty"`
 	CreatedAt time.Time `json:"createdAt,omitempty"`
 	SizeBytes float32 `json:"sizeBytes,omitempty"`

@@ -425,8 +425,10 @@ components:
                 strategy:
                     type: string
                     enum:
+                        - random
                         - recommended
                         - topology-aware
+                        - fixed-topology
                     default: recommended
                 options:
                     type: object
@@ -442,8 +444,7 @@ components:
                                 for that label, the scheduler treats both nodes 
                                 as being in the same topology domain. 
                                 When topology-aware provisioning is enabled, 
-                                the scheduler tries to spread a volume's master 
-                                and replica copies across different topology domains.
+                                the scheduler uses this label for that purpose.
                     nullable: true
                     description: >
                         Used together with topology-aware strategy to further
@@ -484,6 +485,13 @@ components:
                 The format of this type is undefined and may change but the
                 defined properties will not change.
             example: c5666b58-b805-4215-ab4a-cb094948ccc6
+
+        SnapshotID:
+            type: integer
+            description: >
+                A unique identifier for a snapshot.
+            minimum: 0
+            maximum: 18446744073709551615
 
         DeploymentID:
             type: string
@@ -886,7 +894,7 @@ components:
                 name:
                     type: string
                 id: 
-                    type: string 
+                    $ref: "#/components/schemas/SnapshotID"
                 location: 
                     type: string 
                 createdAt: 
@@ -908,7 +916,7 @@ components:
                 namespaceID:
                     type: string 
                 snapshotID:
-                    type: string
+                    $ref: "#/components/schemas/SnapshotID"
 
         Namespace:
             type: object
@@ -3608,7 +3616,8 @@ paths:
             summary: Creates a new replica deployment on a specific node.
             operationId: addDeploymentOnNode
             description: >
-                Creates a new replica deployment on a specific node.
+                Creates a new replica deployment on a specific node and
+                updates a volume's number of replicas.
 
                 The new deployment is not excluded from any rules that move,
                 failover or remove deployments and as such it can still be moved
