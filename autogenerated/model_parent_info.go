@@ -12,5 +12,6 @@ package api
 type ParentInfo struct {
 	Id string `json:"id,omitempty"`
 	NamespaceID string `json:"namespaceID,omitempty"`
-	SnapshotID string `json:"snapshotID,omitempty"`
+	// A unique identifier for a snapshot. 
+	SnapshotID int32 `json:"snapshotID,omitempty"`
 }

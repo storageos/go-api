@@ -71,7 +71,7 @@ Method | HTTP request | Description
 
 Creates a new replica deployment on a specific node.
 
-Creates a new replica deployment on a specific node. The new deployment is not excluded from any rules that move, failover or remove deployments and as such it can still be moved elsewhere if the Control Plane thinks wise to do so after being created. 
+Creates a new replica deployment on a specific node and updates a volume's number of replicas. The new deployment is not excluded from any rules that move, failover or remove deployments and as such it can still be moved elsewhere if the Control Plane thinks wise to do so after being created. 
 
 ### Required Parameters
 
