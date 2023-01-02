@@ -1,4 +1,4 @@
-module github.com/storageos/go-api
+module github.com/storageos/go-api/v2
 
 go 1.17
 
