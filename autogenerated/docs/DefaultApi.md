@@ -46,6 +46,7 @@ Method | HTTP request | Description
 [**ResizeVolume**](DefaultApi.md#ResizeVolume) | **Put** /namespaces/{namespaceID}/volumes/{id}/size | Increase the size of a volume.
 [**SetComputeOnly**](DefaultApi.md#SetComputeOnly) | **Put** /nodes/{id}/compute-only | Modify the computeonly behaviour state for a node
 [**SetCordoned**](DefaultApi.md#SetCordoned) | **Put** /nodes/{id}/cordon | Modify the cordoned state for a node
+[**SetFailoverGracePeriod**](DefaultApi.md#SetFailoverGracePeriod) | **Put** /nodes/{id}/failover-grace-period | Modify the failover grace period for a node
 [**SetFailureMode**](DefaultApi.md#SetFailureMode) | **Put** /namespaces/{namespaceID}/volumes/{id}/failure-mode | Set the failure mode of the volume.
 [**SetPlacementStrategy**](DefaultApi.md#SetPlacementStrategy) | **Put** /namespaces/{namespaceID}/volumes/{id}/placement-strategy | Sets the placement strategy of the volume.
 [**SetPreferredEvictionCandidates**](DefaultApi.md#SetPreferredEvictionCandidates) | **Put** /namespaces/{namespaceID}/volumes/{id}/preferred-eviction-candidates | Specifies a list of deployments to be preferred to be evicted.
@@ -1624,6 +1625,53 @@ Name | Type | Description  | Notes
 ### Optional Parameters
 
 Optional parameters are passed through a pointer to a SetCordonedOpts struct
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+ **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+
+### Return type
+
+[**Node**](Node.md)
+
+### Authorization
+
+[jwt](../README.md#jwt)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## SetFailoverGracePeriod
+
+> Node SetFailoverGracePeriod(ctx, id, setFailoverGracePeriodData, optional)
+
+Modify the failover grace period for a node
+
+Set the failover grace period for the node corresponding  to id given by the request. 
+
+### Required Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string**| ID of a Node | 
+**setFailoverGracePeriodData** | [**SetFailoverGracePeriodData**](SetFailoverGracePeriodData.md)|  | 
+ **optional** | ***SetFailoverGracePeriodOpts** | optional parameters | nil if no parameters
+
+### Optional Parameters
+
+Optional parameters are passed through a pointer to a SetFailoverGracePeriodOpts struct
 
 
 Name | Type | Description  | Notes
