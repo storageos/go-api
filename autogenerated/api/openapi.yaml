@@ -7402,6 +7402,8 @@ components:
         cordonedAt: 2019-03-29T23:13:13Z
         gossipEndpoint: '["192.0.2.1:5711"]'
         health: online
+        failoverGracePeriod:
+        - 10000
         version: NDI0MjQyNDI0MjQyNDI0MjQy
         capacity:
           total: 42
@@ -7480,6 +7482,13 @@ components:
           format: date-time
           readOnly: true
           type: string
+        failoverGracePeriod:
+          description: |
+            The failover grace period of the node in milliseconds.
+          example:
+          - 10000
+          readOnly: true
+          type: uint64
         labels:
           additionalProperties:
             type: string

@@ -31,6 +31,8 @@ type Node struct {
 	Cordoned bool `json:"cordoned,omitempty"`
 	// The time the node has been cordoned. This field's purpose is informative only.  String format is RFC3339. 
 	CordonedAt time.Time `json:"cordonedAt,omitempty"`
+	// The failover grace period of the node in milliseconds. 
+	FailoverGracePeriod uint64 `json:"failoverGracePeriod,omitempty"`
 	// A set of arbitrary key value labels to apply to the entity. 
 	Labels map[string]string `json:"labels,omitempty"`
 	// The time the entity was created. This timestamp is set by the node that created the entity, and may not be correct if the node's local clock was skewed. This value is for the user's informative purposes only, and correctness is not required. String format is RFC3339. 

@@ -14,6 +14,7 @@ Name | Type | Description | Notes
 **ClusteringEndpoint** | **string** | Endpoint at which we operate our clustering gRPC API. This value is set on startup by the corresponding environment variable (INTERNAL_API_ADVERTISE_ADDRESS)  | [optional] [readonly] 
 **Cordoned** | **bool** | Cordoned describes the cordoned state of the node. A cordoned node will not have new volume deployments scheduled on it  | [optional] [readonly] [default to false]
 **CordonedAt** | [**time.Time**](time.Time.md) | The time the node has been cordoned. This field&#39;s purpose is informative only.  String format is RFC3339.  | [optional] [readonly] 
+**FailoverGracePeriod** | **uint64** | The failover grace period of the node in milliseconds.  | [optional] [readonly] 
 **Labels** | **map[string]string** | A set of arbitrary key value labels to apply to the entity.  | [optional] 
 **CreatedAt** | [**time.Time**](time.Time.md) | The time the entity was created. This timestamp is set by the node that created the entity, and may not be correct if the node&#39;s local clock was skewed. This value is for the user&#39;s informative purposes only, and correctness is not required. String format is RFC3339.  | [optional] [readonly] 
 **UpdatedAt** | [**time.Time**](time.Time.md) | The time the entity was last updated. This timestamp is set by the node that last updated the entity, and may not be correct if the node&#39;s local clock was skewed. This value is for the user&#39;s informative purposes only, and correctness is not required. String format is RFC3339.  | [optional] [readonly] 
